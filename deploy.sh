@@ -5,7 +5,7 @@ npm run build
 rm -r dist/.git
 git add -A
 git commit -m 'deploy'
-git push origin gh-pages
+git push
 git checkout main
 
 cd -
