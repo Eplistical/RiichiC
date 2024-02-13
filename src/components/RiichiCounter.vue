@@ -22,16 +22,9 @@
     <el-button type="danger" @click="FinishGame">结束游戏</el-button>
 
     <div>
-      <span> 当前局: {{ current_hand }}, {{ game.honba }} 本场 </span>
+      <span> {{ current_hand }}, {{ game.honba }} 本场 </span>
       <span> 供托: {{ game.riichi_sticks }} </span>
     </div>
-
-    <div v-for="wind in Winds">
-      [{{ WindsDisplayTextMap.wind_character[game.players[wind].current_wind] }}]
-      {{ game.players[wind].name }}: {{ game.players[wind].points }}
-    </div>
-
-    {{ game.hand_results.result }} game.hand_results.result
 
     <el-form :model="game.hand_results">
       <el-form-item label="立直">
@@ -117,10 +110,24 @@
     </el-form>
   </div>
 
+  <el-table :data="points_board" style="width: 100%">
+    <el-table-column
+      :prop="player_id"
+      :label="
+        game.players[player_id].name +
+        '[' +
+        WindsDisplayTextMap.wind_character[game.players[player_id].current_wind] +
+        ']'
+      "
+      v-for="player_id in Winds"
+    />
+  </el-table>
+
   <el-table
     :data="game.log"
     :default-sort="{ prop: 'log_index', order: 'descending' }"
     style="width: 100%"
+    stripe
   >
     <el-table-column prop="log_index" label="手" />
     <el-table-column prop="hand_signature" label="场" />
@@ -787,6 +794,13 @@ export default {
       } else {
         return `对局未开始`
       }
+    },
+    points_board() {
+      let board = {}
+      for (let [_, player_id] of Object.entries(Winds)) {
+        board[player_id] = game.value.players[player_id].points
+      }
+      return [board]
     }
   },
   methods: {
