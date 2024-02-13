@@ -28,7 +28,7 @@
 
     <el-form :model="game.hand_results">
       <el-form-item label="立直">
-        <el-checkbox-group
+        <el-checkbox-group fill="#f7bc45"
           v-for="player_id in Winds"
           v-model="game.hand_results.riichi"
           size="default"
@@ -49,7 +49,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="听牌" v-if="game.hand_results.result == HandResults.DRAW" size="default">
-        <el-checkbox-group v-model="game.hand_results.tenpai">
+        <el-checkbox-group fill="#289e20" v-model="game.hand_results.tenpai">
           <el-checkbox-button v-for="player_id in Winds" :label="player_id">
             {{ game.players[player_id].name }}
           </el-checkbox-button>
@@ -63,6 +63,7 @@
         "
       >
         <el-radio-group
+          fill="#289e20"
           v-for="player_id in Winds"
           v-model="game.hand_results.winner"
           size="default"
@@ -72,6 +73,7 @@
       </el-form-item>
       <el-form-item label="点炮" v-if="game.hand_results.result == HandResults.RON">
         <el-radio-group
+            fill="#e86161"
           v-for="player_id in Winds"
           v-model="game.hand_results.deal_in"
           size="default"
