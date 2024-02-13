@@ -168,7 +168,18 @@ import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 import { useCookies } from 'vue3-cookies'
 import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.js'
-import { HandResults, ResultDisplayTextMap, PointsLadder, PointsLadderDisplayMap, AllowedHans, AllowedFus, RonPointsDealer, RonPointsNonDealer, TsumoPointsDealer, TsumoPointsNonDealer } from './game_constants.js'
+import {
+  HandResults,
+  ResultDisplayTextMap,
+  PointsLadder,
+  PointsLadderDisplayMap,
+  AllowedHans,
+  AllowedFus,
+  RonPointsDealer,
+  RonPointsNonDealer,
+  TsumoPointsDealer,
+  TsumoPointsNonDealer
+} from './game_constants.js'
 import { MLeagueRuleset } from './rulesets.ts'
 
 const DEBUG_FLAG = true
@@ -179,7 +190,7 @@ function Log(msg, debug = false) {
   }
 }
 
-const ruleset = MLeagueRuleset;
+const ruleset = MLeagueRuleset
 
 // Initialize game data
 function InitGame(game, ruleset) {
@@ -291,7 +302,13 @@ function SetUpNewHand(game, ruleset) {
     ruleset
   )
   if (!game_finished) {
-    UpdateSeatsAndGameStateForNextHand(game, ruleset, renchan, honba_increase, cleanup_riichi_sticks)
+    UpdateSeatsAndGameStateForNextHand(
+      game,
+      ruleset,
+      renchan,
+      honba_increase,
+      cleanup_riichi_sticks
+    )
   }
   SaveCookies()
 }
@@ -655,7 +672,13 @@ function HandleResetLog(game, ruleset, index, row) {
     ruleset
   )
   if (!game_finished) {
-    UpdateSeatsAndGameStateForNextHand(game, ruleset, renchan, honba_increase, cleanup_riichi_sticks)
+    UpdateSeatsAndGameStateForNextHand(
+      game,
+      ruleset,
+      renchan,
+      honba_increase,
+      cleanup_riichi_sticks
+    )
   }
 
   SaveCookies()
@@ -685,42 +708,42 @@ const game = ref({
 })
 
 function memorySizeOf(obj) {
-  var bytes = 0;
+  var bytes = 0
 
   function sizeOf(obj) {
     if (obj !== null && obj !== undefined) {
       switch (typeof obj) {
-        case "number":
-          bytes += 8;
-          break;
-        case "string":
-          bytes += obj.length * 2;
-          break;
-        case "boolean":
-          bytes += 4;
-          break;
-        case "object":
-          var objClass = Object.prototype.toString.call(obj).slice(8, -1);
-          if (objClass === "Object" || objClass === "Array") {
+        case 'number':
+          bytes += 8
+          break
+        case 'string':
+          bytes += obj.length * 2
+          break
+        case 'boolean':
+          bytes += 4
+          break
+        case 'object':
+          var objClass = Object.prototype.toString.call(obj).slice(8, -1)
+          if (objClass === 'Object' || objClass === 'Array') {
             for (var key in obj) {
-              if (!obj.hasOwnProperty(key)) continue;
-              sizeOf(obj[key]);
+              if (!obj.hasOwnProperty(key)) continue
+              sizeOf(obj[key])
             }
-          } else bytes += obj.toString().length * 2;
-          break;
+          } else bytes += obj.toString().length * 2
+          break
       }
     }
-    return bytes;
+    return bytes
   }
 
   function formatByteSize(bytes) {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(3) + " KiB";
-    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(3) + " MiB";
-    else return (bytes / 1073741824).toFixed(3) + " GiB";
+    if (bytes < 1024) return bytes + ' bytes'
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(3) + ' KiB'
+    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(3) + ' MiB'
+    else return (bytes / 1073741824).toFixed(3) + ' GiB'
   }
 
-  return formatByteSize(sizeOf(obj));
+  return formatByteSize(sizeOf(obj))
 }
 
 const { cookies } = useCookies(['game', 'ruleset'])
@@ -729,7 +752,9 @@ function SaveCookies() {
   Log(`SaveCookies game: ${game.value.round_wind}-${game.value.hand}-${game.value.honba}`)
   cookies.set('game', game.value, '10m')
   cookies.set('ruleset', ruleset, '10m')
-  Log(`SaveCookies ck: ${cookies.get('game').round_wind}-${cookies.get('game').hand}-${cookies.get('game').honba}`)
+  Log(
+    `SaveCookies ck: ${cookies.get('game').round_wind}-${cookies.get('game').hand}-${cookies.get('game').honba}`
+  )
 }
 
 function LoadCookies() {
