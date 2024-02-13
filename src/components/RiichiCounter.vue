@@ -46,10 +46,16 @@
           v-model="game.hand_results.result"
           size="default"
         >
-          <el-radio-button :label="result"> {{ HandOutcomeEnumDisplayTextMap[result] }} </el-radio-button>
+          <el-radio-button :label="result">
+            {{ HandOutcomeEnumDisplayTextMap[result] }}
+          </el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="听牌" v-if="game.hand_results.result == HandOutcomeEnum.DRAW" size="default">
+      <el-form-item
+        label="听牌"
+        v-if="game.hand_results.result == HandOutcomeEnum.DRAW"
+        size="default"
+      >
         <el-checkbox-group fill="#289e20" v-model="game.hand_results.tenpai">
           <el-checkbox-button v-for="player_id in Winds" :label="player_id">
             {{ game.players[player_id].name }}
@@ -168,7 +174,7 @@ import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 import { useCookies } from 'vue3-cookies'
 import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.ts'
-import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap} from './hand.ts'
+import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import {
   PointsLadder,
   PointsLadderDisplayMap,

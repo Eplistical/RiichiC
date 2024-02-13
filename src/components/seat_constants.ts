@@ -1,4 +1,5 @@
-export type Seat = string;
+export type Seat = string
+export type Wind = string
 
 export const Winds = Object.freeze({
   EAST: 'east',

@@ -1,11 +1,9 @@
 export enum GameState {
   NOT_START,
   ON_GOING,
-  FINISHED,
-};
+  FINISHED
+}
 
 export class GameStage {
-  state: GameState;
-  honba: number;
-  riichi_sticks: number;
+  state: GameState
 }

@@ -14,20 +14,20 @@ export const PointsLadderDisplayMap = Object.freeze({
   [PointsLadder.YAKUMAN]: '役满'
 })
 
-export type Han = 1 | 2 | 3 | 4 | string;
-export type Fu = 20|25|30|40|50|6070|80|90|100|110|undefined;
+export type Han = number | string
+export type Fu = number | undefined
 
-export const AllowedHans = [1, 2, 3, 4].concat(Object.keys(PointsLadder))
-export const AllowedFus = Object.freeze({
+export const AllowedHans: Han[] = ([1, 2, 3, 4] as Han[]).concat(Object.keys(PointsLadder))
+export const AllowedFus: Record<Han, Array<Fu>> = Object.freeze({
   [1]: [30, 40, 50, 60, 70, 80, 90, 100, 110],
   [2]: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
   [3]: [20, 25, 30, 40, 50, 60],
   [4]: [20, 25, 30]
 })
 
-export type PointsMapKey = string | [number, number];
+export type PointsMapKey = string | [Han, Fu]
 
-export const RonPointsNonDealer = Object.freeze({
+export const RonPointsNonDealer: Record<PointsMapKey, number> = Object.freeze({
   [[1, 30]]: 1000,
   [[1, 40]]: 1300,
   [[1, 50]]: 1600,
