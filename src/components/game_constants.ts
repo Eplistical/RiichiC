@@ -1,14 +1,3 @@
-export const HandResults = Object.freeze({
-  TSUMO: 'tsumo',
-  RON: 'ron',
-  DRAW: 'draw'
-})
-
-export const ResultDisplayTextMap = Object.freeze({
-  [HandResults.DRAW]: '流局',
-  [HandResults.TSUMO]: '自摸',
-  [HandResults.RON]: '荣和'
-})
 export const PointsLadder = Object.freeze({
   MANGAN: 'MANGAN',
   HANEMAN: 'HANEMAN',
@@ -25,14 +14,18 @@ export const PointsLadderDisplayMap = Object.freeze({
   [PointsLadder.YAKUMAN]: '役满'
 })
 
-export const AllowedHans = [1, 2, 3, 4].concat(Object.keys(PointsLadder))
+export type Han = 1 | 2 | 3 | 4 | string;
+export type Fu = 20|25|30|40|50|6070|80|90|100|110|undefined;
 
+export const AllowedHans = [1, 2, 3, 4].concat(Object.keys(PointsLadder))
 export const AllowedFus = Object.freeze({
   [1]: [30, 40, 50, 60, 70, 80, 90, 100, 110],
   [2]: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
   [3]: [20, 25, 30, 40, 50, 60],
   [4]: [20, 25, 30]
 })
+
+export type PointsMapKey = string | [number, number];
 
 export const RonPointsNonDealer = Object.freeze({
   [[1, 30]]: 1000,

@@ -42,14 +42,14 @@
 
       <el-form-item label="对局结果">
         <el-radio-group
-          v-for="result in HandResults"
+          v-for="result in HandOutcomeEnum"
           v-model="game.hand_results.result"
           size="default"
         >
-          <el-radio-button :label="result"> {{ ResultDisplayTextMap[result] }} </el-radio-button>
+          <el-radio-button :label="result"> {{ HandOutcomeEnumDisplayTextMap[result] }} </el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="听牌" v-if="game.hand_results.result == HandResults.DRAW" size="default">
+      <el-form-item label="听牌" v-if="game.hand_results.result == HandOutcomeEnum.DRAW" size="default">
         <el-checkbox-group fill="#289e20" v-model="game.hand_results.tenpai">
           <el-checkbox-button v-for="player_id in Winds" :label="player_id">
             {{ game.players[player_id].name }}
@@ -59,8 +59,8 @@
       <el-form-item
         label="胡牌"
         v-if="
-          game.hand_results.result == HandResults.TSUMO ||
-          game.hand_results.result == HandResults.RON
+          game.hand_results.result == HandOutcomeEnum.TSUMO ||
+          game.hand_results.result == HandOutcomeEnum.RON
         "
       >
         <el-radio-group
@@ -72,7 +72,7 @@
           <el-radio-button :label="player_id"> {{ game.players[player_id].name }} </el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="点炮" v-if="game.hand_results.result == HandResults.RON">
+      <el-form-item label="点炮" v-if="game.hand_results.result == HandOutcomeEnum.RON">
         <el-radio-group
           fill="#e86161"
           v-for="player_id in Winds"
@@ -167,10 +167,9 @@
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 import { useCookies } from 'vue3-cookies'
-import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.js'
+import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.ts'
+import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap} from './hand.ts'
 import {
-  HandResults,
-  ResultDisplayTextMap,
   PointsLadder,
   PointsLadderDisplayMap,
   AllowedHans,
@@ -179,8 +178,9 @@ import {
   RonPointsNonDealer,
   TsumoPointsDealer,
   TsumoPointsNonDealer
-} from './game_constants.js'
+} from './game_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
+import { GetPointMapKey } from './hand.ts'
 
 const DEBUG_FLAG = true
 
@@ -233,7 +233,7 @@ function ResolveNextHand(game, ruleset) {
   let renchan = false
   let honba_increase = false
   let cleanup_riichi_sticks = true
-  if (hand_results.result == HandResults.DRAW) {
+  if (hand_results.result == HandOutcomeEnum.DRAW) {
     cleanup_riichi_sticks = false
     honba_increase = true
     if (game.value.hand_results.tenpai.includes(dealer)) {
@@ -422,42 +422,6 @@ function ResolvePointsDeltaOnTsumo(game, ruleset) {
   return points_delta
 }
 
-function GetPointMapKey(han, fu, ruleset) {
-  Log(`GetPointMapKey: han = ${han}, fu = ${fu}`)
-  if (PointsLadder.hasOwnProperty(han)) {
-    return han
-  }
-  if (han < 3) {
-    return [han, fu]
-  } else if (han == 3) {
-    if (fu >= 70) {
-      return PointsLadder.MANGAN
-    } else if (fu == 60 && ruleset.round_up_mangan) {
-      return PointsLadder.MANGAN
-    } else {
-      return [han, fu]
-    }
-  } else if (han == 4) {
-    if (fu >= 40) {
-      return PointsLadder.MANGAN
-    } else if (fu == 30 && ruleset.round_up_mangan) {
-      return PointsLadder.MANGAN
-    } else {
-      return [han, fu]
-    }
-  } else if (han == 5) {
-    return PointsLadder.MANGAN
-  } else if (han < 8) {
-    return PointsLadder.HANEMAN
-  } else if (han < 11) {
-    return PointsLadder.BAIMAN
-  } else if (han == 13) {
-    return PointsLadder.SANBAIMAN
-  } else {
-    return PointsLadder.YAKUMAN
-  }
-}
-
 // Helper function, resolves points changes in the case of ron.
 function ResolvePointsDeltaOnRon(game, ruleset) {
   Log(`ResolvePointsDeltaOnRon`)
@@ -481,11 +445,11 @@ function ResolvePointsDelta(game, ruleset) {
   const hand_results = game.value.hand_results
 
   let points_delta = {}
-  if (hand_results.result === HandResults.DRAW) {
+  if (hand_results.result === HandOutcomeEnum.DRAW) {
     return ResolvePointsDeltaOnDraw(game, ruleset)
-  } else if (hand_results.result === HandResults.TSUMO) {
+  } else if (hand_results.result === HandOutcomeEnum.TSUMO) {
     return ResolvePointsDeltaOnTsumo(game, ruleset)
-  } else if (hand_results.result === HandResults.RON) {
+  } else if (hand_results.result === HandOutcomeEnum.RON) {
     return ResolvePointsDeltaOnRon(game, ruleset)
   } else {
     alert(`错误对局结果: ${JSON.stringify(hand_results.result)}`)
@@ -495,17 +459,17 @@ function ResolvePointsDelta(game, ruleset) {
 
 function ValidateHandResults(game, ruleset) {
   const hand_results = game.value.hand_results
-  if (!Object.values(HandResults).includes(hand_results.result)) {
+  if (!Object.values(HandOutcomeEnum).includes(hand_results.result)) {
     return [false, `错误对局结果: ${hand_results.result}`]
   }
 
-  if (hand_results.result == HandResults.DRAW) {
+  if (hand_results.result == HandOutcomeEnum.DRAW) {
     for (const riichi_player of hand_results.riichi) {
       if (!hand_results.tenpai.includes(riichi_player)) {
         return [false, `立直家未听牌: ${game.value.players[riichi_player].name}`]
       }
     }
-  } else if (hand_results.result == HandResults.TSUMO) {
+  } else if (hand_results.result == HandOutcomeEnum.TSUMO) {
     if (!Object.values(Winds).includes(hand_results.winner)) {
       return [false, `找不到自摸家: ${hand_results.winner}`]
     }
@@ -526,7 +490,7 @@ function ValidateHandResults(game, ruleset) {
         `番符组合不存在: ${hand_results.result}, ${hand_results.han}, ${hand_results.fu}`
       ]
     }
-  } else if (hand_results.result == HandResults.RON) {
+  } else if (hand_results.result == HandOutcomeEnum.RON) {
     if (!Object.values(Winds).includes(hand_results.winner)) {
       return [false, `找不到胡牌家: ${hand_results.winner}`]
     }
@@ -593,7 +557,7 @@ function FinishCurrentHand(game, ruleset) {
     // for display
     beginning_riichi_sticks: game.value.riichi_sticks - game.value.hand_results.riichi.length,
     hand_signature: `${WindsDisplayTextMap.wind_character[game.value.round_wind]}${game.value.hand}-${game.value.honba}`,
-    result: ResultDisplayTextMap[game.value.hand_results.result],
+    result: HandOutcomeEnumDisplayTextMap[game.value.hand_results.result],
     riichi: JSON.parse(JSON.stringify(game.value.hand_results.riichi))
   }
   for (const [_, player_id] of Object.entries(Winds)) {
@@ -606,11 +570,11 @@ function FinishCurrentHand(game, ruleset) {
     }
   }
 
-  if (game.value.hand_results.result == HandResults.DRAW) {
+  if (game.value.hand_results.result == HandOutcomeEnum.DRAW) {
     hand_log.result += `[${game.value.hand_results.tenpai.map((x) => {
       return game.value.players[x].name
     })}]`
-  } else if (game.value.hand_results.result == HandResults.TSUMO) {
+  } else if (game.value.hand_results.result == HandOutcomeEnum.TSUMO) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
     const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, ruleset)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
@@ -618,7 +582,7 @@ function FinishCurrentHand(game, ruleset) {
     } else {
       hand_log.result += `[${key}]`
     }
-  } else if (game.value.hand_results.result == HandResults.RON) {
+  } else if (game.value.hand_results.result == HandOutcomeEnum.RON) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
     const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, ruleset)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
@@ -707,51 +671,11 @@ const game = ref({
   }
 })
 
-function memorySizeOf(obj) {
-  var bytes = 0
-
-  function sizeOf(obj) {
-    if (obj !== null && obj !== undefined) {
-      switch (typeof obj) {
-        case 'number':
-          bytes += 8
-          break
-        case 'string':
-          bytes += obj.length * 2
-          break
-        case 'boolean':
-          bytes += 4
-          break
-        case 'object':
-          var objClass = Object.prototype.toString.call(obj).slice(8, -1)
-          if (objClass === 'Object' || objClass === 'Array') {
-            for (var key in obj) {
-              if (!obj.hasOwnProperty(key)) continue
-              sizeOf(obj[key])
-            }
-          } else bytes += obj.toString().length * 2
-          break
-      }
-    }
-    return bytes
-  }
-
-  function formatByteSize(bytes) {
-    if (bytes < 1024) return bytes + ' bytes'
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(3) + ' KiB'
-    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(3) + ' MiB'
-    else return (bytes / 1073741824).toFixed(3) + ' GiB'
-  }
-
-  return formatByteSize(sizeOf(obj))
-}
-
-const { cookies } = useCookies(['game', 'ruleset'])
+const { cookies } = useCookies(['game'])
 
 function SaveCookies() {
   Log(`SaveCookies game: ${game.value.round_wind}-${game.value.hand}-${game.value.honba}`)
   cookies.set('game', game.value, '10m')
-  cookies.set('ruleset', ruleset, '10m')
   Log(
     `SaveCookies ck: ${cookies.get('game').round_wind}-${cookies.get('game').hand}-${cookies.get('game').honba}`
   )
@@ -759,13 +683,11 @@ function SaveCookies() {
 
 function LoadCookies() {
   Object.assign(game.value, cookies.get('game'))
-  Object.assign(ruleset, cookies.get('ruleset'))
 }
 
 function ClearCookies() {
   Log(`ClearCookies`)
   cookies.remove('game')
-  cookies.remove('ruleset')
 }
 
 export default {
@@ -790,8 +712,8 @@ export default {
       game: game,
       Winds: Winds,
       WindsDisplayTextMap: WindsDisplayTextMap,
-      HandResults: HandResults,
-      ResultDisplayTextMap: ResultDisplayTextMap,
+      HandOutcomeEnum: HandOutcomeEnum,
+      HandOutcomeEnumDisplayTextMap: HandOutcomeEnumDisplayTextMap,
       PointsLadder: PointsLadder,
       PointsLadderDisplayMap: PointsLadderDisplayMap,
       AllowedHans: AllowedHans,

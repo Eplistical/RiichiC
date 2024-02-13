@@ -1,6 +1,7 @@
-import { Winds } from './seat_constants.js'
+import {Winds} from './seat_constants.ts'
 
-interface RulesetInterface {
+export type Ruleset = {
+  num_players: 3 | 4
   starting_points: number
   honba_points: number
   round_up_mangan: boolean
@@ -13,7 +14,8 @@ interface RulesetInterface {
   all_last_dealer_tenpai_renchan: boolean
 }
 
-export const MLeagueRuleset: RulesetInterface = Object.freeze({
+export const MLeagueRuleset: RuleSet = Object.freeze({
+  num_players: 4,
   starting_points: 25000,
   honba_points: 300,
   round_up_mangan: true,
