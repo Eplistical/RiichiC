@@ -28,7 +28,8 @@
 
     <el-form :model="game.hand_results">
       <el-form-item label="立直">
-        <el-checkbox-group fill="#f7bc45"
+        <el-checkbox-group
+          fill="#f7bc45"
           v-for="player_id in Winds"
           v-model="game.hand_results.riichi"
           size="default"
@@ -73,7 +74,7 @@
       </el-form-item>
       <el-form-item label="点炮" v-if="game.hand_results.result == HandResults.RON">
         <el-radio-group
-            fill="#e86161"
+          fill="#e86161"
           v-for="player_id in Winds"
           v-model="game.hand_results.deal_in"
           size="default"
@@ -787,9 +788,9 @@ function FinishCurrentHand(game, rules) {
     log_index: game.value.log.length,
 
     // for reset
-    on_going: game.value.on_going,
-    finished: game.value.finished,
-    round_wind: game.value.round_wind,
+    on_going: JSON.parse(JSON.stringify(game.value.on_going)),
+    finished: JSON.parse(JSON.stringify(game.value.finished)),
+    round_wind: JSON.parse(JSON.stringify(game.value.round_wind)),
     round_wind: JSON.parse(JSON.stringify(game.value.round_wind)),
     hand: JSON.parse(JSON.stringify(game.value.hand)),
     honba: JSON.parse(JSON.stringify(game.value.honba)),
@@ -800,7 +801,7 @@ function FinishCurrentHand(game, rules) {
     beginning_riichi_sticks: game.value.riichi_sticks - game.value.hand_results.riichi.length,
     hand_signature: `${WindsDisplayTextMap.wind_character[game.value.round_wind]}${game.value.hand}-${game.value.honba}`,
     result: ResultDisplayTextMap[game.value.hand_results.result],
-    riichi: game.value.hand_results.riichi
+    riichi: JSON.parse(JSON.stringify(game.value.hand_results.riichi))
   }
   for (const [_, player_id] of Object.entries(Winds)) {
     const delta = points_delta.hasOwnProperty(player_id) ? points_delta[player_id] : 0
@@ -866,7 +867,8 @@ function HandleResetLog(game, rules, index, row) {
     hand: row.hand,
     honba: row.honba,
     players: row.players,
-    hand_results: row.hand_results
+    hand_results: row.hand_results,
+    riichi_sticks: row.beginning_riichi_sticks + row.riichi.length
   })
   // clean up logs after the target log index
   game.value.log = game.value.log.slice(0, row.log_index + 1)
