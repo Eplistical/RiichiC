@@ -123,6 +123,7 @@
     />
   </el-table>
 
+  <!-- game log view -->
   <el-table
     :data="game.log"
     :default-sort="{ prop: 'log_index', order: 'descending' }"
@@ -156,7 +157,7 @@
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 
-const kDebugFlag = true
+const DEBUG_FLAG = true
 
 const Winds = Object.freeze({
   EAST: 'east',
@@ -219,7 +220,7 @@ const PointsLadderDisplayMap = Object.freeze({
 const AllowedHans = [1, 2, 3, 4].concat(Object.keys(PointsLadder))
 
 const AllowedFus = Object.freeze({
-  [1]: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
+  [1]: [30, 40, 50, 60, 70, 80, 90, 100, 110],
   [2]: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
   [3]: [20, 25, 30, 40, 50, 60, 70],
   [4]: [20, 25, 30]
@@ -388,7 +389,7 @@ const TsumoPointsDealer = Object.freeze({
 })
 
 function Log(msg, debug = false) {
-  if (!debug || kDebugFlag) {
+  if (!debug || DEBUG_FLAG) {
     console.log(JSON.stringify(msg))
   }
 }
@@ -431,7 +432,7 @@ function SetUpNewHand(game, rules) {
   const all_last = IsAllLast(game, rules)
   let renchan = false
   let honba_increase = false
-  if (hand_results.result == 'draw') {
+  if (hand_results.result == HandResults.DRAW) {
     honba_increase = true
     if (game.value.hand_results.tenpai.includes(dealer)) {
       renchan =
@@ -467,7 +468,7 @@ function SetUpNewHand(game, rules) {
   } else {
     game.value.honba = 0
   }
-  if (hand_results.result != 'draw') {
+  if (hand_results.result != HandResults.DRAW) {
     game.value.riichi_sticks = 0
   }
   game.value.hand_results = {
@@ -639,11 +640,11 @@ function ResolvePointsDelta(game, rules) {
   const hand_results = game.value.hand_results
 
   let points_delta = {}
-  if (hand_results.result === 'draw') {
+  if (hand_results.result === HandResults.DRAW) {
     return ResolvePointsDeltaOnDraw(game, rules)
-  } else if (hand_results.result === 'tsumo') {
+  } else if (hand_results.result === HandResults.TSUMO) {
     return ResolvePointsDeltaOnTsumo(game, rules)
-  } else if (hand_results.result === 'ron') {
+  } else if (hand_results.result === HandResults.RON) {
     return ResolvePointsDeltaOnRon(game, rules)
   } else {
     alert(`错误对局结果: ${JSON.stringify(hand_results.result)}`)
@@ -651,9 +652,81 @@ function ResolvePointsDelta(game, rules) {
   return points_delta
 }
 
+function ValidateHandResults(game, rules) {
+  const hand_results = game.value.hand_results
+  if (!Object.values(HandResults).includes(hand_results.result)) {
+    return [false, `错误对局结果: ${hand_results.result}`]
+  }
+
+  if (hand_results.result == HandResults.DRAW) {
+    for (const riichi_player of hand_results.riichi) {
+      if (!hand_results.tenpai.includes(riichi_player)) {
+        return [false, `立直家未听牌: ${game.value.players[riichi_player].name}`]
+      }
+    }
+  } else if (hand_results.result == HandResults.TSUMO) {
+    if (!Object.values(Winds).includes(hand_results.winner)) {
+      return [false, `找不到自摸家: ${hand_results.winner}`]
+    }
+    if (!Object.values(AllowedHans).includes(hand_results.han)) {
+      return [false, `番数错误: ${hand_results.han}`]
+    }
+    if (
+      !Object.values(PointsLadder).includes(hand_results.han) &&
+      !Object.values(AllowedFus[hand_results.han]).includes(hand_results.fu)
+    ) {
+      return [false, `符数错误: ${hand_results.fu}`]
+    }
+
+    const key = GetPointMapKey(hand_results.han, hand_results.fu)
+    if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
+      return [
+        false,
+        `番符组合不存在: ${hand_results.result}, ${hand_results.han}, ${hand_results.fu}`
+      ]
+    }
+  } else if (hand_results.result == HandResults.RON) {
+    if (!Object.values(Winds).includes(hand_results.winner)) {
+      return [false, `找不到自摸家: ${hand_results.winner}`]
+    }
+    if (!Object.values(Winds).includes(hand_results.deal_in)) {
+      return [false, `找不到点炮家: ${hand_results.deal_in}`]
+    }
+    if (hand_results.deal_in == hand_results.winner) {
+      return [false, `点炮家不能和胡家一样: ${hand_results.winner} == ${hand_results.deal_in}`]
+    }
+    if (!Object.values(AllowedHans).includes(hand_results.han)) {
+      return [false, `番数错误: ${hand_results.han}`]
+    }
+    if (
+      !Object.values(PointsLadder).includes(hand_results.han) &&
+      !Object.values(AllowedFus[hand_results.han]).includes(hand_results.fu)
+    ) {
+      return [false, `符数错误: ${hand_results.fu}`]
+    }
+    const key = GetPointMapKey(hand_results.han, hand_results.fu)
+    if (!RonPointsNonDealer.hasOwnProperty(key)) {
+      return [
+        false,
+        `番符组合不存在: ${hand_results.result}, ${hand_results.han}, ${hand_results.fu}`
+      ]
+    }
+  }
+  return [true, '']
+}
+
 // Handles the current hand results.
 function FinishCurrentHand(game, rules) {
   Log(`FinishCurrentHand`)
+
+  // Validate hand results
+  const [valid, msg] = ValidateHandResults(game, rules)
+  Log(valid)
+  Log(msg)
+  if (!valid) {
+    alert(msg)
+    return
+  }
 
   // resolve points changes
   const points_delta = ResolvePointsDelta(game, rules)
