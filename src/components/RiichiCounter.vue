@@ -167,237 +167,10 @@
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 import { useCookies } from 'vue3-cookies'
+import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.js'
+import { HandResults, ResultDisplayTextMap, PointsLadder, PointsLadderDisplayMap, AllowedHans, AllowedFus, RonPointsDealer, RonPointsNonDealer, TsumoPointsDealer, TsumoPointsNonDealer } from './game_constants.js'
 
 const DEBUG_FLAG = true
-
-const Winds = Object.freeze({
-  EAST: 'east',
-  SOUTH: 'south',
-  WEST: 'west',
-  NORTH: 'north'
-})
-
-const HandResults = Object.freeze({
-  TSUMO: 'tsumo',
-  RON: 'ron',
-  DRAW: 'draw'
-})
-
-const NextWindMap = Object.freeze({
-  [Winds.EAST]: Winds.SOUTH,
-  [Winds.SOUTH]: Winds.WEST,
-  [Winds.WEST]: Winds.NORTH,
-  [Winds.NORTH]: Winds.EAST
-})
-
-const LastWindMap = Object.freeze({
-  [Winds.EAST]: Winds.NORTH,
-  [Winds.SOUTH]: Winds.EAST,
-  [Winds.WEST]: Winds.SOUTH,
-  [Winds.NORTH]: Winds.WEST
-})
-
-const WindsDisplayTextMap = Object.freeze({
-  wind_character: {
-    [Winds.EAST]: '东',
-    [Winds.SOUTH]: '南',
-    [Winds.WEST]: '西',
-    [Winds.NORTH]: '北'
-  }
-})
-
-const ResultDisplayTextMap = Object.freeze({
-  [HandResults.DRAW]: '流局',
-  [HandResults.TSUMO]: '自摸',
-  [HandResults.RON]: '荣和'
-})
-
-const PointsLadder = Object.freeze({
-  MANGAN: 'MANGAN',
-  HANEMAN: 'HANEMAN',
-  BAIMAN: 'BAIMAN',
-  SANBAIMAN: 'SANBAIMAN',
-  YAKUMAN: 'YAKUMAN'
-})
-
-const PointsLadderDisplayMap = Object.freeze({
-  [PointsLadder.MANGAN]: '满贯',
-  [PointsLadder.HANEMAN]: '跳满',
-  [PointsLadder.BAIMAN]: '倍满',
-  [PointsLadder.SANBAIMAN]: '三倍满',
-  [PointsLadder.YAKUMAN]: '役满'
-})
-
-const AllowedHans = [1, 2, 3, 4].concat(Object.keys(PointsLadder))
-
-const AllowedFus = Object.freeze({
-  [1]: [30, 40, 50, 60, 70, 80, 90, 100, 110],
-  [2]: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
-  [3]: [20, 25, 30, 40, 50, 60, 70],
-  [4]: [20, 25, 30]
-})
-
-const RonPointsNonDealer = Object.freeze({
-  [[1, 30]]: 1000,
-  [[1, 40]]: 1300,
-  [[1, 50]]: 1600,
-  [[1, 60]]: 2000,
-  [[1, 70]]: 2300,
-  [[1, 80]]: 2600,
-  [[1, 90]]: 2900,
-  [[1, 100]]: 3200,
-  [[1, 110]]: 3600,
-
-  [[2, 25]]: 1600,
-  [[2, 30]]: 2000,
-  [[2, 40]]: 2600,
-  [[2, 50]]: 3200,
-  [[2, 60]]: 3900,
-  [[2, 70]]: 4500,
-  [[2, 80]]: 5200,
-  [[2, 90]]: 5800,
-  [[2, 100]]: 6400,
-  [[2, 110]]: 7100,
-
-  [[3, 25]]: 3200,
-  [[3, 30]]: 3900,
-  [[3, 40]]: 5200,
-  [[3, 50]]: 6400,
-  [[3, 70]]: 8000,
-  [[3, 80]]: 8000,
-  [[3, 90]]: 8000,
-  [[3, 100]]: 8000,
-  [[3, 110]]: 8000,
-
-  [[4, 25]]: 6400,
-  [[4, 30]]: 7700,
-
-  [PointsLadder.MANGAN]: 8000,
-  [PointsLadder.HANEMAN]: 12000,
-  [PointsLadder.BAIMAN]: 16000,
-  [PointsLadder.SANBAIMAN]: 24000,
-  [PointsLadder.YAKUMAN]: 32000
-})
-
-const RonPointsDealer = Object.freeze({
-  [[1, 30]]: 1500,
-  [[1, 40]]: 2000,
-  [[1, 50]]: 2400,
-  [[1, 60]]: 2900,
-  [[1, 70]]: 3400,
-  [[1, 80]]: 3900,
-  [[1, 90]]: 4400,
-  [[1, 100]]: 4800,
-  [[1, 110]]: 5300,
-
-  [[2, 25]]: 2400,
-  [[2, 30]]: 2900,
-  [[2, 40]]: 3900,
-  [[2, 50]]: 4800,
-  [[2, 60]]: 5800,
-  [[2, 70]]: 6800,
-  [[2, 80]]: 7700,
-  [[2, 90]]: 8700,
-  [[2, 100]]: 9600,
-  [[2, 110]]: 10600,
-
-  [[3, 25]]: 4800,
-  [[3, 30]]: 5800,
-  [[3, 40]]: 7700,
-  [[3, 50]]: 9600,
-  [[3, 70]]: 11600,
-
-  [[4, 25]]: 9600,
-  [[4, 30]]: 11600,
-
-  [PointsLadder.MANGAN]: 12000,
-  [PointsLadder.HANEMAN]: 18000,
-  [PointsLadder.BAIMAN]: 24000,
-  [PointsLadder.SANBAIMAN]: 36000,
-  [PointsLadder.YAKUMAN]: 48000
-})
-
-const TsumoPointsNonDealer = Object.freeze({
-  // [non dealer points, dealer points]
-  [[1, 30]]: [300, 500],
-  [[1, 40]]: [400, 700],
-  [[1, 50]]: [400, 800],
-  [[1, 60]]: [500, 1000],
-  [[1, 70]]: [600, 1200],
-  [[1, 80]]: [700, 1300],
-  [[1, 90]]: [800, 1500],
-  [[1, 100]]: [800, 1600],
-  [[1, 110]]: [900, 1800],
-
-  [[2, 20]]: [400, 700],
-  [[2, 30]]: [500, 1000],
-  [[2, 40]]: [700, 1300],
-  [[2, 50]]: [800, 1600],
-  [[2, 60]]: [1000, 2000],
-  [[2, 70]]: [1200, 2300],
-  [[2, 80]]: [1300, 2600],
-  [[2, 90]]: [1500, 2900],
-  [[2, 100]]: [1600, 3200],
-  [[2, 110]]: [1800, 3600],
-
-  [[3, 20]]: [700, 1300],
-  [[3, 25]]: [800, 1600],
-  [[3, 30]]: [1000, 2000],
-  [[3, 40]]: [1300, 2600],
-  [[3, 50]]: [1600, 3200],
-  [[3, 70]]: [2000, 3900],
-
-  [[4, 20]]: [1300, 2600],
-  [[4, 25]]: [1600, 3200],
-  [[4, 30]]: [2000, 3900],
-
-  [PointsLadder.MANGAN]: [2000, 4000],
-  [PointsLadder.HANEMAN]: [3000, 6000],
-  [PointsLadder.BAIMAN]: [4000, 8000],
-  [PointsLadder.SANBAIMAN]: [6000, 12000],
-  [PointsLadder.YAKUMAN]: [8000, 16000]
-})
-
-const TsumoPointsDealer = Object.freeze({
-  // => points all
-  [[1, 30]]: 500,
-  [[1, 40]]: 700,
-  [[1, 50]]: 800,
-  [[1, 60]]: 1000,
-  [[1, 70]]: 1200,
-  [[1, 80]]: 1300,
-  [[1, 90]]: 1500,
-  [[1, 100]]: 1600,
-  [[1, 110]]: 1800,
-
-  [[2, 20]]: 700,
-  [[2, 30]]: 1000,
-  [[2, 40]]: 1300,
-  [[2, 50]]: 1600,
-  [[2, 60]]: 2000,
-  [[2, 70]]: 2300,
-  [[2, 80]]: 2600,
-  [[2, 90]]: 2900,
-  [[2, 100]]: 3200,
-  [[2, 110]]: 3600,
-
-  [[3, 20]]: 1300,
-  [[3, 25]]: 1600,
-  [[3, 30]]: 2000,
-  [[3, 40]]: 2600,
-  [[3, 50]]: 3200,
-  [[3, 70]]: 3900,
-
-  [[4, 20]]: 2600,
-  [[4, 25]]: 3200,
-  [[4, 30]]: 3900,
-
-  [PointsLadder.MANGAN]: 4000,
-  [PointsLadder.HANEMAN]: 6000,
-  [PointsLadder.BAIMAN]: 8000,
-  [PointsLadder.SANBAIMAN]: 12000,
-  [PointsLadder.YAKUMAN]: 16000
-})
 
 function Log(msg, debug = false) {
   if (!debug || DEBUG_FLAG) {
@@ -517,7 +290,6 @@ function SetUpNewHand(game, rules) {
   if (!game_finished) {
     UpdateSeatsAndGameStateForNextHand(game, rules, renchan, honba_increase, cleanup_riichi_sticks)
   }
-  Log(`Game info after setting up new hand: ${JSON.stringify(game.value)}`)
   SaveCookies()
 }
 
@@ -631,6 +403,7 @@ function ResolvePointsDeltaOnTsumo(game, rules) {
 }
 
 function GetPointMapKey(han, fu, rules) {
+  Log(`GetPointMapKey: han = ${han}, fu = ${fu}`)
   if (PointsLadder.hasOwnProperty(han)) {
     return han
   }
@@ -726,7 +499,7 @@ function ValidateHandResults(game, rules) {
       return [false, `符数错误: ${hand_results.fu}`]
     }
 
-    const key = GetPointMapKey(hand_results.han, hand_results.fu)
+    const key = GetPointMapKey(hand_results.han, hand_results.fu, rules)
     if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
       return [
         false,
@@ -735,7 +508,7 @@ function ValidateHandResults(game, rules) {
     }
   } else if (hand_results.result == HandResults.RON) {
     if (!Object.values(Winds).includes(hand_results.winner)) {
-      return [false, `找不到自摸家: ${hand_results.winner}`]
+      return [false, `找不到胡牌家: ${hand_results.winner}`]
     }
     if (!Object.values(Winds).includes(hand_results.deal_in)) {
       return [false, `找不到点炮家: ${hand_results.deal_in}`]
@@ -752,7 +525,7 @@ function ValidateHandResults(game, rules) {
     ) {
       return [false, `符数错误: ${hand_results.fu}`]
     }
-    const key = GetPointMapKey(hand_results.han, hand_results.fu)
+    const key = GetPointMapKey(hand_results.han, hand_results.fu, rules)
     if (!RonPointsNonDealer.hasOwnProperty(key)) {
       return [
         false,
@@ -819,7 +592,7 @@ function FinishCurrentHand(game, rules) {
     })}]`
   } else if (game.value.hand_results.result == HandResults.TSUMO) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
-    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu)
+    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, rules)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
       hand_log.result += `[${PointsLadderDisplayMap[key]}]`
     } else {
@@ -827,7 +600,7 @@ function FinishCurrentHand(game, rules) {
     }
   } else if (game.value.hand_results.result == HandResults.RON) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
-    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu)
+    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, rules)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
       hand_log.result += `[${PointsLadderDisplayMap[key]}]`
     } else {
@@ -921,16 +694,55 @@ const game = ref({
   }
 })
 
-const { cookies } = useCookies()
+function memorySizeOf(obj) {
+  var bytes = 0;
+
+  function sizeOf(obj) {
+    if (obj !== null && obj !== undefined) {
+      switch (typeof obj) {
+        case "number":
+          bytes += 8;
+          break;
+        case "string":
+          bytes += obj.length * 2;
+          break;
+        case "boolean":
+          bytes += 4;
+          break;
+        case "object":
+          var objClass = Object.prototype.toString.call(obj).slice(8, -1);
+          if (objClass === "Object" || objClass === "Array") {
+            for (var key in obj) {
+              if (!obj.hasOwnProperty(key)) continue;
+              sizeOf(obj[key]);
+            }
+          } else bytes += obj.toString().length * 2;
+          break;
+      }
+    }
+    return bytes;
+  }
+
+  function formatByteSize(bytes) {
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(3) + " KiB";
+    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(3) + " MiB";
+    else return (bytes / 1073741824).toFixed(3) + " GiB";
+  }
+
+  return formatByteSize(sizeOf(obj));
+}
+
+const { cookies } = useCookies(['game', 'rules'])
 
 function SaveCookies() {
-  Log(`SaveCookies`)
-  cookies.set('game', game.value)
-  cookies.set('rules', rules.value)
+  Log(`SaveCookies game: ${game.value.round_wind}-${game.value.hand}-${game.value.honba}`)
+  cookies.set('game', game.value, '10m')
+  cookies.set('rules', rules.value, '10m')
+  Log(`SaveCookies ck: ${cookies.get('game').round_wind}-${cookies.get('game').hand}-${cookies.get('game').honba}`)
 }
 
 function LoadCookies() {
-  Log(`LoadCookies`)
   Object.assign(game.value, cookies.get('game'))
   Object.assign(rules.value, cookies.get('rules'))
 }
@@ -955,8 +767,8 @@ export default {
   mounted() {
     Log('mounted')
     LoadCookies()
-    // save data to cookie every 10s
-    window.setInterval(this.SaveCookies, 10000)
+    // save data to cookie every 5s
+    window.setInterval(this.SaveCookies, 5000)
   },
   data: function () {
     return {
