@@ -130,8 +130,8 @@
     style="width: 100%"
     stripe
   >
+    <el-table-column fixed prop="hand_signature" label="场" />
     <el-table-column prop="log_index" label="手" />
-    <el-table-column prop="hand_signature" label="场" />
     <el-table-column prop="beginning_riichi_sticks" label="开局供托" />
     <el-table-column prop="result" label="结果" />
     <el-table-column prop="east_points_delta_with_riichi" :label="game.players[Winds.EAST].name" />
@@ -144,6 +144,13 @@
       prop="north_points_delta_with_riichi"
       :label="game.players[Winds.NORTH].name"
     />
+    <el-table-column label="操作">
+      <template #default="scope">
+        <el-button size="small" type="warning" @click="HandleResetLog(scope.$index, scope.row)"
+          >重置</el-button
+        >
+      </template>
+    </el-table-column>
   </el-table>
 
   <!-- after-game view -->
@@ -156,6 +163,7 @@
 <script>
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
+import { useCookies } from 'vue3-cookies'
 
 const DEBUG_FLAG = true
 
@@ -394,45 +402,49 @@ function Log(msg, debug = false) {
   }
 }
 
-// Sets up the game.
+// Initialize game data
+function InitGame(game, rules) {
+  Object.assign(game.value, {
+    finished: false,
+    round_wind: Winds.EAST,
+    hand: 1,
+    riichi_sticks: 0,
+    honba: 0,
+    log: [],
+    hand_results: {
+      riichi: [],
+      tenpai: []
+    }
+  })
+  for (const [_, player_id] of Object.entries(Winds)) {
+    game.value.players[player_id].points = rules.starting_points
+    game.value.players[player_id].current_wind = player_id
+  }
+  Log(`InitGame: ${JSON.stringify(game)}`)
+}
+
+// Sets up a new game. The game must not be on going
 function SetUpGame(game, rules) {
+  Log(`SetUpGame, rules: ${JSON.stringify(rules)}`)
   if (game.value.on_going === true) {
     alert(`Game is already on going!`)
     return
   }
-
-  Log('SetUpGame, rules: ${JSON.stringify(rules)}')
-  game.value.round_wind = Winds.EAST
-  game.value.hand = 1
-  game.value.honba = 0
-  game.value.riichi_sticks = 0
-  game.value.log = []
-  game.value.hand_results = {
-    riichi: [],
-    tenpai: []
-  }
-  for (let [_, player] of Object.entries(game.value.players)) {
-    player.starting_points = rules.starting_points
-    player.points = rules.starting_points
-  }
+  InitGame(game, rules)
   game.value.on_going = true
 }
 
-// Sets up a new hand according to last hand's results, and clean up hand results.
-// All points changes should be resolved and applied before calling this method.
-function SetUpNewHand(game, rules) {
-  Log('SetUpNewHand')
-  if (game.value.on_going == false || game.value.finished === true) {
-    alert(`游戏尚未开始/已经结束.`)
-    return
-  }
+function ResolveNextHand(game, rules) {
+  Log('ResolveNextHand')
 
   let hand_results = game.value.hand_results
   const dealer = FindDealerId(game.value.players)
   const all_last = IsAllLast(game, rules)
   let renchan = false
   let honba_increase = false
+  let cleanup_riichi_sticks = true
   if (hand_results.result == HandResults.DRAW) {
+    cleanup_riichi_sticks = false
     honba_increase = true
     if (game.value.hand_results.tenpai.includes(dealer)) {
       renchan =
@@ -446,37 +458,64 @@ function SetUpNewHand(game, rules) {
     }
   }
 
-  // Shift winds if game continues
   const game_finished = all_last && !renchan
-  if (!game_finished && !renchan) {
+  return [game_finished, renchan, honba_increase, cleanup_riichi_sticks]
+}
+
+function UpdateSeatsAndGameStateForNextHand(
+  game,
+  rules,
+  renchan,
+  honba_increase,
+  cleanup_riichi_sticks
+) {
+  Log(
+    `UpdateSeatsAndGameStateForNextHand: renchan = ${renchan}, honba_increase = ${honba_increase}, cleanup_riichi_sticks = ${cleanup_riichi_sticks}`
+  )
+  if (!renchan) {
     for (let [_, player] of Object.entries(game.value.players)) {
       player.current_wind = LastWindMap[player.current_wind]
     }
 
     const num_players = Object.keys(game.value.players).length
     if (game.value.hand == num_players) {
-      game.value.round_wind = LastWindMap[game.value.round_wind]
+      game.value.round_wind = NextWindMap[game.value.round_wind]
       game.value.hand = 1
     } else {
       game.value.hand += 1
     }
   }
-
-  // adjust honba and riichi sticks
   if (honba_increase) {
     game.value.honba += 1
   } else {
     game.value.honba = 0
   }
-  if (hand_results.result != HandResults.DRAW) {
+  if (cleanup_riichi_sticks) {
     game.value.riichi_sticks = 0
   }
   game.value.hand_results = {
     riichi: [],
     tenpai: []
   }
+}
 
+// Sets up a new hand according to last hand's results, and clean up hand results.
+// All points changes should be resolved and applied before calling this method.
+function SetUpNewHand(game, rules) {
+  Log('SetUpNewHand')
+  if (game.value.on_going == false || game.value.finished === true) {
+    alert(`游戏尚未开始/已经结束.`)
+    return
+  }
+  const [game_finished, renchan, honba_increase, cleanup_riichi_sticks] = ResolveNextHand(
+    game,
+    rules
+  )
+  if (!game_finished) {
+    UpdateSeatsAndGameStateForNextHand(game, rules, renchan, honba_increase, cleanup_riichi_sticks)
+  }
   Log(`Game info after setting up new hand: ${JSON.stringify(game.value)}`)
+  SaveCookies()
 }
 
 // Finds dealer ID from players
@@ -498,15 +537,21 @@ function IsAllLast(game, rules) {
 // Finishes the whole game.
 function FinishGame(game, rules) {
   Log('FinishGame')
-  confirm('确定结束游戏?')
+  if (!confirm('确定结束游戏?')) {
+    return
+  }
   game.value.on_going = false
   game.value.finished = true
+  SaveCookies()
 }
 
 function CleanUpGame(game, rules) {
   Log('CleanUpGame')
-  confirm('记录不会保存，确定重开?')
-  game.value.finished = false
+  if (!confirm('记录不会保存，确定重开?')) {
+    return
+  }
+  InitGame(game, rules)
+  ClearCookies()
 }
 
 // Helper function, resolves points changes in the case of draw.
@@ -728,21 +773,30 @@ function FinishCurrentHand(game, rules) {
     return
   }
 
-  // resolve points changes
+  // resolve and apply points changes
   const points_delta = ResolvePointsDelta(game, rules)
   Log(`Resolved points_delta = ${JSON.stringify(points_delta)}`)
   for (const [player_id, delta] of Object.entries(points_delta)) {
     game.value.players[player_id].points += delta
   }
 
-  // store results to log
+  // create hand log at the end a hand
   let hand_log = {
     log_index: game.value.log.length,
-    round_wind: WindsDisplayTextMap.wind_character[game.value.round_wind],
-    hand: game.value.hand,
-    honba: game.value.honba,
-    hand_signature: `${WindsDisplayTextMap.wind_character[game.value.round_wind]}${game.value.hand}-${game.value.honba}`,
+
+    // for reset
+    on_going: game.value.on_going,
+    finished: game.value.finished,
+    round_wind: game.value.round_wind,
+    round_wind: JSON.parse(JSON.stringify(game.value.round_wind)),
+    hand: JSON.parse(JSON.stringify(game.value.hand)),
+    honba: JSON.parse(JSON.stringify(game.value.honba)),
+    players: JSON.parse(JSON.stringify(game.value.players)),
+    hand_results: JSON.parse(JSON.stringify(game.value.hand_results)),
+
+    // for display
     beginning_riichi_sticks: game.value.riichi_sticks - game.value.hand_results.riichi.length,
+    hand_signature: `${WindsDisplayTextMap.wind_character[game.value.round_wind]}${game.value.hand}-${game.value.honba}`,
     result: ResultDisplayTextMap[game.value.hand_results.result],
     riichi: game.value.hand_results.riichi
   }
@@ -781,6 +835,7 @@ function FinishCurrentHand(game, rules) {
 
   // set up a next hand.
   SetUpNewHand(game, rules)
+  SaveCookies()
 }
 
 // Handle player riichi event
@@ -794,6 +849,36 @@ function HandlePlayerRiichi(player_id, game, rules) {
     player.points += rules.riichi_cost
     game.value.riichi_sticks -= 1
   }
+}
+
+function HandleResetLog(game, rules, index, row) {
+  Log(`HandleResetLog: ${index}, ${JSON.stringify(row)}`)
+  if (!confirm(`确定重置？`)) {
+    return
+  }
+  // reset game state
+  Object.assign(game.value, {
+    on_going: row.on_going,
+    finished: row.finished,
+    round_wind: row.round_wind,
+    hand: row.hand,
+    honba: row.honba,
+    players: row.players,
+    hand_results: row.hand_results
+  })
+  // clean up logs after the target log index
+  game.value.log.length = row.log_index
+
+  // Update states to next hand
+  const [game_finished, renchan, honba_increase, cleanup_riichi_sticks] = ResolveNextHand(
+    game,
+    rules
+  )
+  if (!game_finished) {
+    UpdateSeatsAndGameStateForNextHand(game, rules, renchan, honba_increase, cleanup_riichi_sticks)
+  }
+
+  SaveCookies()
 }
 
 const rules = ref({
@@ -815,26 +900,42 @@ const game = ref({
   players: {
     [Winds.EAST]: {
       name: '赤木',
-      starting_wind: Winds.EAST,
       current_wind: Winds.EAST
     },
     [Winds.SOUTH]: {
       name: '原田',
-      starting_wind: Winds.SOUTH,
       current_wind: Winds.SOUTH
     },
     [Winds.WEST]: {
       name: '瓦西子',
-      starting_wind: Winds.WEST,
       current_wind: Winds.WEST
     },
     [Winds.NORTH]: {
       name: '天',
-      starting_wind: Winds.NORTH,
       current_wind: Winds.NORTH
     }
   }
 })
+
+const { cookies } = useCookies()
+
+function SaveCookies() {
+  Log(`SaveCookies`)
+  cookies.set('game', game.value)
+  cookies.set('rules', rules.value)
+}
+
+function LoadCookies() {
+  Log(`LoadCookies`)
+  Object.assign(game.value, cookies.get('game'))
+  Object.assign(rules.value, cookies.get('rules'))
+}
+
+function ClearCookies() {
+  Log(`ClearCookies`)
+  cookies.remove('game')
+  cookies.remove('rules')
+}
 
 export default {
   name: 'RiichiCounter',
@@ -846,6 +947,12 @@ export default {
   },
   created() {
     Log('created')
+  },
+  mounted() {
+    Log('mounted')
+    LoadCookies()
+    // save data to cookie every 10s
+    window.setInterval(this.SaveCookies, 10000)
   },
   data: function () {
     return {
@@ -891,6 +998,18 @@ export default {
     },
     FinishCurrentHand: () => {
       FinishCurrentHand(game, rules.value)
+    },
+    HandleResetLog: (index, row) => {
+      HandleResetLog(game, rules.value, index, row)
+    },
+    LoadCookies: () => {
+      LoadCookies()
+    },
+    SaveCookies: () => {
+      SaveCookies()
+    },
+    ClearCookies: () => {
+      ClearCookies()
     }
   }
 }
