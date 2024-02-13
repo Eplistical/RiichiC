@@ -867,7 +867,7 @@ function HandleResetLog(game, rules, index, row) {
     hand_results: row.hand_results
   })
   // clean up logs after the target log index
-  game.value.log.length = row.log_index
+  game.value.log = game.value.log.slice(0, row.log_index + 1)
 
   // Update states to next hand
   const [game_finished, renchan, honba_increase, cleanup_riichi_sticks] = ResolveNextHand(
