@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "bootstrap": "^5.3.2",
@@ -27,6 +29,7 @@
     "@vue/test-utils": "^2.4.4",
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
+    "gh-pages": "^6.1.1",
     "jsdom": "^24.0.0",
     "prettier": "^3.0.3",
     "unplugin-auto-import": "^0.17.5",
