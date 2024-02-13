@@ -169,6 +169,7 @@ import { ref } from 'vue'
 import { useCookies } from 'vue3-cookies'
 import { Winds, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.js'
 import { HandResults, ResultDisplayTextMap, PointsLadder, PointsLadderDisplayMap, AllowedHans, AllowedFus, RonPointsDealer, RonPointsNonDealer, TsumoPointsDealer, TsumoPointsNonDealer } from './game_constants.js'
+import { MLeagueRuleset } from './rulesets.ts'
 
 const DEBUG_FLAG = true
 
@@ -178,8 +179,10 @@ function Log(msg, debug = false) {
   }
 }
 
+const ruleset = MLeagueRuleset;
+
 // Initialize game data
-function InitGame(game, rules) {
+function InitGame(game, ruleset) {
   Object.assign(game.value, {
     finished: false,
     round_wind: Winds.EAST,
@@ -193,29 +196,29 @@ function InitGame(game, rules) {
     }
   })
   for (const [_, player_id] of Object.entries(Winds)) {
-    game.value.players[player_id].points = rules.starting_points
+    game.value.players[player_id].points = ruleset.starting_points
     game.value.players[player_id].current_wind = player_id
   }
   Log(`InitGame: ${JSON.stringify(game)}`)
 }
 
 // Sets up a new game. The game must not be on going
-function SetUpGame(game, rules) {
-  Log(`SetUpGame, rules: ${JSON.stringify(rules)}`)
+function SetUpGame(game, ruleset) {
+  Log(`SetUpGame, ruleset: ${JSON.stringify(ruleset)}`)
   if (game.value.on_going === true) {
     alert(`Game is already on going!`)
     return
   }
-  InitGame(game, rules)
+  InitGame(game, ruleset)
   game.value.on_going = true
 }
 
-function ResolveNextHand(game, rules) {
+function ResolveNextHand(game, ruleset) {
   Log('ResolveNextHand')
 
   let hand_results = game.value.hand_results
   const dealer = FindDealerId(game.value.players)
-  const all_last = IsAllLast(game, rules)
+  const all_last = IsAllLast(game, ruleset)
   let renchan = false
   let honba_increase = false
   let cleanup_riichi_sticks = true
@@ -224,13 +227,13 @@ function ResolveNextHand(game, rules) {
     honba_increase = true
     if (game.value.hand_results.tenpai.includes(dealer)) {
       renchan =
-        (!all_last && rules.dealer_tenpai_renchan) ||
-        (all_last && rules.all_last_dealer_tenpai_renchan)
+        (!all_last && ruleset.dealer_tenpai_renchan) ||
+        (all_last && ruleset.all_last_dealer_tenpai_renchan)
     }
   } else {
     if (game.value.hand_results.winner == dealer) {
       honba_increase = true
-      renchan = !all_last || rules.all_last_dealer_win_renchan
+      renchan = !all_last || ruleset.all_last_dealer_win_renchan
     }
   }
 
@@ -240,7 +243,7 @@ function ResolveNextHand(game, rules) {
 
 function UpdateSeatsAndGameStateForNextHand(
   game,
-  rules,
+  ruleset,
   renchan,
   honba_increase,
   cleanup_riichi_sticks
@@ -277,7 +280,7 @@ function UpdateSeatsAndGameStateForNextHand(
 
 // Sets up a new hand according to last hand's results, and clean up hand results.
 // All points changes should be resolved and applied before calling this method.
-function SetUpNewHand(game, rules) {
+function SetUpNewHand(game, ruleset) {
   Log('SetUpNewHand')
   if (game.value.on_going == false || game.value.finished === true) {
     alert(`游戏尚未开始/已经结束.`)
@@ -285,10 +288,10 @@ function SetUpNewHand(game, rules) {
   }
   const [game_finished, renchan, honba_increase, cleanup_riichi_sticks] = ResolveNextHand(
     game,
-    rules
+    ruleset
   )
   if (!game_finished) {
-    UpdateSeatsAndGameStateForNextHand(game, rules, renchan, honba_increase, cleanup_riichi_sticks)
+    UpdateSeatsAndGameStateForNextHand(game, ruleset, renchan, honba_increase, cleanup_riichi_sticks)
   }
   SaveCookies()
 }
@@ -304,13 +307,13 @@ function FindDealerId(players) {
 }
 
 // Checks if current hand is all last
-function IsAllLast(game, rules) {
+function IsAllLast(game, ruleset) {
   const num_players = Object.keys(game.value.players).length
   return game.hand == num_players && rule.last_round_wind == game.round_wind
 }
 
 // Finishes the whole game.
-function FinishGame(game, rules) {
+function FinishGame(game, ruleset) {
   Log('FinishGame')
   if (!confirm('确定结束游戏?')) {
     return
@@ -320,17 +323,17 @@ function FinishGame(game, rules) {
   SaveCookies()
 }
 
-function CleanUpGame(game, rules) {
+function CleanUpGame(game, ruleset) {
   Log('CleanUpGame')
   if (!confirm('记录不会保存，确定重开?')) {
     return
   }
-  InitGame(game, rules)
+  InitGame(game, ruleset)
   ClearCookies()
 }
 
 // Helper function, resolves points changes in the case of draw.
-function ResolvePointsDeltaOnDraw(game, rules) {
+function ResolvePointsDeltaOnDraw(game, ruleset) {
   Log(`ResolvePointsDeltaOnDraw`)
   const tenpai = game.value.hand_results.tenpai
   const num_players = Object.keys(game.value.players).length
@@ -340,8 +343,8 @@ function ResolvePointsDeltaOnDraw(game, rules) {
     return {}
   }
 
-  const tenpai_delta = rules.draw_tenpai_points / num_tenpai
-  const noten_delta = -rules.draw_tenpai_points / num_noten
+  const tenpai_delta = ruleset.draw_tenpai_points / num_tenpai
+  const noten_delta = -ruleset.draw_tenpai_points / num_noten
   let points_delta = {}
   for (const [_, player_id] of Object.entries(Winds)) {
     if (tenpai.includes(player_id)) {
@@ -358,22 +361,22 @@ function IsDealer(player) {
 }
 
 // Helper function, resolves points changes in the case of tsumo.
-function ResolvePointsDeltaOnTsumo(game, rules) {
+function ResolvePointsDeltaOnTsumo(game, ruleset) {
   Log(`ResolvePointsDeltaOnTsumo`)
   const num_players = Object.keys(game.value.players).length
   const winner = game.value.hand_results.winner
   const han = game.value.hand_results.han
   const fu = game.value.hand_results.fu
   const dealer_win = IsDealer(game.value.players[winner])
-  const key = GetPointMapKey(han, fu, rules)
+  const key = GetPointMapKey(han, fu, ruleset)
 
   let points_delta = {}
   if (dealer_win) {
     const delta =
-      TsumoPointsDealer[key] + (game.value.honba * rules.honba_points) / (num_players - 1)
+      TsumoPointsDealer[key] + (game.value.honba * ruleset.honba_points) / (num_players - 1)
     for (const [_, player_id] of Object.entries(Winds)) {
       if (player_id == winner) {
-        points_delta[player_id] = 3 * delta + game.value.riichi_sticks * rules.riichi_cost
+        points_delta[player_id] = 3 * delta + game.value.riichi_sticks * ruleset.riichi_cost
       } else {
         points_delta[player_id] = -delta
       }
@@ -381,13 +384,13 @@ function ResolvePointsDeltaOnTsumo(game, rules) {
   } else {
     let [raw_non_dealer_delta, raw_dealer_delta] = TsumoPointsNonDealer[key]
     const non_dealer_delta =
-      -raw_non_dealer_delta - (game.value.honba * rules.honba_points) / (num_players - 1)
+      -raw_non_dealer_delta - (game.value.honba * ruleset.honba_points) / (num_players - 1)
     const dealer_delta =
-      -raw_dealer_delta - (game.value.honba * rules.honba_points) / (num_players - 1)
+      -raw_dealer_delta - (game.value.honba * ruleset.honba_points) / (num_players - 1)
     const winner_delta =
       -non_dealer_delta * (num_players - 2) -
       dealer_delta +
-      game.value.riichi_sticks * rules.riichi_cost
+      game.value.riichi_sticks * ruleset.riichi_cost
 
     for (const [_, player_id] of Object.entries(Winds)) {
       if (player_id == winner) {
@@ -402,7 +405,7 @@ function ResolvePointsDeltaOnTsumo(game, rules) {
   return points_delta
 }
 
-function GetPointMapKey(han, fu, rules) {
+function GetPointMapKey(han, fu, ruleset) {
   Log(`GetPointMapKey: han = ${han}, fu = ${fu}`)
   if (PointsLadder.hasOwnProperty(han)) {
     return han
@@ -412,7 +415,7 @@ function GetPointMapKey(han, fu, rules) {
   } else if (han == 3) {
     if (fu >= 70) {
       return PointsLadder.MANGAN
-    } else if (fu == 60 && rules.round_up_mangan) {
+    } else if (fu == 60 && ruleset.round_up_mangan) {
       return PointsLadder.MANGAN
     } else {
       return [han, fu]
@@ -420,7 +423,7 @@ function GetPointMapKey(han, fu, rules) {
   } else if (han == 4) {
     if (fu >= 40) {
       return PointsLadder.MANGAN
-    } else if (fu == 30 && rules.round_up_mangan) {
+    } else if (fu == 30 && ruleset.round_up_mangan) {
       return PointsLadder.MANGAN
     } else {
       return [han, fu]
@@ -439,41 +442,41 @@ function GetPointMapKey(han, fu, rules) {
 }
 
 // Helper function, resolves points changes in the case of ron.
-function ResolvePointsDeltaOnRon(game, rules) {
+function ResolvePointsDeltaOnRon(game, ruleset) {
   Log(`ResolvePointsDeltaOnRon`)
   const winner = game.value.hand_results.winner
   const deal_in = game.value.hand_results.deal_in
   const han = game.value.hand_results.han
   const fu = game.value.hand_results.fu
   const points_map = IsDealer(game.value.players[winner]) ? RonPointsDealer : RonPointsNonDealer
-  const key = GetPointMapKey(han, fu, rules)
-  const delta = points_map[key] + game.value.honba * rules.honba_points
+  const key = GetPointMapKey(han, fu, ruleset)
+  const delta = points_map[key] + game.value.honba * ruleset.honba_points
 
   let points_delta = {}
-  points_delta[winner] = delta + game.value.riichi_sticks * rules.riichi_cost
+  points_delta[winner] = delta + game.value.riichi_sticks * ruleset.riichi_cost
   points_delta[deal_in] = -delta
   return points_delta
 }
 
 // Resolves points changes from current hand resuls.
-function ResolvePointsDelta(game, rules) {
+function ResolvePointsDelta(game, ruleset) {
   Log(`ResolvePointsDelta`)
   const hand_results = game.value.hand_results
 
   let points_delta = {}
   if (hand_results.result === HandResults.DRAW) {
-    return ResolvePointsDeltaOnDraw(game, rules)
+    return ResolvePointsDeltaOnDraw(game, ruleset)
   } else if (hand_results.result === HandResults.TSUMO) {
-    return ResolvePointsDeltaOnTsumo(game, rules)
+    return ResolvePointsDeltaOnTsumo(game, ruleset)
   } else if (hand_results.result === HandResults.RON) {
-    return ResolvePointsDeltaOnRon(game, rules)
+    return ResolvePointsDeltaOnRon(game, ruleset)
   } else {
     alert(`错误对局结果: ${JSON.stringify(hand_results.result)}`)
   }
   return points_delta
 }
 
-function ValidateHandResults(game, rules) {
+function ValidateHandResults(game, ruleset) {
   const hand_results = game.value.hand_results
   if (!Object.values(HandResults).includes(hand_results.result)) {
     return [false, `错误对局结果: ${hand_results.result}`]
@@ -499,7 +502,7 @@ function ValidateHandResults(game, rules) {
       return [false, `符数错误: ${hand_results.fu}`]
     }
 
-    const key = GetPointMapKey(hand_results.han, hand_results.fu, rules)
+    const key = GetPointMapKey(hand_results.han, hand_results.fu, ruleset)
     if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
       return [
         false,
@@ -525,7 +528,7 @@ function ValidateHandResults(game, rules) {
     ) {
       return [false, `符数错误: ${hand_results.fu}`]
     }
-    const key = GetPointMapKey(hand_results.han, hand_results.fu, rules)
+    const key = GetPointMapKey(hand_results.han, hand_results.fu, ruleset)
     if (!RonPointsNonDealer.hasOwnProperty(key)) {
       return [
         false,
@@ -537,11 +540,11 @@ function ValidateHandResults(game, rules) {
 }
 
 // Handles the current hand results.
-function FinishCurrentHand(game, rules) {
+function FinishCurrentHand(game, ruleset) {
   Log(`FinishCurrentHand`)
 
   // Validate hand results
-  const [valid, msg] = ValidateHandResults(game, rules)
+  const [valid, msg] = ValidateHandResults(game, ruleset)
   Log(valid)
   Log(msg)
   if (!valid) {
@@ -550,7 +553,7 @@ function FinishCurrentHand(game, rules) {
   }
 
   // resolve and apply points changes
-  const points_delta = ResolvePointsDelta(game, rules)
+  const points_delta = ResolvePointsDelta(game, ruleset)
   Log(`Resolved points_delta = ${JSON.stringify(points_delta)}`)
   for (const [player_id, delta] of Object.entries(points_delta)) {
     game.value.players[player_id].points += delta
@@ -580,7 +583,7 @@ function FinishCurrentHand(game, rules) {
     const delta = points_delta.hasOwnProperty(player_id) ? points_delta[player_id] : 0
     const riichi = game.value.hand_results.riichi.includes(player_id)
     hand_log[`${player_id}_points_delta_with_riichi`] =
-      `${delta - (riichi ? rules.riichi_cost : 0)}`
+      `${delta - (riichi ? ruleset.riichi_cost : 0)}`
     if (riichi) {
       hand_log[`${player_id}_points_delta_with_riichi`] += '(立直)'
     }
@@ -592,7 +595,7 @@ function FinishCurrentHand(game, rules) {
     })}]`
   } else if (game.value.hand_results.result == HandResults.TSUMO) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
-    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, rules)
+    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, ruleset)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
       hand_log.result += `[${PointsLadderDisplayMap[key]}]`
     } else {
@@ -600,7 +603,7 @@ function FinishCurrentHand(game, rules) {
     }
   } else if (game.value.hand_results.result == HandResults.RON) {
     hand_log.result = `${game.value.players[game.value.hand_results.winner].name}` + hand_log.result
-    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, rules)
+    const key = GetPointMapKey(game.value.hand_results.han, game.value.hand_results.fu, ruleset)
     if (PointsLadderDisplayMap.hasOwnProperty(key)) {
       hand_log.result += `[${PointsLadderDisplayMap[key]}]`
     } else {
@@ -610,24 +613,24 @@ function FinishCurrentHand(game, rules) {
   game.value.log.push(hand_log)
 
   // set up a next hand.
-  SetUpNewHand(game, rules)
+  SetUpNewHand(game, ruleset)
   SaveCookies()
 }
 
 // Handle player riichi event
-function HandlePlayerRiichi(player_id, game, rules) {
+function HandlePlayerRiichi(player_id, game, ruleset) {
   Log(`HandlePlayerRiichi called for ${player_id}`)
   let player = game.value.players[player_id]
   if (game.value.hand_results.riichi.includes(player_id)) {
-    player.points -= rules.riichi_cost
+    player.points -= ruleset.riichi_cost
     game.value.riichi_sticks += 1
   } else {
-    player.points += rules.riichi_cost
+    player.points += ruleset.riichi_cost
     game.value.riichi_sticks -= 1
   }
 }
 
-function HandleResetLog(game, rules, index, row) {
+function HandleResetLog(game, ruleset, index, row) {
   Log(`HandleResetLog: ${index}, ${JSON.stringify(row)}`)
   if (!confirm(`确定重置？`)) {
     return
@@ -649,27 +652,14 @@ function HandleResetLog(game, rules, index, row) {
   // Update states to next hand
   const [game_finished, renchan, honba_increase, cleanup_riichi_sticks] = ResolveNextHand(
     game,
-    rules
+    ruleset
   )
   if (!game_finished) {
-    UpdateSeatsAndGameStateForNextHand(game, rules, renchan, honba_increase, cleanup_riichi_sticks)
+    UpdateSeatsAndGameStateForNextHand(game, ruleset, renchan, honba_increase, cleanup_riichi_sticks)
   }
 
   SaveCookies()
 }
-
-const rules = ref({
-  starting_points: 25000,
-  honba_points: 300,
-  round_up_mangan: true,
-  head_bump: true,
-  draw_tenpai_points: 3000,
-  riichi_cost: 1000,
-  last_round_wind: Winds.SOUTH,
-  dealer_tenpai_renchan: true,
-  all_last_dealer_win_renchan: true,
-  all_last_dealer_tenpai_renchan: true
-})
 
 const game = ref({
   on_going: false,
@@ -733,24 +723,24 @@ function memorySizeOf(obj) {
   return formatByteSize(sizeOf(obj));
 }
 
-const { cookies } = useCookies(['game', 'rules'])
+const { cookies } = useCookies(['game', 'ruleset'])
 
 function SaveCookies() {
   Log(`SaveCookies game: ${game.value.round_wind}-${game.value.hand}-${game.value.honba}`)
   cookies.set('game', game.value, '10m')
-  cookies.set('rules', rules.value, '10m')
+  cookies.set('ruleset', ruleset, '10m')
   Log(`SaveCookies ck: ${cookies.get('game').round_wind}-${cookies.get('game').hand}-${cookies.get('game').honba}`)
 }
 
 function LoadCookies() {
   Object.assign(game.value, cookies.get('game'))
-  Object.assign(rules.value, cookies.get('rules'))
+  Object.assign(ruleset, cookies.get('ruleset'))
 }
 
 function ClearCookies() {
   Log(`ClearCookies`)
   cookies.remove('game')
-  cookies.remove('rules')
+  cookies.remove('ruleset')
 }
 
 export default {
@@ -801,22 +791,22 @@ export default {
   },
   methods: {
     SetUpGame: () => {
-      SetUpGame(game, rules.value)
+      SetUpGame(game, ruleset)
     },
     FinishGame: () => {
-      FinishGame(game, rules.value)
+      FinishGame(game, ruleset)
     },
     CleanUpGame: () => {
-      CleanUpGame(game, rules.value)
+      CleanUpGame(game, ruleset)
     },
     HandlePlayerRiichi: (player_id) => {
-      HandlePlayerRiichi(player_id, game, rules.value)
+      HandlePlayerRiichi(player_id, game, ruleset)
     },
     FinishCurrentHand: () => {
-      FinishCurrentHand(game, rules.value)
+      FinishCurrentHand(game, ruleset)
     },
     HandleResetLog: (index, row) => {
-      HandleResetLog(game, rules.value, index, row)
+      HandleResetLog(game, ruleset, index, row)
     },
     LoadCookies: () => {
       LoadCookies()
