@@ -1,7 +1,7 @@
 import { Hand } from "./hand.ts"
 import { Winds } from "./seat_constants.ts"
 import { Ruleset } from './rulesets.ts'
-import { Players } from './players.ts'
+import { PlayerId, Players } from './players.ts'
 
 enum GameState {
   ON_GOING,
@@ -58,10 +58,14 @@ export class Game {
     // TODO
   }
 
-  PlayerRiichi(player_id: number) {
+  PlayerRiichi(player_id: PlayerId) {
+    this.players.GetPlayer(player_id).ApplyPointsDelta(-this.ruleset.riichi_cost);
+    this.current_hand.IncreaseRiichiStick();
   }
 
-  CancelPlayerRiichi(player_id: number) {
+  RevertPlayerRiichi(player_id: PlayerId) {
+    this.players.GetPlayer(player_id).ApplyPointsDelta(this.ruleset.riichi_cost);
+    this.current_hand.DecreaseRiichiStick();
   }
 
 }

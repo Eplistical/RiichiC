@@ -52,8 +52,15 @@ export class Players {
     return this.player_map
   }
 
-  GetPlayer(player_id: PlayerId): Player {
-    return this.player_map[player_id]
+  GetPlayer(player_id: PlayerId): Player | undefined {
+    if (player_id in this.player_map) {
+      return this.player_map[player_id]
+    }
+    return undefined
+  }
+
+  GetPlayers(player_ids: PlayerId[]): Array<Player|undefined> {
+    return player_ids.map((id) => this.GetPlayer(id));
   }
 
   FindDealer(): [PlayerId, Player] {
@@ -73,7 +80,6 @@ export class Players {
     }
   }
 
-  // shift seats to next hand
   ShiftSeats() {
     for (let [player_id, player] of Object.entries(this.player_map)) {
       player.current_wind = LastWindMap[player.current_wind];

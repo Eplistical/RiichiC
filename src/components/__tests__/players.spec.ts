@@ -28,6 +28,17 @@ describe(('Players'), ()=> {
     expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
     expect(Object.values(players.GetPlayerMap()).map((p) => p.IsDealer())).toEqual([true, false, false, false])
   })
+  it('should get player correctly', () => {
+    let players = new Players(test_ruleset, ["P1", "P2", "P3", "P4"]); 
+    expect(players.GetPlayer(Winds.EAST).name).toEqual("P1");
+    expect(players.GetPlayer(Winds.SOUTH).name).toEqual("P2");
+    expect(players.GetPlayer(Winds.WEST).name).toEqual("P3");
+    expect(players.GetPlayer(Winds.NORTH).name).toEqual("P4");
+  })
+  it('should get ordered players correctly', () => {
+    let players = new Players(test_ruleset, ["P1", "P2", "P3", "P4"]); 
+    expect(players.GetPlayers([Winds.EAST, Winds.NORTH, Winds.EAST, Winds.SOUTH]).map((p) => p.name)).toEqual(["P1", "P4", "P1", "P2"]);
+  })
   it('should return correct players number', () => {
     let players = new Players(test_ruleset, ["P1", "P2", "P3", "P4"]); 
     expect(players.NumPlayers()).toEqual(4);
