@@ -5,10 +5,8 @@ import { Winds } from '../seat_constants.ts'
 import { Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand } from '../hand.ts'
 import { Players } from '../players.ts'
-import { GameState, GameStage } from '../game_stage.ts'
 
 let ruleset: Ruleset;
-let game_stage: GameStage;
 let players: Players;
 let hand: Hand;
 let hand_results: HandResults;
@@ -28,7 +26,6 @@ beforeEach(() => {
     all_last_dealer_tenpai_renchan: true,
   }
 
-  game_stage = new GameStage({state: GameState.ON_GOING});
   players = new Players(ruleset, ["P1", "P2", "P3", "P4"]); 
   hand = new Hand({
     round_wind: Winds.EAST, 
@@ -55,21 +52,21 @@ describe(('ResolvePointsDelta Should Work On Draw'), ()=> {
       outcome: HandOutcomeEnum.DRAW,
       tenpai: [],
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({});
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({});
   })
   it('when everyone tenpai', () => {
     Object.assign(hand_results, {
       outcome: HandOutcomeEnum.DRAW,
       tenpai: [Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH],
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({});
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({});
   })
   it('when 1 player tenpai', () => {
     Object.assign(hand_results, {
       outcome: HandOutcomeEnum.DRAW,
       tenpai: [Winds.EAST],
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 3000,
       [Winds.SOUTH]: -1000,
       [Winds.WEST]: -1000,
@@ -81,7 +78,7 @@ describe(('ResolvePointsDelta Should Work On Draw'), ()=> {
       outcome: HandOutcomeEnum.DRAW,
       tenpai: [Winds.EAST, Winds.WEST],
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 1500,
       [Winds.SOUTH]: -1500,
       [Winds.WEST]: 1500,
@@ -93,7 +90,7 @@ describe(('ResolvePointsDelta Should Work On Draw'), ()=> {
       outcome: HandOutcomeEnum.DRAW,
       tenpai: [Winds.SOUTH, Winds.WEST, Winds.NORTH],
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -3000,
       [Winds.SOUTH]: 1000,
       [Winds.WEST]: 1000,
@@ -108,7 +105,7 @@ describe(('ResolvePointsDelta Should Work On Draw'), ()=> {
     Object.assign(hand, {
       honba: 3,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 1500,
       [Winds.SOUTH]: -1500,
       [Winds.WEST]: 1500,
@@ -121,7 +118,7 @@ describe(('ResolvePointsDelta Should Work On Draw'), ()=> {
       tenpai: [Winds.EAST, Winds.WEST],
       riichi: [Winds.EAST, Winds.WEST],
     });
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 1500,
       [Winds.SOUTH]: -1500,
       [Winds.WEST]: 1500,
@@ -139,7 +136,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       han: 1,
       fu: 30,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 1500,
       [Winds.SOUTH]: -1500,
     });
@@ -152,7 +149,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       han: 1,
       fu: 30,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -1000,
       [Winds.SOUTH]: 1000,
     });
@@ -169,7 +166,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     Object.assign(ruleset, {
       round_up_mangan: true,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 12000,
       [Winds.SOUTH]: -12000,
     });
@@ -177,7 +174,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     Object.assign(ruleset, {
       round_up_mangan: false,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 11600,
       [Winds.SOUTH]: -11600,
     });
@@ -194,7 +191,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     Object.assign(ruleset, {
       round_up_mangan: true,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.WEST]: -8000,
       [Winds.SOUTH]: 8000,
     });
@@ -202,7 +199,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     Object.assign(ruleset, {
       round_up_mangan: false,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.WEST]: -7700,
       [Winds.SOUTH]: 7700,
     });
@@ -216,7 +213,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       fu: undefined,
     })
 
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.WEST]: -18000,
       [Winds.EAST]: 18000,
     });
@@ -230,7 +227,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       fu: undefined,
     })
 
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.WEST]: -12000,
       [Winds.SOUTH]: 12000,
     });
@@ -244,7 +241,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       fu: 40,
     })
     hand.honba = 3;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.SOUTH]: 6100,
       [Winds.WEST]: -6100,
     });
@@ -259,7 +256,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     })
     hand.honba = 3;
     ruleset.honba_points = 1500;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.SOUTH]: 9700,
       [Winds.WEST]: -9700,
     });
@@ -274,7 +271,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
       riichi: [Winds.SOUTH, Winds.EAST],
     })
     hand.riichi_sticks = 3;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.SOUTH]: 11000,
       [Winds.WEST]: -8000,
     });
@@ -290,7 +287,7 @@ describe(('ResolvePointsDelta Should Work On Ron'), ()=> {
     })
     hand.riichi_sticks = 3;
     ruleset.riichi_cost = 2500;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.SOUTH]: 15500,
       [Winds.WEST]: -8000,
     });
@@ -305,7 +302,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       han: 1,
       fu: 30,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 1500,
       [Winds.SOUTH]: -500,
       [Winds.WEST]: -500,
@@ -319,7 +316,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       han: 1,
       fu: 30,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -500,
       [Winds.SOUTH]: 1100,
       [Winds.WEST]: -300,
@@ -334,14 +331,14 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       fu: 30,
     })
     ruleset.round_up_mangan = true;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 12000,
       [Winds.SOUTH]: -4000,
       [Winds.WEST]: -4000,
       [Winds.NORTH]: -4000,
     });
     ruleset.round_up_mangan = false;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 11700,
       [Winds.SOUTH]: -3900,
       [Winds.WEST]: -3900,
@@ -356,14 +353,14 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       fu: 60,
     })
     ruleset.round_up_mangan = true;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -4000,
       [Winds.SOUTH]: -2000,
       [Winds.WEST]: -2000,
       [Winds.NORTH]: 8000,
     });
     ruleset.round_up_mangan = false;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -3900,
       [Winds.SOUTH]: -2000,
       [Winds.WEST]: -2000,
@@ -377,7 +374,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       han: 9,
       fu: undefined,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 24000,
       [Winds.SOUTH]: -8000,
       [Winds.WEST]: -8000,
@@ -391,7 +388,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       han: 12,
       fu: undefined,
     })
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -12000,
       [Winds.SOUTH]: 24000,
       [Winds.WEST]: -6000,
@@ -406,7 +403,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       fu: undefined,
     })
     hand.honba = 1;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -16100,
       [Winds.SOUTH]: -8100,
       [Winds.WEST]: 32300,
@@ -422,7 +419,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
     })
     ruleset.honba_points = 1500;
     hand.honba = 2;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: 9900,
       [Winds.SOUTH]: -3300,
       [Winds.WEST]: -3300,
@@ -438,7 +435,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
       riichi: [Winds.WEST, Winds.EAST],
     })
     hand.riichi_sticks = 2;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -2600,
       [Winds.SOUTH]: 7200,
       [Winds.WEST]: -1300,
@@ -455,7 +452,7 @@ describe(('ResolvePointsDelta Should Work On Tsumo'), ()=> {
     })
     hand.riichi_sticks = 1;
     ruleset.riichi_cost = 500;
-    expect(hand.ResolvePointsDelta(game_stage, hand_results, ruleset, players)).toEqual({
+    expect(hand.ResolvePointsDelta(hand_results, ruleset, players)).toEqual({
       [Winds.EAST]: -1800,
       [Winds.SOUTH]: -900,
       [Winds.WEST]: -900,

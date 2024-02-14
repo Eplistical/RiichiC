@@ -14,7 +14,6 @@ import {
 import { Ruleset } from './rulesets.ts'
 import { Wind } from './seat_constants.ts'
 import { PlayerId, Players } from './players.ts'
-import { GameStage } from './game_stage.ts'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -70,7 +69,7 @@ export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey
       return PointsLadder.HANEMAN
     } else if (han < 11) {
       return PointsLadder.BAIMAN
-    } else if (han == 13) {
+    } else if (han < 13) {
       return PointsLadder.SANBAIMAN
     } else {
       return PointsLadder.YAKUMAN
@@ -78,11 +77,41 @@ export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey
   }
 }
 
+interface HandInterface {
+  round_wind: Wind;
+  hand: number;
+  honba: number;
+  riichi_sticks: number;
+}
+
 export class Hand {
   round_wind: Wind
   hand: number
   honba: number
   riichi_sticks: number
+
+  constructor({round_wind, hand, honba, riichi_sticks} : HandInterface) {
+    this.round_wind = round_wind
+    this.hand = hand
+    this.honba = honba
+    this.riichi_sticks = riichi_sticks
+  } 
+
+  ResolvePointsDelta(
+    hand_results: HandResults,
+    ruleset: Ruleset,
+    players: Players
+  ): PointsDelta {
+    if (hand_results.outcome === HandOutcomeEnum.DRAW) {
+      return this.ResolvePointsDeltaOnDraw(hand_results, ruleset, players)
+    } else if (hand_results.outcome === HandOutcomeEnum.TSUMO) {
+      return this.ResolvePointsDeltaOnTsumo(hand_results, ruleset, players)
+    } else if (hand_results.outcome === HandOutcomeEnum.RON) {
+      return this.ResolvePointsDeltaOnRon(hand_results, ruleset, players)
+    } else {
+      alert(`错误对局结果: ${JSON.stringify(hand_results.outcome)}`)
+    }
+  }
 
   private GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey {
     if (typeof han == 'string') {
@@ -114,7 +143,7 @@ export class Hand {
         return PointsLadder.HANEMAN
       } else if (han < 11) {
         return PointsLadder.BAIMAN
-      } else if (han == 13) {
+      } else if (han < 13) {
         return PointsLadder.SANBAIMAN
       } else {
         return PointsLadder.YAKUMAN
@@ -123,7 +152,6 @@ export class Hand {
   }
 
   private ResolvePointsDeltaOnTsumo(
-    stage: GameStage,
     hand_results: HandResults,
     ruleset: Ruleset,
     players: Players
@@ -170,7 +198,6 @@ export class Hand {
   }
 
   private ResolvePointsDeltaOnRon(
-    stage: GameStage,
     hand_results: HandResults,
     ruleset: Ruleset,
     players: Players
@@ -183,7 +210,7 @@ export class Hand {
     const num_players: number = players.NumPlayers()
 
     let points_delta: PointsDelta = {}
-    const points_map = players[winner_id].IsDealer() ? RonPointsDealer : RonPointsNonDealer
+    const points_map = players.GetPlayer(winner_id).IsDealer() ? RonPointsDealer : RonPointsNonDealer
     const delta = points_map[key] + this.honba * ruleset.honba_points
     points_delta[winner_id] = delta + this.riichi_sticks * ruleset.riichi_cost
     points_delta[deal_in_id] = -delta
@@ -191,7 +218,6 @@ export class Hand {
   }
 
   private ResolvePointsDeltaOnDraw(
-    stage: GameStage,
     hand_results: HandResults,
     ruleset: Ruleset,
     players: Players
@@ -214,22 +240,5 @@ export class Hand {
       }
     }
     return points_delta
-  }
-
-  ResolvePointsDelta(
-    stage: GameStage,
-    hand_results: HandResults,
-    ruleset: Ruleset,
-    players: Players
-  ): PointsDelta {
-    if (hand_results.outcome === HandOutcomeEnum.DRAW) {
-      return this.ResolvePointsDeltaOnDraw(stage, hand_results, ruleset, players)
-    } else if (hand_results.outcome === HandOutcomeEnum.TSUMO) {
-      return this.ResolvePointsDeltaOnTsumo(stage, hand_results, ruleset, players)
-    } else if (hand_results.outcome === HandOutcomeEnum.RON) {
-      return this.ResolvePointsDeltaOnRon(stage, hand_results, ruleset, players)
-    } else {
-      alert(`错误对局结果: ${JSON.stringify(hand_results.outcome)}`)
-    }
   }
 }

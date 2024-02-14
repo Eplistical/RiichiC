@@ -1,5 +1,7 @@
 import { Ruleset } from './rulesets.ts'
-import { Seat, Winds, NextWindMap } from './seat_constants.ts'
+import { Seat, Winds, NextWindMap, LastWindMap} from './seat_constants.ts'
+import {PointsDelta} from './hands.ts'
+import { pl } from 'element-plus/es/locale/index.js'
 
 // Use beginning seat as a player's ID
 export type PlayerId = Seat
@@ -30,6 +32,7 @@ export class Players {
   player_map: Record<PlayerId, Player>
 
   constructor(ruleset: Ruleset, player_names: Array<string>) {
+    this.player_map = {}
     let seat: Seat = Winds.EAST
     for (let i = 0; i < ruleset.num_players; ++i) {
       this.player_map[seat] = new Player(ruleset, player_names[i], seat)
@@ -60,5 +63,20 @@ export class Players {
       }
     }
     alert(`FindDealer: Failed to find dealer in ${JSON.stringify(this.player_map)}`)
+  }
+
+  ApplyPointsDelta(points_delta: PointsDelta) {
+    for (let [player_id, player] of Object.entries(this.player_map)) {
+      if (points_delta.hasOwnProperty(player_id)) {
+        player.ApplyPointsDelta(points_delta[player_id]);
+      }
+    }
+  }
+
+  // shift seats to next hand
+  ShiftSeats() {
+    for (let [player_id, player] of Object.entries(this.player_map)) {
+      player.current_wind = LastWindMap[player.current_wind];
+    }
   }
 }
