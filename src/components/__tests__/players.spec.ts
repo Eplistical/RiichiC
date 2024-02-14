@@ -77,4 +77,25 @@ describe(('Players'), ()=> {
     expect(Object.values(players.GetPlayerMap()).map((p) => p.points)).toEqual([25000, 25000, 25000, 25000])
     expect(players.TotalPoints()).toEqual(100000);
   })
+  it('should shift seats correctly', () => {
+    let players = new Players(test_ruleset, ["P1", "P2", "P3", "P4"]); 
+    expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+    expect(players.FindDealer()[1].name).toEqual("P1")
+
+    players.ShiftSeats()
+    expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.NORTH, Winds.EAST, Winds.SOUTH, Winds.WEST])
+    expect(players.FindDealer()[1].name).toEqual("P2")
+
+    players.ShiftSeats()
+    expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.WEST, Winds.NORTH, Winds.EAST, Winds.SOUTH])
+    expect(players.FindDealer()[1].name).toEqual("P3")
+
+    players.ShiftSeats()
+    expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.SOUTH, Winds.WEST, Winds.NORTH, Winds.EAST])
+    expect(players.FindDealer()[1].name).toEqual("P4")
+
+    players.ShiftSeats()
+    expect(Object.values(players.GetPlayerMap()).map((p) => p.current_wind)).toEqual([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+    expect(players.FindDealer()[1].name).toEqual("P1")
+  })
 })
