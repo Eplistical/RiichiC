@@ -6,7 +6,7 @@ import { Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
 import { PlayerId, Players } from '../players.ts'
 import { enableAutoUnmount } from '../../../node_modules/@vue/test-utils/dist/index'
-import { PointsLadder } from '../game_constants'
+import { PointsLadder } from '../game_constants.ts'
 
 let ruleset: Ruleset;
 let players: Players;
