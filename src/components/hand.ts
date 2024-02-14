@@ -89,13 +89,74 @@ export class Hand {
   hand: number
   honba: number
   riichi_sticks: number
+  results: HandResults | undefined;
+  on_going: boolean;
 
   constructor({round_wind, hand, honba, riichi_sticks} : HandInterface) {
     this.round_wind = round_wind
     this.hand = hand
     this.honba = honba
-    this.riichi_sticks = riichi_sticks
+    this.riichi_sticks = riichi_sticks;
+    this.results = undefined;
+    this.on_going = false;
   } 
+
+  ValidateHandResults(hand_results: HandResults) : [boolean, string] {
+    // TODO
+    return [true, ""];
+  }
+
+  FinishWithResulsts(hand_results: HandResults) {
+    // TODO
+  }
+
+  MoveForwardToNextHand(hand_results: HandResults, players: Players) {
+    // TODO
+  }
+
+  IncreaseRiichiStick() {
+    this.riichi_sticks += 1;
+  }
+
+  CleanUpRiichiSticks() {
+    this.riichi_sticks = 0;
+  }
+
+  IncreaseHonba() {
+    this.honba += 1;
+  }
+
+  CleanUpHonba() {
+    this.honba = 0;
+  } 
+
+  IsAllLast(ruleset: Ruleset): boolean{
+    return (ruleset.last_round_wind == this.round_wind && this.hand == ruleset.num_players);
+  }
+
+  ResolveNextHand(hand_results: HandResults, ruleset: Ruleset, players: Players) {
+    const [dealer_id, dealer] = players.FindDealer();
+    const all_last = this.IsAllLast(ruleset);
+    let renchan = false
+    let honba_increase = false
+    let cleanup_riichi_sticks = true
+    if (hand_results.outcome == HandOutcomeEnum.DRAW) {
+      cleanup_riichi_sticks = false
+      honba_increase = true
+      if (hand_results.tenpai.includes(dealer_id)) {
+        renchan =
+          (!all_last && ruleset.dealer_tenpai_renchan) ||
+          (all_last && ruleset.all_last_dealer_tenpai_renchan)
+      }
+    } else {
+      if (hand_results.winner == dealer_id) {
+        honba_increase = true
+        renchan = !all_last || ruleset.all_last_dealer_win_renchan
+      }
+    }
+    const should_finish_game = all_last && !renchan
+    return [should_finish_game, renchan, honba_increase, cleanup_riichi_sticks]
+  }
 
   ResolvePointsDelta(
     hand_results: HandResults,
