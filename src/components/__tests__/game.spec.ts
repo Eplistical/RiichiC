@@ -44,7 +44,8 @@ beforeEach(() => {
 
 describe(('Game Construction'), ()=> {
   it('should assign correct values', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     expect(game.state).toEqual(GameState.NOT_STARTED);
     expect(game.ruleset).toEqual(ruleset);
     expect(game.players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])).toEqual([
@@ -76,19 +77,22 @@ describe(('Game Construction'), ()=> {
 
 describe(('Game Start'), ()=> {
   it('Should work for an unstarted game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.NOT_STARTED;
     game.Start();
     expect(game.state).toEqual(GameState.ON_GOING);
   })
   it('Should ignore an ongoing game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.ON_GOING;
     game.Start();
     expect(game.state).toEqual(GameState.ON_GOING);
   })
   it('Should ignore an ongoing game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.FINISHED;
     game.Start();
     expect(game.state).toEqual(GameState.FINISHED);
@@ -97,19 +101,22 @@ describe(('Game Start'), ()=> {
 
 describe(('Game StartCurrentHand'), ()=> {
   it('Should start correctly', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     expect(game.current_hand.IsOngoing()).toEqual(false);
     game.StartCurrentHand();
     expect(game.current_hand.IsOngoing()).toEqual(true);
   })
   it('Should skip when game is not started correctly', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.StartCurrentHand();
     expect(game.current_hand.IsOngoing()).toEqual(false);
   })
   it('Should skip when game finished', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.FINISHED
     game.StartCurrentHand();
     expect(game.current_hand.IsOngoing()).toEqual(false);
@@ -118,7 +125,8 @@ describe(('Game StartCurrentHand'), ()=> {
 
 describe(('Game FinishCurrentHand'), () => {
   it('Should handle draw correctly', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -134,7 +142,8 @@ describe(('Game FinishCurrentHand'), () => {
     )
   }) 
   it('Should handle ron correctly', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -156,7 +165,8 @@ describe(('Game FinishCurrentHand'), () => {
     )
   }) 
   it('Should handle tsumo correctly', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -181,7 +191,8 @@ describe(('Game FinishCurrentHand'), () => {
 
 describe(('Game SetUpNextHandOrFinishGame'), () => {
   it('Should move forward on draw dealer noten', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -203,7 +214,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
   })
 
   it('Should renchan on draw dealer tenpai', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -225,7 +237,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
   })
 
   it('Should move forward on non-dealer ron', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -248,7 +261,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
     }))
   })
   it('Should move forward on non-dealer tsumo', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -273,7 +287,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
   })
 
   it('Should renchan on dealer ron', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -296,7 +311,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
     }))
   })
   it('Should renchan on dealer tsumo', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -320,7 +336,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
    })
 
   it('Should finish game on all last non-dealer win', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     // move to all last
     for (let i = 0; i < 7; ++i) {
@@ -351,7 +368,8 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
     expect(game.state).toEqual(GameState.FINISHED)
   })
   it('Should renchan on all last dealer win', () => { 
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     // move to all last
     for (let i = 0; i < 7; ++i) {
@@ -385,19 +403,22 @@ describe(('Game SetUpNextHandOrFinishGame'), () => {
 
 describe(('Game Finish'), ()=> {
   it('Should ignore an unstarted game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Finish();
     expect(game.state).toEqual(GameState.NOT_STARTED);
   })
   it('Should skip when a hand is not finished', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.Finish();
     expect(game.state).toEqual(GameState.ON_GOING);
   })
   it('Should work for an ongoing game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -408,7 +429,8 @@ describe(('Game Finish'), ()=> {
     expect(game.state).toEqual(GameState.FINISHED);
   })
   it('Should ignore an finished game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.FinishCurrentHand({
@@ -424,28 +446,32 @@ describe(('Game Finish'), ()=> {
 
 describe(('Game SaveHandLog'), ()=> {
   it('Should ignore unstarted game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.NOT_STARTED;
     game.SaveHandLog()
     expect(game.log).toHaveLength(0);
   })
 
   it('Should ignore finished game', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.state = GameState.FINISHED;
     game.SaveHandLog()
     expect(game.log).toHaveLength(0);
   })
 
   it('Should ignore unstarted hand', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start()
     game.SaveHandLog()
     expect(game.log).toHaveLength(0);
   })
 
   it('Should ignore ongoing hand', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.SaveHandLog();
@@ -453,7 +479,8 @@ describe(('Game SaveHandLog'), ()=> {
   })
 
   it('Should save correct information to log', () => {
-    let game = new Game({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
+    let game = new Game();
+    game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     // to south-2
     for (let i = 0; i < 6; ++i) {

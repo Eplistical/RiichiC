@@ -1,5 +1,6 @@
 <template>
   <main>
-    <RiichiCounter />
+    <RiichiC />
+    <!-- <RiichiCounter /> -->
   </main>
 </template>

@@ -8,6 +8,10 @@ export const Winds = Object.freeze({
   NORTH: 'north'
 })
 
+export const WindsOrder = [
+  Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH
+];
+
 export const NextWindMap = Object.freeze({
   [Winds.EAST]: Winds.SOUTH,
   [Winds.SOUTH]: Winds.WEST,

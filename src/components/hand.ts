@@ -37,12 +37,44 @@ export type PointsDelta = Record<PlayerId, number>
 
 export type HandResults = {
   outcome: string | undefined
-  riichi: Set<PlayerId>
-  tenpai: Set<PlayerId>
-  winner: PlayerId | undefined
-  deal_in: PlayerId | undefined
-  han: number | string | undefined
-  fu: number | undefined
+  tenpai?: Set<PlayerId>
+  winner?: PlayerId | undefined
+  deal_in?: PlayerId | undefined
+  han?: number | string | undefined
+  fu?: number | undefined
+}
+
+// Get rid of useless fields for an outcome
+export function RemoveUnusedFieldsForHandResults({outcome, tenpai, winner, deal_in, han, fu}: HandResults): HandResults {
+  if (tenpai == undefined) {
+    tenpai = new Set<PlayerId>()
+  } else {
+    tenpai = new Set<PlayerId>(tenpai)
+  }
+
+  if (outcome == HandOutcomeEnum.DRAW) {
+    return {
+      outcome: outcome,
+      tenpai: tenpai,
+    }
+  }
+  else if (outcome == HandOutcomeEnum.RON) {
+    return {
+      outcome: outcome,
+      winner: winner,
+      deal_in: deal_in,
+      han: han,
+      fu: fu,
+    }
+  }
+  else if (outcome == HandOutcomeEnum.TSUMO) {
+    return {
+      outcome: outcome,
+      winner: winner,
+      han: han,
+      fu: fu,
+    }
+  }
 }
 
 export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey {
@@ -95,6 +127,7 @@ export class Hand {
   round_wind: Wind;
   hand: number;
   honba: number;
+  riichi: Set<PlayerId>;
   riichi_sticks: number;
   state: HandState;
   has_next_hand: boolean;
@@ -105,6 +138,7 @@ export class Hand {
     this.hand = hand;
     this.honba = honba;
     this.riichi_sticks = riichi_sticks;
+    this.riichi = new Set<PlayerId>();
     this.has_next_hand = true;
     this.CleanUpResults();
   } 
@@ -118,7 +152,7 @@ export class Hand {
     this.state= HandState.ON_GOING;
   }
 
-  Finish(players: Players, ruleset: Ruleset) {
+  Finish(players: Players, ruleset: Ruleset): boolean {
     if (this.state != HandState.ON_GOING) {
       console.warn(`cannot finish the hand when it is not ongoing`)
       return false;
@@ -139,8 +173,16 @@ export class Hand {
     return true;
   }
 
-  // the hand must be finished before calling this method.
+  IsOngoing() {
+    return this.state == HandState.ON_GOING;
+  }
+
+  IsFinished() {
+    return this.state == HandState.FINISHED;
+  }
+
   SetUpNextHand(players: Players, ruleset: Ruleset): [Hand, boolean] | undefined {
+    // the hand must be finished before calling this method.
     if (this.state != HandState.FINISHED) {
       console.warn(`cannot set up the next hand when the current hand is not finished`)
       return undefined;
@@ -176,17 +218,17 @@ export class Hand {
   }
 
   PlayerRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (!this.results.riichi.has(player_id)) {
+    if (!this.riichi.has(player_id)) {
       this.riichi_sticks += 1;
-      this.results.riichi.add(player_id);
+      this.riichi.add(player_id);
       players.GetPlayer(player_id).ApplyPointsDelta(-ruleset.riichi_cost);
     }
   }
 
   PlayerUnRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (this.results.riichi.has(player_id)) {
+    if (this.riichi.has(player_id)) {
       this.riichi_sticks -= 1;
-      this.results.riichi.delete(player_id);
+      this.riichi.delete(player_id);
       players.GetPlayer(player_id).ApplyPointsDelta(ruleset.riichi_cost);
     }
   }
@@ -195,7 +237,7 @@ export class Hand {
     return (ruleset.last_round_wind == this.round_wind && this.hand == ruleset.num_players);
   }
 
-  ResolvePointsDelta(
+  private ResolvePointsDelta(
     hand_results: HandResults,
     ruleset: Ruleset,
     players: Players
@@ -216,8 +258,8 @@ export class Hand {
       return [false, `错误对局结果: ${this.results.outcome}`]
     }
 
-    if (this.results.outcome == HandOutcomeEnum.DRAW && this.results.riichi) {
-      for (const riichi_player of this.results.riichi) {
+    if (this.results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
+      for (const riichi_player of this.riichi) {
         if (!this.results.tenpai.has(riichi_player)) {
           return [false, `立直家未听牌: ${players.GetPlayer(riichi_player).name}`]
         }
@@ -313,7 +355,6 @@ export class Hand {
   private CleanUpResults() {
     this.results = {
       outcome: undefined,
-      riichi: new Set<PlayerId>(),
       tenpai: new Set<PlayerId>(),
       winner: undefined,
       deal_in: undefined,
