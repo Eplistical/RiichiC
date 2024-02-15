@@ -78,6 +78,14 @@ export function RemoveUnusedFieldsForHandResults({outcome, tenpai, winner, deal_
   }
 }
 
+export function MaybeApplyRoundUpMangan(ruleset: Ruleset, results: HandResults): HandResults {
+  if (ruleset.round_up_mangan && results.outcome != HandOutcomeEnum.DRAW && (results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60)) {
+    results.han = PointsLadder.MANGAN
+    results.fu = undefined
+  }
+  return results
+}
+
 export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey {
   if (typeof han == 'string') {
     if (PointsLadder.hasOwnProperty(han)) {

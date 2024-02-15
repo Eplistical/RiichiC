@@ -15,6 +15,9 @@
     </div>
     <el-button type="primary" @click="SetUpGame">开始游戏</el-button>
   </div>
+
+
+  <!-- ongoing & finished game view -->
   <div v-else>
     <div v-if="GameIsOnGoing">
       <el-button type="danger" @click="FinishGame">结束游戏</el-button>
@@ -27,6 +30,7 @@
       <span> {{ CurrentHandText }} </span>
       <span> | </span>
       <span> {{ RiichiSticksText }} </span>
+      <span v-if="GameIsFinished"> [游戏已结束] </span>
     </div>
 
     <el-table :data="ScoreBoard" style="width: 100%">
@@ -141,7 +145,8 @@
     <el-collapse-item title="日志">
       <el-table :data="GameLogBoard" style="width: 100%" stripe>
         <el-table-column fixed prop="hand_signature" label="场" />
-        <el-table-column prop="end_game_riichi_sticks" label="局末供托" />
+        <!--<el-table-column prop="end_game_riichi_sticks" label="局末供托" />-->
+        <el-table-column prop="start_game_riichi_sticks" label="开局供托" />
         <el-table-column prop="results_summary" label="结局" />
         <el-table-column v-for="player_id in WindsOrder" :prop="player_id" :label="GetPlayerName(player_id)"/>
         <el-table-column label="操作">
@@ -163,6 +168,8 @@
         <el-table-column prop="riichi_agari_rate" label="立直和牌" :formatter="(x)=>x.riichi_agari_rate.toFixed(2)"/>
         <el-table-column prop="riichi_tsumo_rate" label="立直自摸" :formatter="(x)=>x.riichi_tsumo_rate.toFixed(2)"/>
         <el-table-column prop="riichi_deal_in_rate" label="立直放铳" :formatter="(x)=>x.riichi_deal_in_rate.toFixed(2)"/>
+        <el-table-column prop="agari_over_mangan" label="满上大和"/>
+        <el-table-column prop="deal_in_over_mangan" label="满上大铳"/>
       </el-table>
   </div>
 
@@ -173,7 +180,7 @@
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
 import { Winds, WindsOrder, NextWindMap, LastWindMap, WindsDisplayTextMap } from './seat_constants.ts'
-import { HandOutcomeEnum, RemoveUnusedFieldsForHandResults, HandOutcomeEnumDisplayTextMap } from './hand.ts'
+import { HandOutcomeEnum, RemoveUnusedFieldsForHandResults, MaybeApplyRoundUpMangan, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import {
   PointsLadder,
   PointsLadderDisplayMap,
@@ -244,11 +251,15 @@ export default {
       for (let i = 0; i < this.game.log.length; ++i) {
         const log = this.game.log[i]
         const hand = log.hand
-        const players = log.players.player_map
+        const players = log.players
+        const last_log = (i > 0) ? this.game.log[i-1] : null;
+        const last_hand = last_log ? last_log.hand : null;
+        const last_hand_players = last_log ? last_log.players : null;
         let row = {}
         row.log_index = i
         row.hand_signature = `${WindsDisplayTextMap.wind_character[hand.round_wind]}${hand.hand}-${hand.honba}`
         row.end_game_riichi_sticks = hand.riichi_sticks
+        row.start_game_riichi_sticks = last_hand ? last_hand.riichi_sticks : 0;
         row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
 
         if (hand.results.outcome == HandOutcomeEnum.RON || hand.results.outcome == HandOutcomeEnum.TSUMO) {
@@ -260,7 +271,16 @@ export default {
           }
         }
         for (const player_id of WindsOrder) {
-          row[player_id] = `${players[player_id].points}`
+          const end_hand_pt = players.GetPlayer(player_id).points
+          const start_hand_pt = (last_hand_players ? last_hand_players.GetPlayer(player_id).points : this.game.ruleset.starting_points)
+          const pt_delta = end_hand_pt - start_hand_pt
+          row[player_id] = `${end_hand_pt}`
+          if (pt_delta > 0) {
+            row[player_id] += `(+${pt_delta})`
+          }
+          else if (pt_delta < 0) {
+            row[player_id] += `(${pt_delta})`
+          }
           if (hand.riichi.has(player_id)) {
             row[player_id] += `[立]`
           }
@@ -307,6 +327,8 @@ export default {
           riichi_ron: 0, 
           riichi_deal_in: 0, 
           tenpai_on_draw: 0,
+          agari_over_mangan: 0,
+          deal_in_over_mangan: 0,
         };
         this.game.log.forEach((log) => {
           const hand = log.hand
@@ -328,11 +350,17 @@ export default {
             if (hand.results.outcome != HandOutcomeEnum.TSUMO) {
               stats.riichi_tsumo += 1;
             }
+            if (hand.results.han in PointsLadder) {
+              stats.agari_over_mangan += 1;
+            }
           }
           if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
             stats.deal_in += 1;
             if (player_riichi) {
               stats.riichi_deal_in += 1;
+            }
+            if (hand.results.han in PointsLadder) {
+              stats.deal_in_over_mangan += 1;
             }
           }
         })
@@ -377,7 +405,9 @@ export default {
     SubmitHandResultsForm() {
       console.log("SubmitHandResultsForm")
 
-      const hand_finished = this.game.FinishCurrentHand(RemoveUnusedFieldsForHandResults(this.hand_results_form));
+      let hand_results = RemoveUnusedFieldsForHandResults(this.hand_results_form)
+      hand_results = MaybeApplyRoundUpMangan(this.game.ruleset, hand_results)
+      const hand_finished = this.game.FinishCurrentHand(hand_results)
       if (hand_finished) {
         this.game.SaveHandLog();
         this.game.SetUpNextHandOrFinishGame()
