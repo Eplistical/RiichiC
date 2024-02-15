@@ -176,11 +176,25 @@ import {
 import { MLeagueRuleset } from './rulesets.ts'
 import { Hand, HandState } from './hand.ts'
 import { Game, GameState } from './game.ts'
+import { useCookies } from "vue3-cookies";
+
+const ENABLE_COOKIE = false;
 
 export default {
   name: 'RiichiC',
   components: {
     ElButton
+  },
+  setup() {
+    const { cookies } = useCookies();
+    return { cookies };
+  },
+  mounted() {
+    this.LoadCookie();
+    this.RunPeriodicalTasks();
+  },
+  beforeDestroy() {
+    clearInterval(this.periodic)
   },
   data() {
     return {
@@ -198,6 +212,8 @@ export default {
       PointsLadderDisplayMap: PointsLadderDisplayMap,
       AllowedHans: AllowedHans,
       AllowedFus: AllowedFus,
+
+      periodic: null,
     }
   },
   computed: {
@@ -326,6 +342,45 @@ export default {
     GetPlayerName(player_id) {
       return this.game.players.GetPlayer(player_id).name
     },
+    RunPeriodicalTasks() {
+      this.periodic = setInterval(() => { this.SaveCookie() }, 5000 /*every 5 sec*/);
+    },
+    SaveCookie() {
+		  if (ENABLE_COOKIE) {
+        const players_cookie= JSON.stringify(this.game.players)
+        this.cookies.set("players", players_cookie);
+        console.log(`Set players cookie = ${players_cookie}`)
+
+        const game_state_cookie = JSON.stringify(this.game.state)
+        this.cookies.set("game_state", game_state_cookie);
+        console.log(`Set game_state cookie = ${game_state_cookie}`)
+
+        const game_log_cookie = JSON.stringify(
+          this.game.log.map((x) => {return {
+            state: x.state, 
+            players: x.players, 
+            hand: x.hand,
+            hand_riichi: [...x.hand.riichi],
+            hand_resulst_tenpai: [...x.hand.results.tenpai],
+          }})
+        )
+        this.cookies.set("game_log", game_log_cookie);
+        console.log(`Set game_log cookie = ${game_log_cookie}`)
+
+        const ruleset_cookie = JSON.stringify(this.game.ruleset)
+        this.cookies.set("ruleset", ruleset_cookie);
+        console.log(`Set ruleset cookie = ${ruleset_cookie}`)
+      }
+		},
+    LoadCookie() {
+		  if (ENABLE_COOKIE) {
+        console.log(`LoadCookie`);
+        console.log("player:", this.cookies.get("players"))
+        console.log("game_state:", this.cookies.get("game_state"))
+        console.log("game_log:", this.cookies.get("game_log"))
+        console.log("ruleset:", this.cookies.get("ruleset"))
+      }
+		},
   },
 }
 </script>

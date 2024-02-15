@@ -1,6 +1,5 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import RiichiCounter from './components/RiichiCounter.vue'
 import RiichiC  from './components/RiichiC.vue'
 </script>
 
