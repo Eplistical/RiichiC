@@ -15,6 +15,20 @@
         </el-row>
       </div>
       <el-button type="primary" @click="SetUpGame">开始游戏</el-button>
+      <el-divider> 规则 </el-divider>
+      <el-row>
+        <el-col :span="12">
+          开局点数 
+        </el-col>
+        <el-col :span="12">
+          <el-input-number v-model="ruleset.starting_points" placeholder="开局点数" :step="1000"/>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12"> 切上满贯 </el-col>
+        <el-col :span="12"> <el-switch v-model="ruleset.round_up_mangan" active-text="开" inactive-text="关" />
+        </el-col>
+      </el-row>
     </div>
 
     <!-- ongoing & finished game view -->
@@ -38,7 +52,7 @@
             </div>
           </div>
           <el-checkbox-group fill="#f7bc45" v-model="hand_results_form.riichi">
-            <el-checkbox-button :label="player_id" @change="HandlePlayerRiichi(player_id, $event)">
+            <el-checkbox-button :label="player_id" @change="HandlePlayerRiichi(player_id, $event)" :disabled="!GameIsOnGoing">
               立直
             </el-checkbox-button>
           </el-checkbox-group>
@@ -266,7 +280,7 @@ export default {
   data() {
     return {
       player_names: ['赤木', '原田', '瓦西子', '天'],
-      ruleset: MLeagueRuleset,
+      ruleset: {...MLeagueRuleset},
       game: new Game(),
       hand_results_form: {},
 
