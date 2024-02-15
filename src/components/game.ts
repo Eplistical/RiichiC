@@ -71,7 +71,7 @@ export class Game {
       console.warn(
         'finishe game when the current hand is not finished, the current hand will be abandoned.'
       )
-      this.current_hand.Abandon()
+      this.current_hand.Abandon(this.players, this.ruleset)
     }
     this.state = GameState.FINISHED
   }
@@ -90,7 +90,9 @@ export class Game {
       return false
     }
     Object.assign(this.current_hand.results, hand_results)
-    return this.current_hand.Finish(this.players, this.ruleset)
+    const hand_finished = this.current_hand.Finish(this.players, this.ruleset)
+    this.SanityCheckTotalPoints()
+    return hand_finished
   }
 
   SetUpNextHandOrFinishGame() {
@@ -116,6 +118,7 @@ export class Game {
     if (players_should_shift_seats) {
       this.players.ShiftSeats()
     }
+    this.SanityCheckTotalPoints()
   }
 
   SaveHandLog() {
@@ -127,11 +130,13 @@ export class Game {
       console.warn('cannot save hand log, hand is not finished.')
       return
     }
+    this.SanityCheckTotalPoints()
     const hand_log = {
       state: this.state,
       hand: this.current_hand.Clone(),
       players: this.players.Clone(this.ruleset)
     }
+    console.log("Saving hand to log: ", hand_log)
     this.log.push(hand_log)
   }
 
@@ -153,6 +158,17 @@ export class Game {
     this.players = log_to_reset.players
     this.state = log_to_reset.state
     this.log = this.log.slice(0, log_index + 1)
+    this.SanityCheckTotalPoints()
     return true
+  }
+
+  private SanityCheckTotalPoints() {
+    const player_total_points = this.players.TotalPoints()
+    const onhold_riichi_sticks_points = this.current_hand.riichi_sticks * this.ruleset.riichi_cost
+    const expected_total_points = this.ruleset.starting_points * this.ruleset.num_players
+    const check_passed = (player_total_points + onhold_riichi_sticks_points == expected_total_points)
+    if (!check_passed)
+    console.warn("total points check failed! player total points = ", player_total_points, " on hold riichi sticks points = ", onhold_riichi_sticks_points,
+      " expected total points = ", expected_total_points)
   }
 }
