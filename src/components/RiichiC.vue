@@ -136,7 +136,7 @@
       <el-button type="primary" @click="SubmitHandResultsForm">提交</el-button>
     </el-form-item>
   </el-form>
-
+  </div>  
   <el-collapse v-if="!GameIsNotStarted">
     <el-collapse-item title="日志">
       <el-table :data="GameLogBoard" style="width: 100%" stripe>
@@ -151,9 +151,21 @@
         </el-table-column>
       </el-table>
     </el-collapse-item>
-  </el-collapse>
+  </el-collapse>  
+  <div v-if="GameIsFinished">
+      <el-table :data="GameStatsBoard" style="width: 100%" stripe>
+        <el-table-column prop="player" label="玩家" />
+        <el-table-column prop="rank" label="排名" />
+        <el-table-column prop="riichi" label="立直" />
+        <el-table-column prop="agari" label="和牌" />
+        <el-table-column prop="deal_in" label="放铳" />
+        <el-table-column prop="tenpai_on_draw" label="流局听牌" />
+        <el-table-column prop="riichi_agari_rate" label="立直和牌" :formatter="(x)=>x.riichi_agari_rate.toFixed(2)"/>
+        <el-table-column prop="riichi_tsumo_rate" label="立直自摸" :formatter="(x)=>x.riichi_tsumo_rate.toFixed(2)"/>
+        <el-table-column prop="riichi_deal_in_rate" label="立直放铳" :formatter="(x)=>x.riichi_deal_in_rate.toFixed(2)"/>
+      </el-table>
+  </div>
 
-  </div>  
 
 </template>
 
@@ -256,16 +268,82 @@ export default {
             row[player_id] += `[听]`
           }
           if ((hand.results.outcome == HandOutcomeEnum.TSUMO || hand.results.outcome == HandOutcomeEnum.RON) && hand.results.winner == player_id) {
-            row[player_id] += `[胡]`
+            row[player_id] += `[和]`
           }
           if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
-            row[player_id] += `[点]`
+            row[player_id] += `[铳]`
           }
         }
         board.push(row)
       }
       return board.reverse()
     },
+    GameStatsBoard() {
+      console.log("Generate GameStatsBoard")
+      let board = []
+      // scan log to compute stats
+      for (const player_id of WindsOrder) {
+        let row = {}
+        row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap.wind_character[player_id]}起]`
+        // find players rank from current hand
+        if (this.game.players) {
+          const current_points = (this.game.players ? this.game.players.GetPlayers(WindsOrder).map((p)=>p.points) : [0,0,0,0]);
+          const pt = this.game.players.GetPlayer(player_id).points
+          console.log(player_id, " current pt: ", current_points, " pt = " , pt)
+          row.rank = current_points.reduce((acc, val)=>{ return (val > pt ? acc + 1 : acc) }, 1);
+        }
+        else {
+          row.rank = -1;
+        }
+        // loop log to compute game stats
+        let stats = { 
+          riichi: 0, 
+          agari: 0, 
+          tsumo: 0,
+          ron: 0,
+          deal_in: 0,
+          riichi_agari: 0, 
+          riichi_tsumo: 0, 
+          riichi_ron: 0, 
+          riichi_deal_in: 0, 
+          tenpai_on_draw: 0,
+        };
+        this.game.log.forEach((log) => {
+          const hand = log.hand
+          const player_riichi = (log.hand.riichi && log.hand.riichi.has(player_id))
+          if (player_riichi) {
+            stats.riichi += 1
+          }
+          if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai && hand.results.tenpai.has(player_id)) {
+            stats.tenpai_on_draw += 1;
+          }
+          if (hand.results.outcome != HandOutcomeEnum.DRAW && hand.results.winner == player_id) {
+            stats.agari += 1;
+            if (player_riichi) {
+              stats.riichi_agari += 1;
+            }
+            if (hand.results.outcome != HandOutcomeEnum.RON) {
+              stats.riichi_ron += 1;
+            }
+            if (hand.results.outcome != HandOutcomeEnum.TSUMO) {
+              stats.riichi_tsumo += 1;
+            }
+          }
+          if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
+            stats.deal_in += 1;
+            if (player_riichi) {
+              stats.riichi_deal_in += 1;
+            }
+          }
+        })
+        stats.riichi_agari_rate = ((stats.riichi) ? (stats.riichi_agari / stats.riichi): 0.0);
+        stats.riichi_tsumo_rate = ((stats.riichi) ? (stats.riichi_tsumo / stats.riichi): 0.0);
+        stats.riichi_deal_in_rate = ((stats.riichi) ? (stats.riichi_deal_in / stats.riichi): 0.0);
+        Object.assign(row, stats)
+        board.push(row)
+      }
+      return board
+    }
   },
   methods: {
     SetUpGame() {

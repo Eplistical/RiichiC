@@ -98,7 +98,6 @@ export class Game {
     }
     // Cannot set up next hand
     const next_hand_info = this.current_hand.SetUpNextHand(this.players, this.ruleset);
-    console.log('next hand: ', JSON.stringify(next_hand_info))
     if (next_hand_info === undefined) {
       if (this.current_hand.has_next_hand == false) {
         // the game reaches the end, should finish
