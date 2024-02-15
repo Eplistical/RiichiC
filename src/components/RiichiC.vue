@@ -1,203 +1,220 @@
 <template>
-  <!-- unstartd game view -->
-  <div v-if="GameIsNotStarted">
-    <div v-for="i in ruleset.num_players">
-      <el-row :gutter="20">
-        <span class="ml-3 w-35 text-gray-600"
-          >{{ WindsDisplayTextMap.wind_character[WindsOrder[i - 1]] }}起
-        </span>
-        <el-input
-          v-model="player_names[i - 1]"
-          class="w-50 m-2"
-          size="default"
-          clearable
-          placeholder="玩家名"
-        />
-      </el-row>
+  <div class="screen_div">
+    <!-- unstartd game view -->
+    <div v-if="GameIsNotStarted">
+      <div v-for="i in ruleset.num_players" class="player_name_input">
+        <el-row>
+          <span> {{ WindsDisplayTextMap.wind_character[WindsOrder[i - 1]] }}起 </span>
+          <el-input
+            v-model="player_names[i - 1]"
+            class="w-50 m-2"
+            size="large"
+            clearable
+            placeholder="玩家名"
+          />
+        </el-row>
+      </div>
+      <el-button type="primary" @click="SetUpGame">开始游戏</el-button>
     </div>
-    <el-button type="primary" @click="SetUpGame">开始游戏</el-button>
-  </div>
 
-  <!-- ongoing & finished game view -->
-  <div v-else>
+    <!-- ongoing & finished game view -->
+    <div v-else>
+      <div class="gameboard">
+        <div class="hand_info_board">
+          <div>{{ CurrentHandText }}</div>
+          <div>{{ RiichiSticksText }}</div>
+          <div v-if="GameIsFinished">[游戏已结束]</div>
+        </div>
+
+        <div v-for="player_id in WindsOrder" :class="`${player_id}_player_board`">
+          <div :class="IsDealer(player_id) ? `dealer_player_board` : `non_dealer_player_board`">
+            <div>
+              {{ GetPlayerName(player_id) }}[{{
+                WindsDisplayTextMap.wind_character[GetPlayerCurrentWind(player_id)]
+              }}]
+            </div>
+            <div>
+              {{ GetPlayerPoints(player_id) }}
+            </div>
+          </div>
+          <el-checkbox-group fill="#f7bc45" v-model="hand_results_form.riichi">
+            <el-checkbox-button :label="player_id" @change="HandlePlayerRiichi(player_id, $event)">
+              立直
+            </el-checkbox-button>
+          </el-checkbox-group>
+        </div>
+      </div>
+      <el-divider />
+    </div>
+
+    <el-collapse v-if="GameIsOnGoing">
+      <el-collapse-item title="对局结果">
+        <!-- on-going game view -->
+        <div v-if="GameIsOnGoing">
+          <el-form :model="hand_results_form">
+            <el-form-item label="">
+              <el-radio-group
+                v-for="outcome in HandOutcomeEnum"
+                v-model="hand_results_form.outcome"
+                size="default"
+              >
+                <el-radio-button :label="outcome">
+                  {{ HandOutcomeEnumDisplayTextMap[outcome] }}
+                </el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item
+              label="听牌"
+              v-if="hand_results_form.outcome == HandOutcomeEnum.DRAW"
+              size="default"
+            >
+              <el-checkbox-group fill="#289e20" v-model="hand_results_form.tenpai">
+                <el-checkbox-button v-for="player_id in WindsOrder" :label="player_id">
+                  {{ GetPlayerName(player_id) }}
+                </el-checkbox-button>
+              </el-checkbox-group>
+            </el-form-item>
+
+            <el-form-item
+              label="胡牌"
+              v-if="
+                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
+                hand_results_form.outcome == HandOutcomeEnum.RON
+              "
+            >
+              <el-radio-group
+                fill="#289e20"
+                v-for="player_id in WindsOrder"
+                v-model="hand_results_form.winner"
+                size="default"
+              >
+                <el-radio-button :label="player_id">
+                  {{ GetPlayerName(player_id) }}
+                </el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item label="点炮" v-if="hand_results_form.outcome == HandOutcomeEnum.RON">
+              <el-radio-group
+                fill="#e86161"
+                v-for="player_id in WindsOrder"
+                v-model="hand_results_form.deal_in"
+                size="default"
+                :disabled="player_id == hand_results_form.winner"
+              >
+                <el-radio-button :label="player_id">
+                  {{ GetPlayerName(player_id) }}
+                </el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item
+              label="番"
+              v-if="
+                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
+                hand_results_form.outcome == HandOutcomeEnum.RON
+              "
+            >
+              <el-radio-group
+                v-for="han in AllowedHans"
+                v-model="hand_results_form.han"
+                size="default"
+              >
+                <el-radio-button :label="han">{{
+                  han in PointsLadderDisplayMap ? PointsLadderBriefDisplayMap[han] : han
+                }}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item
+              label="符"
+              v-if="
+                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
+                hand_results_form.outcome == HandOutcomeEnum.RON
+              "
+            >
+              <el-radio-group
+                v-for="fu in AllowedFus[hand_results_form.han]"
+                v-model="hand_results_form.fu"
+                size="default"
+                :disabled="hand_results_form.han in PointsLadderDisplayMap"
+              >
+                <el-radio-button :label="fu" />
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" @click="SubmitHandResultsForm">提交</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
+
+    <el-collapse v-if="!GameIsNotStarted">
+      <el-collapse-item title="日志">
+        <el-table :data="GameLogBoard" style="width: 100%" stripe>
+          <el-table-column fixed prop="hand_signature" label="场" />
+          <el-table-column prop="start_game_riichi_sticks" label="开局供托" />
+          <el-table-column prop="results_summary" label="结局" />
+          <el-table-column
+            v-for="player_id in WindsOrder"
+            :prop="player_id"
+            :label="GetPlayerName(player_id)"
+          />
+          <el-table-column label="操作">
+            <template #default="scope">
+              <el-button
+                size="small"
+                type="warning"
+                @click="HandleResetGameLog(scope.$index, scope.row)"
+                >重置</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-collapse-item>
+    </el-collapse>
+
+    <el-collapse v-if="GameIsFinished">
+      <el-collapse-item title="统计">
+        <el-table :data="GameStatsBoard" style="width: 100%" stripe>
+          <el-table-column prop="player" label="玩家" />
+          <el-table-column prop="rank" label="排名" />
+          <el-table-column prop="riichi" label="立直" />
+          <el-table-column prop="agari" label="和牌" />
+          <el-table-column prop="deal_in" label="放铳" />
+          <el-table-column prop="tenpai_on_draw" label="流局听牌" />
+          <el-table-column
+            prop="riichi_agari_rate"
+            label="立直和牌"
+            :formatter="(x) => x.riichi_agari_rate.toFixed(2)"
+          />
+          <el-table-column
+            prop="riichi_tsumo_rate"
+            label="立直自摸"
+            :formatter="(x) => x.riichi_tsumo_rate.toFixed(2)"
+          />
+          <el-table-column
+            prop="riichi_deal_in_rate"
+            label="立直放铳"
+            :formatter="(x) => x.riichi_deal_in_rate.toFixed(2)"
+          />
+          <el-table-column prop="agari_over_mangan" label="满上大和" />
+          <el-table-column prop="deal_in_over_mangan" label="满上大铳" />
+        </el-table>
+      </el-collapse-item>
+    </el-collapse>
+
+    <el-divider />
+
     <div v-if="GameIsOnGoing">
       <el-button type="danger" @click="FinishGame">结束游戏</el-button>
     </div>
-    <div v-else>
+
+    <div v-if="GameIsFinished">
       <el-button type="primary" @click="SetUpNewGame">新对局</el-button>
     </div>
-
-    <div>
-      <span> {{ CurrentHandText }} </span>
-      <span> | </span>
-      <span> {{ RiichiSticksText }} </span>
-      <span v-if="GameIsFinished"> [游戏已结束] </span>
-    </div>
-
-    <el-table :data="ScoreBoard" style="width: 100%">
-      <el-table-column
-        :prop="player_id"
-        :label="GetScoreBoardLabel(player_id)"
-        v-for="player_id in WindsOrder"
-      />
-    </el-table>
-  </div>
-
-  <!-- on-going game view -->
-  <div v-if="GameIsOnGoing">
-    <el-form :model="hand_results_form">
-      <el-form-item label="立直">
-        <el-checkbox-group
-          fill="#f7bc45"
-          v-for="player_id in Winds"
-          v-model="hand_results_form.riichi"
-          size="default"
-        >
-          <el-checkbox-button :label="player_id" @change="HandlePlayerRiichi(player_id, $event)">
-            {{ GetPlayerName(player_id) }} 立直！
-          </el-checkbox-button>
-        </el-checkbox-group>
-      </el-form-item>
-
-      <el-form-item label="对局结果">
-        <el-radio-group
-          v-for="outcome in HandOutcomeEnum"
-          v-model="hand_results_form.outcome"
-          size="default"
-        >
-          <el-radio-button :label="outcome">
-            {{ HandOutcomeEnumDisplayTextMap[outcome] }}
-          </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item
-        label="听牌"
-        v-if="hand_results_form.outcome == HandOutcomeEnum.DRAW"
-        size="default"
-      >
-        <el-checkbox-group fill="#289e20" v-model="hand_results_form.tenpai">
-          <el-checkbox-button v-for="player_id in WindsOrder" :label="player_id">
-            {{ GetPlayerName(player_id) }}
-          </el-checkbox-button>
-        </el-checkbox-group>
-      </el-form-item>
-
-      <el-form-item
-        label="胡牌"
-        v-if="
-          hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-          hand_results_form.outcome == HandOutcomeEnum.RON
-        "
-      >
-        <el-radio-group
-          fill="#289e20"
-          v-for="player_id in WindsOrder"
-          v-model="hand_results_form.winner"
-          size="default"
-        >
-          <el-radio-button :label="player_id"> {{ GetPlayerName(player_id) }} </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item label="点炮" v-if="hand_results_form.outcome == HandOutcomeEnum.RON">
-        <el-radio-group
-          fill="#e86161"
-          v-for="player_id in WindsOrder"
-          v-model="hand_results_form.deal_in"
-          size="default"
-          :disabled="player_id == hand_results_form.winner"
-        >
-          <el-radio-button :label="player_id"> {{ GetPlayerName(player_id) }} </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item
-        label="番"
-        v-if="
-          hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-          hand_results_form.outcome == HandOutcomeEnum.RON
-        "
-      >
-        <el-radio-group v-for="han in AllowedHans" v-model="hand_results_form.han" size="default">
-          <el-radio-button :label="han">{{
-            han in PointsLadderDisplayMap ? PointsLadderDisplayMap[han] : han
-          }}</el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item
-        label="符"
-        v-if="
-          hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-          hand_results_form.outcome == HandOutcomeEnum.RON
-        "
-      >
-        <el-radio-group
-          v-for="fu in AllowedFus[hand_results_form.han]"
-          v-model="hand_results_form.fu"
-          size="default"
-          :disabled="hand_results_form.han in PointsLadderDisplayMap"
-        >
-          <el-radio-button :label="fu" />
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item>
-        <el-button type="primary" @click="SubmitHandResultsForm">提交</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
-  <el-collapse v-if="!GameIsNotStarted">
-    <el-collapse-item title="日志">
-      <el-table :data="GameLogBoard" style="width: 100%" stripe>
-        <el-table-column fixed prop="hand_signature" label="场" />
-        <!--<el-table-column prop="end_game_riichi_sticks" label="局末供托" />-->
-        <el-table-column prop="start_game_riichi_sticks" label="开局供托" />
-        <el-table-column prop="results_summary" label="结局" />
-        <el-table-column
-          v-for="player_id in WindsOrder"
-          :prop="player_id"
-          :label="GetPlayerName(player_id)"
-        />
-        <el-table-column label="操作">
-          <template #default="scope">
-            <el-button
-              size="small"
-              type="warning"
-              @click="HandleResetGameLog(scope.$index, scope.row)"
-              >重置</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-collapse-item>
-  </el-collapse>
-  <div v-if="GameIsFinished">
-    <el-table :data="GameStatsBoard" style="width: 100%" stripe>
-      <el-table-column prop="player" label="玩家" />
-      <el-table-column prop="rank" label="排名" />
-      <el-table-column prop="riichi" label="立直" />
-      <el-table-column prop="agari" label="和牌" />
-      <el-table-column prop="deal_in" label="放铳" />
-      <el-table-column prop="tenpai_on_draw" label="流局听牌" />
-      <el-table-column
-        prop="riichi_agari_rate"
-        label="立直和牌"
-        :formatter="(x) => x.riichi_agari_rate.toFixed(2)"
-      />
-      <el-table-column
-        prop="riichi_tsumo_rate"
-        label="立直自摸"
-        :formatter="(x) => x.riichi_tsumo_rate.toFixed(2)"
-      />
-      <el-table-column
-        prop="riichi_deal_in_rate"
-        label="立直放铳"
-        :formatter="(x) => x.riichi_deal_in_rate.toFixed(2)"
-      />
-      <el-table-column prop="agari_over_mangan" label="满上大和" />
-      <el-table-column prop="deal_in_over_mangan" label="满上大铳" />
-    </el-table>
   </div>
 </template>
 
@@ -259,6 +276,7 @@ export default {
       HandOutcomeEnumDisplayTextMap: HandOutcomeEnumDisplayTextMap,
       PointsLadder: PointsLadder,
       PointsLadderDisplayMap: PointsLadderDisplayMap,
+      PointsLadderBriefDisplayMap: PointsLadderBriefDisplayMap,
       AllowedHans: AllowedHans,
       AllowedFus: AllowedFus
     }
@@ -278,13 +296,6 @@ export default {
     },
     RiichiSticksText() {
       return `供托: ${this.game.current_hand.riichi_sticks}`
-    },
-    ScoreBoard() {
-      let row = {}
-      for (const player_id of WindsOrder) {
-        row[player_id] = this.game.players.GetPlayer(player_id).points
-      }
-      return [row]
     },
     GameLogBoard() {
       let board = []
@@ -486,12 +497,17 @@ export default {
         this.hand_results_form = {}
       }
     },
-    GetScoreBoardLabel(player_id) {
-      const player = this.game.players.GetPlayer(player_id)
-      return `${player.name}[${WindsDisplayTextMap.wind_character[player.current_wind]}]`
-    },
     GetPlayerName(player_id) {
       return this.game.players.GetPlayer(player_id).name
+    },
+    GetPlayerCurrentWind(player_id) {
+      return this.game.players.GetPlayer(player_id).current_wind
+    },
+    GetPlayerPoints(player_id) {
+      return this.game.players.GetPlayer(player_id).points
+    },
+    IsDealer(player_id) {
+      return this.game.players.GetPlayer(player_id).IsDealer()
     },
     preventRefresh(event) {
       event.preventDefault()
@@ -500,3 +516,80 @@ export default {
   }
 }
 </script>
+
+<style>
+.screen_div {
+  position: absolute;
+  border-style: dotted;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.player_name_input {
+  position: relative;
+  font-size: 16px;
+}
+
+.gameboard {
+  position: relative;
+  border-style: solid;
+  width: 320px;
+  height: 480px;
+  margin-left: calc(50% - 160px);
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.hand_info_board {
+  position: absolute;
+  border-style: solid;
+  text-align: center;
+  width: 100px;
+  height: 60px;
+  top: 210px;
+  left: 110px;
+  font-size: 16px;
+}
+
+.east_player_board,
+.south_player_board,
+.west_player_board,
+.north_player_board {
+  position: absolute;
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  font-size: 20px;
+}
+
+.dealer_player_board {
+  color: #cc0000;
+}
+
+.non_dealer_player_board {
+  color: #00589a;
+}
+
+.east_player_board {
+  transform: rotate(0deg);
+  bottom: 0;
+  left: 110px;
+}
+.south_player_board {
+  transform: rotate(270deg);
+  right: 0;
+  bottom: 190px;
+}
+.west_player_board {
+  transform: rotate(180deg);
+  top: 0;
+  left: 110px;
+}
+.north_player_board {
+  transform: rotate(90deg);
+  left: 0;
+  bottom: 190px;
+}
+</style>

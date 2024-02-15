@@ -26,7 +26,7 @@ export const LastWindMap = Object.freeze({
 
 export const WindsDisplayTextMap = Object.freeze({
   wind_character: {
-    [Winds.EAST]: '东',
+    [Winds.EAST]: '東',
     [Winds.SOUTH]: '南',
     [Winds.WEST]: '西',
     [Winds.NORTH]: '北'
