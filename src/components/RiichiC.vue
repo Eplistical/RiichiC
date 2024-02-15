@@ -10,6 +10,8 @@
           v-model="player_names[i-1]"
           class="w-50 m-2"
           size="default"
+          clearable
+          placeholder="玩家名"
         />
       </el-row>
     </div>
