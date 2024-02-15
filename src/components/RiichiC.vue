@@ -25,6 +25,22 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="12">
+          本场点数 
+        </el-col>
+        <el-col :span="12">
+          <el-input-number v-model="ruleset.honba_points" placeholder="本场点数" :step="300"/>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          流局罚符 
+        </el-col>
+        <el-col :span="12">
+          <el-input-number v-model="ruleset.draw_tenpai_points" placeholder="流局罚符" :step="600"/>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="12"> 切上满贯 </el-col>
         <el-col :span="12"> <el-switch v-model="ruleset.round_up_mangan" active-text="开" inactive-text="关" />
         </el-col>
@@ -91,7 +107,7 @@
             </el-form-item>
 
             <el-form-item
-              label="胡牌"
+              label="和牌"
               v-if="
                 hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
                 hand_results_form.outcome == HandOutcomeEnum.RON
