@@ -180,6 +180,7 @@
       <el-collapse-item title="统计">
         <el-table :data="GameStatsBoard" style="width: 100%" stripe>
           <el-table-column prop="player" label="玩家" />
+          <el-table-column prop="points" label="点数" />
           <el-table-column prop="rank" label="排名" />
           <el-table-column prop="riichi" label="立直" />
           <el-table-column prop="agari" label="和牌" />
@@ -363,6 +364,7 @@ export default {
       for (const player_id of WindsOrder) {
         let row = {}
         row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap.wind_character[player_id]}起]`
+        row.points = this.GetPlayerPoints(player_id)
         // find players rank from current hand
         if (this.game.players) {
           const current_points = this.game.players
