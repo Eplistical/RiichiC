@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import RiichiC  from './components/RiichiC.vue'
+import RiichiC from './components/RiichiC.vue'
 </script>
 
 <template>

@@ -25,7 +25,7 @@ export enum HandState {
   NOT_STARTED,
   ON_GOING,
   FINISHED,
-  ABANDONED,
+  ABANDONED
 }
 
 export const HandOutcomeEnumDisplayTextMap = Object.freeze({
@@ -46,7 +46,14 @@ export type HandResults = {
 }
 
 // Get rid of useless fields for an outcome
-export function RemoveUnusedFieldsForHandResults({outcome, tenpai, winner, deal_in, han, fu}: HandResults): HandResults {
+export function RemoveUnusedFieldsForHandResults({
+  outcome,
+  tenpai,
+  winner,
+  deal_in,
+  han,
+  fu
+}: HandResults): HandResults {
   if (tenpai == undefined) {
     tenpai = new Set<PlayerId>()
   } else {
@@ -56,30 +63,34 @@ export function RemoveUnusedFieldsForHandResults({outcome, tenpai, winner, deal_
   if (outcome == HandOutcomeEnum.DRAW) {
     return {
       outcome: outcome,
-      tenpai: tenpai,
+      tenpai: tenpai
     }
-  }
-  else if (outcome == HandOutcomeEnum.RON) {
+  } else if (outcome == HandOutcomeEnum.RON) {
     return {
       outcome: outcome,
       winner: winner,
       deal_in: deal_in,
       han: han,
-      fu: fu,
+      fu: fu
     }
-  }
-  else if (outcome == HandOutcomeEnum.TSUMO) {
+  } else if (outcome == HandOutcomeEnum.TSUMO) {
     return {
       outcome: outcome,
       winner: winner,
       han: han,
-      fu: fu,
+      fu: fu
     }
   }
 }
 
 export function MaybeApplyRoundUpMangan(ruleset: Ruleset, results: HandResults): HandResults {
-  if (ruleset.round_up_mangan && results.outcome != HandOutcomeEnum.DRAW && (results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60)) {
+  if (
+    (ruleset.round_up_mangan &&
+      results.outcome != HandOutcomeEnum.DRAW &&
+      results.han == 4 &&
+      results.fu == 30) ||
+    (results.han == 3 && results.fu == 60)
+  ) {
     results.han = PointsLadder.MANGAN
     results.fu = undefined
   }
@@ -125,39 +136,39 @@ export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey
 }
 
 interface HandInterface {
-  round_wind: Wind;
-  hand: number;
-  honba: number;
-  riichi_sticks: number;
+  round_wind: Wind
+  hand: number
+  honba: number
+  riichi_sticks: number
 }
 
 export class Hand {
-  results: HandResults;
-  round_wind: Wind;
-  hand: number;
-  honba: number;
-  riichi: Set<PlayerId>;
-  riichi_sticks: number;
-  state: HandState;
-  has_next_hand: boolean;
+  results: HandResults
+  round_wind: Wind
+  hand: number
+  honba: number
+  riichi: Set<PlayerId>
+  riichi_sticks: number
+  state: HandState
+  has_next_hand: boolean
 
-  constructor({round_wind, hand, honba, riichi_sticks} : HandInterface) {
-    this.state = HandState.NOT_STARTED;
-    this.round_wind = round_wind;
-    this.hand = hand;
-    this.honba = honba;
-    this.riichi_sticks = riichi_sticks;
-    this.riichi = new Set<PlayerId>();
-    this.has_next_hand = true;
-    this.CleanUpResults();
-  } 
+  constructor({ round_wind, hand, honba, riichi_sticks }: HandInterface) {
+    this.state = HandState.NOT_STARTED
+    this.round_wind = round_wind
+    this.hand = hand
+    this.honba = honba
+    this.riichi_sticks = riichi_sticks
+    this.riichi = new Set<PlayerId>()
+    this.has_next_hand = true
+    this.CleanUpResults()
+  }
 
   Clone(): Hand {
     let clone_instance = new Hand({
       round_wind: this.round_wind,
       hand: this.hand,
       honba: this.honba,
-      riichi_sticks: this.riichi_sticks,
+      riichi_sticks: this.riichi_sticks
     })
     clone_instance.riichi = new Set<PlayerId>(this.riichi)
     clone_instance.state = this.state
@@ -184,44 +195,44 @@ export class Hand {
   Start() {
     if (this.state != HandState.NOT_STARTED) {
       console.warn(`cannot start the hand when it is already started`)
-      return;
+      return
     }
     // Mark as on going
-    this.state= HandState.ON_GOING;
+    this.state = HandState.ON_GOING
   }
 
   Finish(players: Players, ruleset: Ruleset): boolean {
     if (this.state != HandState.ON_GOING) {
       console.warn(`cannot finish the hand when it is not ongoing`)
-      return false;
+      return false
     }
     const [valid, msg] = this.ValidateHandResults(players, ruleset)
     if (!valid) {
       alert(`Cannot finish the hand due to invalid hand results: ${msg}`)
-      return false;
+      return false
     }
     // Apply points change and clean up riichi sticks
-    const points_delta = this.ResolvePointsDelta(this.results, ruleset, players);
-    players.ApplyPointsDelta(points_delta);
+    const points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
+    players.ApplyPointsDelta(points_delta)
     if (this.results.outcome != HandOutcomeEnum.DRAW) {
-      this.riichi_sticks = 0;
+      this.riichi_sticks = 0
     }
     // Mark as finished
-    this.state = HandState.FINISHED;
-    return true;
+    this.state = HandState.FINISHED
+    return true
   }
 
   Abandon(players: Players, ruleset: Ruleset) {
     // Mark as finished
-    this.state = HandState.ABANDONED;
+    this.state = HandState.ABANDONED
   }
 
   IsOngoing() {
-    return this.state == HandState.ON_GOING;
+    return this.state == HandState.ON_GOING
   }
 
   IsFinished() {
-    return this.state == HandState.FINISHED;
+    return this.state == HandState.FINISHED
   }
 
   IsAbandoned() {
@@ -231,15 +242,17 @@ export class Hand {
   SetUpNextHand(players: Players, ruleset: Ruleset): [Hand, boolean] | undefined {
     // the hand must be finished before calling this method.
     if (this.state != HandState.FINISHED) {
-      console.warn(`cannot set up the next hand when the current hand is not finished: ${this.state}`)
-      return undefined;
+      console.warn(
+        `cannot set up the next hand when the current hand is not finished: ${this.state}`
+      )
+      return undefined
     }
     if (!this.has_next_hand) {
       console.warn(`cannot set up the next hand as there is no more future hands`)
-      return undefined;
+      return undefined
     }
-    const [dealer_id, dealer] = players.FindDealer();
-    const all_last = this.IsAllLast(ruleset);
+    const [dealer_id, dealer] = players.FindDealer()
+    const all_last = this.IsAllLast(ruleset)
     let renchan = false
     let honba_increase = false
     if (this.results.outcome == HandOutcomeEnum.DRAW) {
@@ -258,30 +271,30 @@ export class Hand {
     const should_finish_game = all_last && !renchan
 
     if (should_finish_game) {
-      this.has_next_hand = false;
-      return undefined;
+      this.has_next_hand = false
+      return undefined
     }
-    return this.CreateNextHand(renchan, honba_increase, players, ruleset);
+    return this.CreateNextHand(renchan, honba_increase, players, ruleset)
   }
 
   PlayerRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
     if (!this.riichi.has(player_id)) {
-      this.riichi_sticks += 1;
-      this.riichi.add(player_id);
-      players.GetPlayer(player_id).ApplyPointsDelta(-ruleset.riichi_cost);
+      this.riichi_sticks += 1
+      this.riichi.add(player_id)
+      players.GetPlayer(player_id).ApplyPointsDelta(-ruleset.riichi_cost)
     }
   }
 
   PlayerUnRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
     if (this.riichi.has(player_id)) {
-      this.riichi_sticks -= 1;
-      this.riichi.delete(player_id);
-      players.GetPlayer(player_id).ApplyPointsDelta(ruleset.riichi_cost);
+      this.riichi_sticks -= 1
+      this.riichi.delete(player_id)
+      players.GetPlayer(player_id).ApplyPointsDelta(ruleset.riichi_cost)
     }
   }
 
-  IsAllLast(ruleset: Ruleset): boolean{
-    return (ruleset.last_round_wind == this.round_wind && this.hand == ruleset.num_players);
+  IsAllLast(ruleset: Ruleset): boolean {
+    return ruleset.last_round_wind == this.round_wind && this.hand == ruleset.num_players
   }
 
   private ResolvePointsDelta(
@@ -300,7 +313,7 @@ export class Hand {
     }
   }
 
-  private ValidateHandResults(players: Players, ruleset: Ruleset) : [boolean, string] {
+  private ValidateHandResults(players: Players, ruleset: Ruleset): [boolean, string] {
     if (!Object.values(HandOutcomeEnum).includes(this.results.outcome)) {
       return [false, `错误对局结果: ${this.results.outcome}`]
     }
@@ -410,28 +423,35 @@ export class Hand {
     }
   }
 
-  private CreateNextHand(renchan: boolean, honba_increase: boolean, players: Players, ruleset: Ruleset): [Hand, boolean] {
-    const next_honba = (honba_increase ? this.honba + 1 : 0);
-    const players_should_shift_seats = !renchan;
-    const next_riichi_sticks = this.riichi_sticks;
-    let next_round_wind = this.round_wind;
-    let next_hand = this.hand;
-
+  private CreateNextHand(
+    renchan: boolean,
+    honba_increase: boolean,
+    players: Players,
+    ruleset: Ruleset
+  ): [Hand, boolean] {
+    const next_honba = honba_increase ? this.honba + 1 : 0
+    const players_should_shift_seats = !renchan
+    const next_riichi_sticks = this.riichi_sticks
+    let next_round_wind = this.round_wind
+    let next_hand = this.hand
 
     if (!renchan) {
       if (this.hand == ruleset.num_players) {
-        next_round_wind = NextWindMap[this.round_wind];
-        next_hand = 1;
-      }
-      else {
-        next_hand = this.hand + 1;
+        next_round_wind = NextWindMap[this.round_wind]
+        next_hand = 1
+      } else {
+        next_hand = this.hand + 1
       }
     }
-    return [new Hand({
-      round_wind: next_round_wind,
-      hand: next_hand,
-      honba: next_honba,
-      riichi_sticks: next_riichi_sticks}), players_should_shift_seats];
+    return [
+      new Hand({
+        round_wind: next_round_wind,
+        hand: next_hand,
+        honba: next_honba,
+        riichi_sticks: next_riichi_sticks
+      }),
+      players_should_shift_seats
+    ]
   }
 
   private ResolvePointsDeltaOnTsumo(
@@ -493,7 +513,9 @@ export class Hand {
     const num_players: number = players.NumPlayers()
 
     let points_delta: PointsDelta = {}
-    const points_map = players.GetPlayer(winner_id).IsDealer() ? RonPointsDealer : RonPointsNonDealer
+    const points_map = players.GetPlayer(winner_id).IsDealer()
+      ? RonPointsDealer
+      : RonPointsNonDealer
     const delta = points_map[key] + this.honba * ruleset.honba_points
     points_delta[winner_id] = delta + this.riichi_sticks * ruleset.riichi_cost
     points_delta[deal_in_id] = -delta

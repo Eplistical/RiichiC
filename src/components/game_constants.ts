@@ -14,7 +14,7 @@ export const PointsLadderDisplayMap = Object.freeze({
   [PointsLadder.YAKUMAN]: '役满'
 })
 
-export const PointsLadderBriefDisplayMap  = Object.freeze({
+export const PointsLadderBriefDisplayMap = Object.freeze({
   [PointsLadder.MANGAN]: '满',
   [PointsLadder.HANEMAN]: '跳',
   [PointsLadder.BAIMAN]: '倍',

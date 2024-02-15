@@ -1,6 +1,6 @@
 import { Ruleset } from './rulesets.ts'
-import { Seat, Winds, NextWindMap, LastWindMap, WindsOrder} from './seat_constants.ts'
-import {PointsDelta} from './hands.ts'
+import { Seat, Winds, NextWindMap, LastWindMap, WindsOrder } from './seat_constants.ts'
+import { PointsDelta } from './hands.ts'
 import { pl } from 'element-plus/es/locale/index.js'
 
 // Use beginning seat as a player's ID
@@ -47,7 +47,10 @@ export class Players {
   }
 
   Clone(ruleset: Ruleset): Players {
-    let clone_instance = new Players(ruleset, this.GetPlayers(WindsOrder).map((p)=>(p.name)))
+    let clone_instance = new Players(
+      ruleset,
+      this.GetPlayers(WindsOrder).map((p) => p.name)
+    )
     for (const player_id of WindsOrder) {
       clone_instance.player_map[player_id] = this.player_map[player_id].Clone(ruleset)
     }
@@ -73,8 +76,8 @@ export class Players {
     return undefined
   }
 
-  GetPlayers(player_ids: PlayerId[]): Array<Player|undefined> {
-    return player_ids.map((id) => this.GetPlayer(id));
+  GetPlayers(player_ids: PlayerId[]): Array<Player | undefined> {
+    return player_ids.map((id) => this.GetPlayer(id))
   }
 
   FindDealer(): [PlayerId, Player] {
@@ -89,14 +92,14 @@ export class Players {
   ApplyPointsDelta(points_delta: PointsDelta) {
     for (let [player_id, player] of Object.entries(this.player_map)) {
       if (points_delta.hasOwnProperty(player_id)) {
-        player.ApplyPointsDelta(points_delta[player_id]);
+        player.ApplyPointsDelta(points_delta[player_id])
       }
     }
   }
 
   ShiftSeats() {
     for (let [player_id, player] of Object.entries(this.player_map)) {
-      player.current_wind = LastWindMap[player.current_wind];
+      player.current_wind = LastWindMap[player.current_wind]
     }
   }
 }
