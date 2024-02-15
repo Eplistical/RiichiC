@@ -176,9 +176,6 @@ import {
 import { MLeagueRuleset } from './rulesets.ts'
 import { Hand, HandState } from './hand.ts'
 import { Game, GameState } from './game.ts'
-import { useCookies } from "vue3-cookies";
-
-const ENABLE_COOKIE = false;
 
 export default {
   name: 'RiichiC',
@@ -186,15 +183,14 @@ export default {
     ElButton
   },
   setup() {
-    const { cookies } = useCookies();
-    return { cookies };
   },
   mounted() {
-    this.LoadCookie();
-    this.RunPeriodicalTasks();
+  },
+  beforeMount() {
+    window.addEventListener("beforeunload", this.preventRefresh);
   },
   beforeDestroy() {
-    clearInterval(this.periodic)
+    window.removeEventListener("beforeunload", this.preventRefresh);
   },
   data() {
     return {
@@ -212,8 +208,6 @@ export default {
       PointsLadderDisplayMap: PointsLadderDisplayMap,
       AllowedHans: AllowedHans,
       AllowedFus: AllowedFus,
-
-      periodic: null,
     }
   },
   computed: {
@@ -321,14 +315,8 @@ export default {
       if (row.log_index >= this.game.log.length) {
         alert(`cannot reset: log index ${row.log_index} >= log length ${this.game.log.length}`)
       }
-      const log_to_recover = this.game.log[row.log_index]
-      console.log("Resetting to", JSON.stringify(log_to_recover.hand), JSON.stringify(log_to_recover.players))
-
-      this.game.players = log_to_recover.players
-      this.game.current_hand = log_to_recover.hand
-      this.game.state = log_to_recover.state
-      this.game.log = this.game.log.slice(0, row.log_index + 1)
-      if (this.game.current_hand.has_next_hand) {
+      const hand_changed = this.game.ResetToPreviousFinishedHand(row.log_index)
+      if (hand_changed && this.game.current_hand.has_next_hand) {
         // hands in log must be finished, thus we can move to next hand.
         this.game.SetUpNextHandOrFinishGame()
         this.game.StartCurrentHand()
@@ -342,45 +330,10 @@ export default {
     GetPlayerName(player_id) {
       return this.game.players.GetPlayer(player_id).name
     },
-    RunPeriodicalTasks() {
-      this.periodic = setInterval(() => { this.SaveCookie() }, 5000 /*every 5 sec*/);
-    },
-    SaveCookie() {
-		  if (ENABLE_COOKIE) {
-        const players_cookie= JSON.stringify(this.game.players)
-        this.cookies.set("players", players_cookie);
-        console.log(`Set players cookie = ${players_cookie}`)
-
-        const game_state_cookie = JSON.stringify(this.game.state)
-        this.cookies.set("game_state", game_state_cookie);
-        console.log(`Set game_state cookie = ${game_state_cookie}`)
-
-        const game_log_cookie = JSON.stringify(
-          this.game.log.map((x) => {return {
-            state: x.state, 
-            players: x.players, 
-            hand: x.hand,
-            hand_riichi: [...x.hand.riichi],
-            hand_resulst_tenpai: [...x.hand.results.tenpai],
-          }})
-        )
-        this.cookies.set("game_log", game_log_cookie);
-        console.log(`Set game_log cookie = ${game_log_cookie}`)
-
-        const ruleset_cookie = JSON.stringify(this.game.ruleset)
-        this.cookies.set("ruleset", ruleset_cookie);
-        console.log(`Set ruleset cookie = ${ruleset_cookie}`)
-      }
-		},
-    LoadCookie() {
-		  if (ENABLE_COOKIE) {
-        console.log(`LoadCookie`);
-        console.log("player:", this.cookies.get("players"))
-        console.log("game_state:", this.cookies.get("game_state"))
-        console.log("game_log:", this.cookies.get("game_log"))
-        console.log("ruleset:", this.cookies.get("ruleset"))
-      }
-		},
+    preventRefresh(event) {
+      event.preventDefault()
+      event.returnValue = ''
+    }
   },
 }
 </script>

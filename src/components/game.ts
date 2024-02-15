@@ -98,6 +98,7 @@ export class Game {
     }
     // Cannot set up next hand
     const next_hand_info = this.current_hand.SetUpNextHand(this.players, this.ruleset);
+    console.log('next hand: ', JSON.stringify(next_hand_info))
     if (next_hand_info === undefined) {
       if (this.current_hand.has_next_hand == false) {
         // the game reaches the end, should finish
@@ -134,15 +135,21 @@ export class Game {
   }
 
   // Resets the game state to a finished game at log[log_index]
-  ResetToPreviousFinishedHand(log_index: number) {
+  ResetToPreviousFinishedHand(log_index: number): boolean {
     if (log_index >= this.log.length) {
       console.warn(`cannot reset log: log_index=${log_index} is greater than the log size ${this.log.length}`)
-      return
+      return false
+    }
+    if (log_index == this.log.length - 1) {
+      console.log("do nothing when resetting to the current game, log index = ", log_index)
+      return false
     }
     const log_to_reset = this.log[log_index]
+    console.log("Resetting to", log_to_reset)
     this.current_hand = log_to_reset.hand
     this.players = log_to_reset.players
     this.state = log_to_reset.state
-    this.log = this.log.slice(0, log_index);
+    this.log = this.log.slice(0, log_index + 1);
+    return true
   }
 }
