@@ -68,8 +68,8 @@ export class Game {
       return ;
     }
     if (!this.current_hand.IsFinished()) {
-      console.warn("cannot finish the game as the current is not finished.");
-      return ;
+      console.warn("finishe game when the current hand is not finished, the current hand will be abandoned.");
+      this.current_hand.Abandon();
     }
     this.state = GameState.FINISHED;
   }
@@ -88,7 +88,6 @@ export class Game {
       return false;
     }
     Object.assign(this.current_hand.results, hand_results);
-    console.log("FinishCurrentHand: ", JSON.stringify(this.current_hand.results))
     return this.current_hand.Finish(this.players, this.ruleset);
   }
 
@@ -126,11 +125,12 @@ export class Game {
       console.warn('cannot save hand log, hand is not finished.')
       return ;
     }
-    this.log.push({
+    const hand_log ={
       state: this.state,
-      hand: JSON.parse(JSON.stringify(this.current_hand)),
-      players: JSON.parse(JSON.stringify(this.players))
-    })
+      hand: this.current_hand.Clone(),
+      players: this.players.Clone(this.ruleset),
+    }
+    this.log.push(hand_log)
   }
 
   // Resets the game state to a finished game at log[log_index]

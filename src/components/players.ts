@@ -1,5 +1,5 @@
 import { Ruleset } from './rulesets.ts'
-import { Seat, Winds, NextWindMap, LastWindMap} from './seat_constants.ts'
+import { Seat, Winds, NextWindMap, LastWindMap, WindsOrder} from './seat_constants.ts'
 import {PointsDelta} from './hands.ts'
 import { pl } from 'element-plus/es/locale/index.js'
 
@@ -16,6 +16,12 @@ class Player {
     this.name = player_name
     this.current_wind = seat
     this.points = ruleset.starting_points
+  }
+
+  Clone(ruleset: Ruleset): Player {
+    let clone_instance = new Player(ruleset, this.name, this.current_wind)
+    clone_instance.points = this.points
+    return clone_instance
   }
 
   IsDealer(): boolean {
@@ -38,6 +44,14 @@ export class Players {
       this.player_map[seat] = new Player(ruleset, player_names[i], seat)
       seat = NextWindMap[seat]
     }
+  }
+
+  Clone(ruleset: Ruleset): Players {
+    let clone_instance = new Players(ruleset, this.GetPlayers(WindsOrder).map((p)=>(p.name)))
+    for (const player_id of WindsOrder) {
+      clone_instance.player_map[player_id] = this.player_map[player_id].Clone(ruleset)
+    }
+    return clone_instance
   }
 
   NumPlayers(): number {

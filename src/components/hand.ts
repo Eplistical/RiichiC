@@ -25,6 +25,7 @@ export enum HandState {
   NOT_STARTED,
   ON_GOING,
   FINISHED,
+  ABANDONED,
 }
 
 export const HandOutcomeEnumDisplayTextMap = Object.freeze({
@@ -143,6 +144,35 @@ export class Hand {
     this.CleanUpResults();
   } 
 
+  Clone(): Hand {
+    let clone_instance = new Hand({
+      round_wind: this.round_wind,
+      hand: this.hand,
+      honba: this.honba,
+      riichi_sticks: this.riichi_sticks,
+    })
+    clone_instance.riichi = new Set<PlayerId>(this.riichi)
+    clone_instance.state = this.state
+    clone_instance.has_next_hand = this.has_next_hand
+    clone_instance.results.outcome = this.results.outcome
+    if (this.results.tenpai) {
+      clone_instance.results.tenpai = new Set<PlayerId>(this.results.tenpai)
+    }
+    if (this.results.winner) {
+      clone_instance.results.winner = this.results.winner
+    }
+    if (this.results.deal_in) {
+      clone_instance.results.deal_in = this.results.deal_in
+    }
+    if (this.results.han) {
+      clone_instance.results.han = this.results.han
+    }
+    if (this.results.fu) {
+      clone_instance.results.fu = this.results.fu
+    }
+    return clone_instance
+  }
+
   Start() {
     if (this.state != HandState.NOT_STARTED) {
       console.warn(`cannot start the hand when it is already started`)
@@ -173,6 +203,11 @@ export class Hand {
     return true;
   }
 
+  Abandon(players: Players, ruleset: Ruleset) {
+    // Mark as finished
+    this.state = HandState.ABANDONED;
+  }
+
   IsOngoing() {
     return this.state == HandState.ON_GOING;
   }
@@ -181,10 +216,14 @@ export class Hand {
     return this.state == HandState.FINISHED;
   }
 
+  IsAbandoned() {
+    return this.state == HandState.ABANDONED
+  }
+
   SetUpNextHand(players: Players, ruleset: Ruleset): [Hand, boolean] | undefined {
     // the hand must be finished before calling this method.
     if (this.state != HandState.FINISHED) {
-      console.warn(`cannot set up the next hand when the current hand is not finished`)
+      console.warn(`cannot set up the next hand when the current hand is not finished: ${this.state}`)
       return undefined;
     }
     if (!this.has_next_hand) {
@@ -369,6 +408,7 @@ export class Hand {
     const next_riichi_sticks = this.riichi_sticks;
     let next_round_wind = this.round_wind;
     let next_hand = this.hand;
+
 
     if (!renchan) {
       if (this.hand == ruleset.num_players) {

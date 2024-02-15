@@ -408,13 +408,14 @@ describe(('Game Finish'), ()=> {
     game.Finish();
     expect(game.state).toEqual(GameState.NOT_STARTED);
   })
-  it('Should skip when a hand is not finished', () => {
+  it('Should abandon a hand that is not finished', () => {
     let game = new Game();
     game.InitGame({ruleset: ruleset, player_names: ['P1', 'P2', 'P3', 'P4']})
     game.Start();
     game.StartCurrentHand();
     game.Finish();
-    expect(game.state).toEqual(GameState.ON_GOING);
+    expect(game.state).toEqual(GameState.FINISHED);
+    expect(game.current_hand.IsAbandoned()).toEqual(true);
   })
   it('Should work for an ongoing game', () => {
     let game = new Game();
@@ -485,9 +486,10 @@ describe(('Game SaveHandLog'), ()=> {
     // to south-2
     for (let i = 0; i < 6; ++i) {
       game.StartCurrentHand();
+      game.PlayerRiichi(Winds.WEST)
       game.FinishCurrentHand({
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>(),
+        tenpai: new Set<PlayerId>([Winds.WEST]),
       });
       game.SaveHandLog();
       game.SetUpNextHandOrFinishGame();
@@ -496,37 +498,43 @@ describe(('Game SaveHandLog'), ()=> {
     expect(game.log[5].state).toEqual(GameState.ON_GOING)
     expect(game.log[5].hand).toEqual(
       expect.objectContaining({
-          round_wind: Winds.SOUTH,
-          hand: 2,
+          round_wind: Winds.EAST,
+          hand: 3,
           honba: 5,
+          riichi: new Set<PlayerId>([Winds.WEST]),
+          riichi_sticks: 6,
+          has_next_hand: true,
           results: {
             outcome: HandOutcomeEnum.DRAW,
-            tenpai: {},
-            riichi: {},
+            tenpai: new Set<PlayerId>([Winds.WEST]),
+            winner: undefined,
+            deal_in: undefined,
+            han: undefined,
+            fu: undefined,
           }
       })
     )
     expect(game.log[5].players.player_map).toEqual(
       expect.objectContaining({
             [Winds.EAST]: {
-              current_wind:  Winds.NORTH,
+              current_wind:  Winds.WEST,
               name: "P1",
-              points: 25000,
+              points: 19000,
             },
             [Winds.SOUTH]: {
-              current_wind:  Winds.EAST,
+              current_wind:  Winds.NORTH,
               name: "P2",
-              points: 25000,
+              points: 19000,
             },
             [Winds.WEST]: {
-              current_wind:  Winds.SOUTH,
+              current_wind:  Winds.EAST,
               name: "P3",
-              points: 25000,
+              points: 37000,
             },
             [Winds.NORTH]: {
-              current_wind:  Winds.WEST,
+              current_wind:  Winds.SOUTH,
               name: "P4",
-              points: 25000,
+              points: 19000,
             },
       })
     )

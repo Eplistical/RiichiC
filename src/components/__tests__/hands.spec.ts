@@ -90,6 +90,7 @@ describe(('Hand Start'), ()=> {
   })
 })
 
+
 describe(('Hand Works On Riichi Event'), ()=> {
   it('should work for player riichi', () => {
     hand.PlayerRiichi(Winds.EAST, players, ruleset);
@@ -1142,5 +1143,44 @@ describe(('Hand Finish Applies Points Delta On Tsumo'), ()=> {
     expect(hand.state).toEqual(HandState.FINISHED);
     expect(players.GetPlayers([Winds.EAST,Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p)=>p.points)).toEqual([43500, 19000, 19000, 19000]);
     expect(hand.riichi_sticks).toEqual(0)
+  })
+})
+
+
+describe(('Hand Clone'), ()=>{
+  it('should copy all fields correctly', () => {
+    Object.assign(hand, 
+      {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 3,
+      honba: 2,
+      riichi: new Set<PlayerId>([Winds.NORTH, Winds.WEST]),
+      riichi_sticks: 1,
+      has_next_hand: true,
+      results: {
+        outcome: HandOutcomeEnum.TSUMO,
+        winner: Winds.EAST,
+        deal_in: Winds.WEST,
+        han: 3,
+        fu: 20,
+        tenpai: new Set<PlayerId>([Winds.SOUTH, Winds.EAST]),
+      }
+    })
+    const clone = hand.Clone()
+    expect(clone).not.toBe(hand)
+    expect(clone.state).toEqual(hand.state)
+    expect(clone.round_wind).toEqual(hand.round_wind)
+    expect(clone.hand).toEqual(hand.hand)
+    expect(clone.honba).toEqual(hand.honba)
+    expect(clone.riichi).toEqual(hand.riichi)
+    expect(clone.riichi_sticks).toEqual(hand.riichi_sticks)
+    expect(clone.has_next_hand).toEqual(hand.has_next_hand)
+    expect(clone.results.outcome).toEqual(hand.results.outcome)
+    expect(clone.results.winner).toEqual(hand.results.winner)
+    expect(clone.results.deal_in).toEqual(hand.results.deal_in)
+    expect(clone.results.han).toEqual(hand.results.han)
+    expect(clone.results.fu).toEqual(hand.results.fu)
+    expect(clone.results.tenpai).toEqual(hand.results.tenpai)
   })
 })
