@@ -520,7 +520,6 @@ export default {
 <style>
 .screen_div {
   position: absolute;
-  border-style: dotted;
   width: 100%;
   height: 100%;
   top: 0;
