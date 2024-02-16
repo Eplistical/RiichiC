@@ -551,28 +551,18 @@ describe('Hand Set Up Next Hand', () => {
 })
 
 describe('Hand Finish', () => {
-  it('should ignore an unstarted hand', () => {
+  it.each([
+    { state: HandState.NOT_STARTED },
+    { state: HandState.FINISHED },
+    { state: HandState.ABANDONED }
+  ])('should ignore a hand that not on-going', ({ state }) => {
     Object.assign(hand, {
-      state: HandState.NOT_STARTED
+      state: state
     })
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
-    expect(hand.IsNotStarted()).toBe(true)
+    expect(hand.state).toEqual(state)
   })
-  it('should ignore a finished hand', () => {
-    Object.assign(hand, {
-      state: HandState.FINISHED
-    })
-    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
-    expect(hand.IsFinished()).toBe(true)
-  })
-  it('should ignore an abandoned hand', () => {
-    Object.assign(hand, {
-      state: HandState.ABANDONED
-    })
-    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
-    expect(hand.IsAbandoned()).toBe(true)
-  })
-  it('should ignore undefined outcome', () => {
+  it('should reject undefined outcome', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
       results: {
@@ -582,178 +572,235 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject riichi noten on draw', () => {
+  it.each([
+    { riichi: [Winds.EAST], tenpai: undefined },
+    { riichi: [Winds.EAST], tenpai: [] },
+    { riichi: [Winds.EAST], tenpai: [Winds.SOUTH] },
+    { riichi: [Winds.EAST, Winds.SOUTH], tenpai: [Winds.EAST] },
+    { riichi: [Winds.EAST, Winds.SOUTH], tenpai: [Winds.EAST, Winds.WEST, Winds.NORTH] },
+    { riichi: [Winds.EAST, Winds.SOUTH, Winds.WEST], tenpai: [Winds.EAST, Winds.WEST, Winds.NORTH] }
+  ])('should reject riichi noten on draw $riichi $tenpai', ({ riichi, tenpai }) => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
-      riichi: new Set<PlayerId>([Winds.EAST, Winds.NORTH]),
-      results: {
-        outcome: HandOutcomeEnum.DRAW,
-        tenpai: [Winds.EAST]
-      }
+      riichi: new Set<PlayerId>(riichi)
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: tenpai
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject undefined winner on ron', () => {
+  it.each([
+    { riichi: [], tenpai: undefined },
+    { riichi: [], tenpai: [] },
+    { riichi: [Winds.EAST], tenpai: [Winds.EAST] },
+    { riichi: [Winds.EAST], tenpai: [Winds.EAST, Winds.SOUTH] },
+    { riichi: [Winds.EAST, Winds.WEST], tenpai: [Winds.EAST, Winds.SOUTH, Winds.WEST] }
+  ])('should accept valid draw results $riichi $tenpai', ({ riichi, tenpai }) => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: undefined,
-        deal_in: Winds.EAST,
-        han: 3,
-        fu: 30
-      }
+      riichi: new Set<PlayerId>(riichi)
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: tenpai
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
+    expect(hand.IsFinished()).toBe(true)
+  })
+  it('should reject undefined winner on ron', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: undefined,
+      deal_in: Winds.EAST,
+      han: 3,
+      fu: 30
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.winner
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined deal in on ron', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.EAST,
-        deal_in: undefined,
-        han: 3,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.EAST,
+      deal_in: undefined,
+      han: 3,
+      fu: 30
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.deal_in
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined han on ron', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.SOUTH,
-        deal_in: Winds.NORTH,
-        han: undefined,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.SOUTH,
+      deal_in: Winds.NORTH,
+      han: undefined,
+      fu: 30
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.han
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject invalid han on ron', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.SOUTH,
-        deal_in: Winds.NORTH,
-        han: 5000,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.SOUTH,
+      deal_in: Winds.NORTH,
+      han: 5000,
+      fu: 30
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject invalid fu on ron', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.SOUTH,
-        deal_in: Winds.NORTH,
-        han: 2,
-        fu: 9
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.SOUTH,
+      deal_in: Winds.NORTH,
+      han: 2,
+      fu: 35
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined fu with small han on ron', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.SOUTH,
-        deal_in: Winds.NORTH,
-        han: 3,
-        fu: undefined
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.SOUTH,
+      deal_in: Winds.NORTH,
+      han: 3,
+      fu: undefined
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.fu
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject bad han-fu pair on ron', () => {
+  it.each([
+    { han: 3, fu: 20 },
+    { han: 1, fu: 20 },
+    { han: 1, fu: 25 }
+  ])('should reject bad han-fu pair on ron $han $fu', ({ han, fu }) => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.RON,
-        winner: Winds.SOUTH,
-        deal_in: Winds.NORTH,
-        han: 3,
-        fu: 20
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: Winds.SOUTH,
+      deal_in: Winds.NORTH,
+      han: han,
+      fu: fu
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined winner on tsumo', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.TSUMO,
-        winner: undefined,
-        han: 3,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: undefined,
+      han: 3,
+      fu: 30
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.winner
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined han on tsumo', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.TSUMO,
-        winner: Winds.WEST,
-        han: undefined,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: Winds.WEST,
+      han: undefined,
+      fu: 30
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.han
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject invalid han on tsumo', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.TSUMO,
-        winner: Winds.WEST,
-        han: -1,
-        fu: 30
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: Winds.WEST,
+      han: -1,
+      fu: 30
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject undefined fu with small han on tsumo', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.TSUMO,
-        winner: Winds.WEST,
-        han: 1,
-        fu: undefined
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: Winds.WEST,
+      han: 1,
+      fu: undefined
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    delete hand_results.fu
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
   it('should reject invalid fu on tsumo', () => {
     Object.assign(hand, {
-      state: HandState.ON_GOING,
-      results: {
-        outcome: HandOutcomeEnum.TSUMO,
-        winner: Winds.WEST,
-        han: 3,
-        fu: 90
-      }
+      state: HandState.ON_GOING
     })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: Winds.WEST,
+      han: 3,
+      fu: 90
+    }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
