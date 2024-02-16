@@ -557,6 +557,7 @@ export default {
   top: 0;
   left: 0;
   background-color: white;
+  color: black;
 }
 
 .player_name_input {
@@ -573,6 +574,7 @@ export default {
   margin-top: 30px;
   margin-bottom: 30px;
   background-color: white;
+  color: black;
 }
 
 .hand_info_board {
