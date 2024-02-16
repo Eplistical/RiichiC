@@ -20,6 +20,10 @@ export const HandOutcomeEnum = Object.freeze({
   DRAW: 'draw'
 })
 
+// Allowed state transitions:
+// NOT_STARTED -> ON_GOING
+// ON_GOING -> FINISHED
+// ON_GOING -> ABANDONED
 export enum HandState {
   NOT_STARTED,
   ON_GOING,
@@ -36,62 +40,12 @@ export const HandOutcomeEnumDisplayTextMap = Object.freeze({
 export type PointsDelta = Record<PlayerId, number>
 
 export type HandResults = {
-  outcome: string | undefined
+  outcome: string | null
   tenpai?: Set<PlayerId>
-  winner?: PlayerId | undefined
-  deal_in?: PlayerId | undefined
-  han?: number | string | undefined
-  fu?: number | undefined
-}
-
-// Get rid of useless fields for an outcome
-export function RemoveUnusedFieldsForHandResults({
-  outcome,
-  tenpai,
-  winner,
-  deal_in,
-  han,
-  fu
-}: HandResults): HandResults {
-  if (tenpai == undefined) {
-    tenpai = new Set<PlayerId>()
-  } else {
-    tenpai = new Set<PlayerId>(tenpai)
-  }
-
-  if (outcome == HandOutcomeEnum.DRAW) {
-    return {
-      outcome: outcome,
-      tenpai: tenpai
-    }
-  } else if (outcome == HandOutcomeEnum.RON) {
-    return {
-      outcome: outcome,
-      winner: winner,
-      deal_in: deal_in,
-      han: han,
-      fu: fu
-    }
-  } else if (outcome == HandOutcomeEnum.TSUMO) {
-    return {
-      outcome: outcome,
-      winner: winner,
-      han: han,
-      fu: fu
-    }
-  }
-}
-
-export function MaybeApplyRoundUpMangan(ruleset: Ruleset, results: HandResults): HandResults {
-  if (
-    ruleset.round_up_mangan &&
-    results.outcome != HandOutcomeEnum.DRAW &&
-    ((results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60))
-  ) {
-    results.han = PointsLadder.MANGAN
-    results.fu = undefined
-  }
-  return results
+  winner?: PlayerId
+  deal_in?: PlayerId
+  han?: number | string
+  fu?: number
 }
 
 interface HandInterface {
@@ -151,25 +105,32 @@ export class Hand {
     return clone_instance
   }
 
-  Start() {
+  Start(): boolean {
     if (this.state != HandState.NOT_STARTED) {
       console.warn(`cannot start the hand when it is already started`)
-      return
+      return false
     }
     // Mark as on going
     this.state = HandState.ON_GOING
+    return true
   }
 
-  Finish(players: Players, ruleset: Ruleset): boolean {
+  Finish(results: HandResults, players: Players, ruleset: Ruleset): boolean {
     if (this.state != HandState.ON_GOING) {
       console.warn(`cannot finish the hand when it is not ongoing`)
       return false
     }
-    const [valid, msg] = this.ValidateHandResults(players, ruleset)
+    const [valid, msg, validated_and_formalized_results] = this.ValidateAndFormalizeHandResults(
+      results,
+      players,
+      ruleset
+    )
     if (!valid) {
       alert(`Cannot finish the hand due to invalid hand results: ${msg}`)
       return false
     }
+    // save validated results
+    this.results = validated_and_formalized_results
     // Apply points change and clean up riichi sticks
     const points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
     players.ApplyPointsDelta(points_delta)
@@ -181,23 +142,32 @@ export class Hand {
     return true
   }
 
-  Abandon(players: Players, ruleset: Ruleset) {
+  Abandon(players: Players, ruleset: Ruleset): boolean {
     // we should revert all riichi's occured in the current hand before abandoning it
+    if (this.state != HandState.ON_GOING) {
+      return false
+    }
     for (const player_id of WindsOrder) {
       this.PlayerUnRiichi(player_id, players, ruleset)
     }
     this.state = HandState.ABANDONED
+    this.CleanUpResults()
+    return true
   }
 
-  IsOngoing() {
+  IsNotStarted(): boolean {
+    return this.state == HandState.NOT_STARTED
+  }
+
+  IsOngoing(): boolean {
     return this.state == HandState.ON_GOING
   }
 
-  IsFinished() {
+  IsFinished(): boolean {
     return this.state == HandState.FINISHED
   }
 
-  IsAbandoned() {
+  IsAbandoned(): boolean {
     return this.state == HandState.ABANDONED
   }
 
@@ -270,67 +240,119 @@ export class Hand {
       return this.ResolvePointsDeltaOnTsumo(hand_results, ruleset, players)
     } else if (hand_results.outcome === HandOutcomeEnum.RON) {
       return this.ResolvePointsDeltaOnRon(hand_results, ruleset, players)
-    } else {
-      alert(`错误对局结果: ${JSON.stringify(hand_results.outcome)}`)
     }
   }
 
-  private ValidateHandResults(players: Players, ruleset: Ruleset): [boolean, string] {
-    if (!Object.values(HandOutcomeEnum).includes(this.results.outcome)) {
-      return [false, `错误对局结果: ${this.results.outcome}`]
+  private ValidateAndFormalizeHandResults(
+    results: HandResults,
+    players: Players,
+    ruleset: Ruleset
+  ): [boolean, string, HandResults?] {
+    const [valid, msg] = this.ValidateHandResults(results, players, ruleset)
+    if (!valid) {
+      return [valid, msg]
+    }
+    const validate_and_formalized_results = this.FormalizeHandResults(results, ruleset)
+    return [valid, msg, validate_and_formalized_results]
+  }
+
+  // Process a valid HandResults to make sure can be stored to a finished hand, and does not contain redundant fields
+  // The hand must be validated before calling this method, i.e. all necessary fields must exist for any outcome
+  private FormalizeHandResults(results: HandResults, ruleset: Ruleset): HandResults {
+    let formalized_results: HandResults = {
+      outcome: results.outcome
+    }
+    if (results.outcome == HandOutcomeEnum.DRAW) {
+      Object.assign(formalized_results, {
+        tenpai: new Set<PlayerId>(results.tenpai ? results.tenpai : [])
+      })
+    } else if (results.outcome == HandOutcomeEnum.TSUMO) {
+      Object.assign(formalized_results, {
+        winner: results.winner,
+        han: results.han,
+        fu: results.fu
+      })
+    } else if (results.outcome == HandOutcomeEnum.RON) {
+      Object.assign(formalized_results, {
+        winner: results.winner,
+        deal_in: results.deal_in,
+        han: results.han,
+        fu: results.fu
+      })
+    }
+    this.MaybeApplyRoundUpMangan(formalized_results, ruleset)
+    return formalized_results
+  }
+
+  // Applies round-up mangan if enabled, updates the results directly
+  private MaybeApplyRoundUpMangan(results: HandResults, ruleset: Ruleset) {
+    if (
+      ruleset.round_up_mangan &&
+      results.outcome != HandOutcomeEnum.DRAW &&
+      ((results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60))
+    ) {
+      results.han = PointsLadder.MANGAN
+      delete results.fu
+    }
+  }
+
+  // Checks whether a hand result contains is valid for finishing this hand.
+  // This does not handle redundant fields.
+  private ValidateHandResults(
+    results: HandResults,
+    players: Players,
+    ruleset: Ruleset
+  ): [boolean, string] {
+    if (!Object.values(HandOutcomeEnum).includes(results.outcome)) {
+      return [false, `错误对局结果: ${results.outcome}`]
     }
 
-    if (this.results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
+    if (results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
+      // when tenpai is null/undefined, does not count it as en error, count it as nobody tenpai instead
       for (const riichi_player of this.riichi) {
-        if (!this.results.tenpai.has(riichi_player)) {
+        if (results.tenpai && !results.tenpai.has(riichi_player)) {
           return [false, `立直家未听牌: ${players.GetPlayer(riichi_player).name}`]
         }
       }
-    } else if (this.results.outcome == HandOutcomeEnum.TSUMO) {
-      if (players.GetPlayer(this.results.winner) === undefined) {
-        return [false, `找不到自摸家: ${this.results.winner}`]
+    } else if (results.outcome == HandOutcomeEnum.TSUMO) {
+      if (players.GetPlayer(results.winner) === undefined) {
+        return [false, `找不到自摸家: ${results.winner}`]
       }
-      if (!Object.values(AllowedHans).includes(this.results.han)) {
-        return [false, `番数错误: ${this.results.han}`]
+      if (!Object.values(AllowedHans).includes(results.han)) {
+        return [false, `番数错误: ${results.han}`]
       }
       if (
-        !Object.values(PointsLadder).includes(this.results.han) &&
-        !Object.values(AllowedFus[this.results.han]).includes(this.results.fu)
+        !Object.values(PointsLadder).includes(results.han) &&
+        !Object.values(AllowedFus[results.han]).includes(results.fu)
       ) {
-        return [false, `符数错误: ${this.results.fu}`]
+        return [false, `符数错误: ${results.fu}`]
       }
-      const key = this.GetPointMapKey(this.results.han, this.results.fu, ruleset)
+      const key = this.GetPointMapKey(results.han, results.fu, ruleset)
       if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
-        return [
-          false,
-          `番符组合不存在: ${this.results.outcome}, ${this.results.han}, ${this.results.fu}`
-        ]
+        return [false, `番符组合不存在: ${results.outcome}, ${results.han}, ${results.fu}`]
       }
-    } else if (this.results.outcome == HandOutcomeEnum.RON) {
-      if (players.GetPlayer(this.results.winner) === undefined) {
-        return [false, `找不到胡牌家: ${this.results.winner}`]
+    } else if (results.outcome == HandOutcomeEnum.RON) {
+      if (players.GetPlayer(results.winner) === undefined) {
+        return [false, `找不到胡牌家: ${results.winner}`]
       }
-      if (players.GetPlayer(this.results.deal_in) === undefined) {
-        return [false, `找不到点炮家: ${this.results.deal_in}`]
+      if (players.GetPlayer(results.deal_in) === undefined) {
+        return [false, `找不到点炮家: ${results.deal_in}`]
       }
-      if (this.results.deal_in == this.results.winner) {
-        return [false, `点炮家不能和胡家一样: ${this.results.winner} == ${this.results.deal_in}`]
+      if (results.deal_in == results.winner) {
+        return [false, `点炮家不能和胡家一样: ${results.winner} == ${results.deal_in}`]
       }
-      if (!Object.values(AllowedHans).includes(this.results.han)) {
-        return [false, `番数错误: ${this.results.han}`]
+      if (!Object.values(AllowedHans).includes(results.han)) {
+        return [false, `番数错误: ${results.han}`]
       }
       if (
-        !Object.values(PointsLadder).includes(this.results.han) &&
-        !Object.values(AllowedFus[this.results.han]).includes(this.results.fu)
+        !Object.values(PointsLadder).includes(results.han) &&
+        !Object.values(AllowedFus[results.han]).includes(results.fu)
       ) {
-        return [false, `符数错误: ${this.results.fu}`]
+        return [false, `符数错误: ${results.fu}`]
       }
-      const key = this.GetPointMapKey(this.results.han, this.results.fu, ruleset)
+      const key = this.GetPointMapKey(results.han, results.fu, ruleset)
       if (!RonPointsNonDealer.hasOwnProperty(key)) {
-        return [
-          false,
-          `番符组合不存在: ${this.results.outcome}, ${this.results.han}, ${this.results.fu}`
-        ]
+        return [false, `番符组合不存在: ${results.outcome}, ${results.han}, ${results.fu}`]
       }
     }
     return [true, '']
@@ -376,12 +398,7 @@ export class Hand {
 
   private CleanUpResults() {
     this.results = {
-      outcome: undefined,
-      tenpai: new Set<PlayerId>(),
-      winner: undefined,
-      deal_in: undefined,
-      han: undefined,
-      fu: undefined
+      outcome: null
     }
   }
 

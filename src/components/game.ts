@@ -90,8 +90,7 @@ export class Game {
       console.warn(`cannot update hand state when game state = ${this.state}`)
       return false
     }
-    Object.assign(this.current_hand.results, hand_results)
-    const hand_finished = this.current_hand.Finish(this.players, this.ruleset)
+    const hand_finished = this.current_hand.Finish(hand_results, this.players, this.ruleset)
     this.SanityCheckTotalPoints()
     return hand_finished
   }

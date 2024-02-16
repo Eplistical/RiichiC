@@ -264,14 +264,8 @@
 
 <script>
 import { ElButton } from 'element-plus'
-import { ref } from 'vue'
 import { Winds, WindsOrder, WindsDisplayTextMap } from './seat_constants.ts'
-import {
-  HandOutcomeEnum,
-  RemoveUnusedFieldsForHandResults,
-  MaybeApplyRoundUpMangan,
-  HandOutcomeEnumDisplayTextMap
-} from './hand.ts'
+import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import {
   PointsLadder,
   PointsLadderDisplayMap,
@@ -403,7 +397,6 @@ export default {
             ? this.game.players.GetPlayers(WindsOrder).map((p) => p.points)
             : [0, 0, 0, 0]
           const pt = this.game.players.GetPlayer(player_id).points
-          console.log(player_id, ' current pt: ', current_points, ' pt = ', pt)
           row.rank = current_points.reduce((acc, val) => {
             return val > pt ? acc + 1 : acc
           }, 1)
@@ -509,10 +502,7 @@ export default {
     },
     SubmitHandResultsForm() {
       console.log('SubmitHandResultsForm')
-
-      let hand_results = RemoveUnusedFieldsForHandResults(this.hand_results_form)
-      hand_results = MaybeApplyRoundUpMangan(this.game.ruleset, hand_results)
-      const hand_finished = this.game.FinishCurrentHand(hand_results)
+      const hand_finished = this.game.FinishCurrentHand(this.hand_results_form)
       if (hand_finished) {
         this.game.SaveHandLog()
         this.game.SetUpNextHandOrFinishGame()
@@ -563,6 +553,7 @@ export default {
   height: 100%;
   top: 0;
   left: 0;
+  background-color: white;
 }
 
 .player_name_input {
@@ -578,6 +569,7 @@ export default {
   margin-left: calc(50% - 160px);
   margin-top: 30px;
   margin-bottom: 30px;
+  background-color: white;
 }
 
 .hand_info_board {
