@@ -32,7 +32,7 @@
       <el-row>
         <el-col :span="12"> 开局点数 </el-col>
         <el-col :span="12">
-          <el-input-number v-model="ruleset.starting_points" placeholder="开局点数" :step="1000" />
+          <el-input-number v-model="ruleset.starting_points" placeholder="开局点数" :step="5000" />
         </el-col>
       </el-row>
       <el-row>
