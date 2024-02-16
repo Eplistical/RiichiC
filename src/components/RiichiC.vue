@@ -386,7 +386,6 @@ export default {
             row[player_id] += `[铳]`
           }
         }
-        row
         board.push(row)
       }
       return board.reverse()
