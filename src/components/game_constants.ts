@@ -23,6 +23,8 @@ export const PointsLadderBriefDisplayMap = Object.freeze({
 })
 
 export const NumberDisplayMap = Object.freeze({
+  [-1]: '無',
+  [0]: '零',
   [1]: '一',
   [2]: '二',
   [3]: '三',
