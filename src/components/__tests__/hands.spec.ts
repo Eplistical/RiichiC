@@ -766,7 +766,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: [],
+      tenpai: []
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -788,7 +788,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: tenpai,
+      tenpai: tenpai
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -816,7 +816,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: tenpai,
+      tenpai: tenpai
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -842,7 +842,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: tenpai,
+      tenpai: tenpai
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)

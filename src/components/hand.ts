@@ -264,7 +264,7 @@ export class Hand {
     }
     if (results.outcome == HandOutcomeEnum.DRAW) {
       Object.assign(formalized_results, {
-        tenpai: (results.tenpai ? results.tenpai : [])
+        tenpai: results.tenpai ? results.tenpai : []
       })
     } else if (results.outcome == HandOutcomeEnum.TSUMO) {
       Object.assign(formalized_results, {

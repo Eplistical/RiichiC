@@ -366,7 +366,10 @@ export default {
           if (hand.riichi.has(player_id)) {
             row[player_id] += `[立]`
           }
-          if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai.includes(player_id)) {
+          if (
+            hand.results.outcome == HandOutcomeEnum.DRAW &&
+            hand.results.tenpai.includes(player_id)
+          ) {
             row[player_id] += `[听]`
           }
           if (
