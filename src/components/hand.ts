@@ -221,7 +221,10 @@ export class Hand {
   }
 
   Abandon(players: Players, ruleset: Ruleset) {
-    // Mark as finished
+    // we should revert all riichi's occured in the current hand before abandoning it
+    for (const player_id of WindsOrder) {
+      this.PlayerUnRiichi(player_id, players, ruleset)
+    }
     this.state = HandState.ABANDONED
   }
 
