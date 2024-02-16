@@ -1,15 +1,11 @@
 import { beforeEach, describe, it, expect } from 'vitest'
 
-import { mount } from '@vue/test-utils'
 import { Winds } from '../seat_constants.ts'
 import { Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
 import { Game, GameState } from '../game.ts'
 import { PlayerId, Players } from '../players.ts'
-import { enableAutoUnmount } from '../../../node_modules/@vue/test-utils/dist/index'
 import { PointsLadder } from '../game_constants.ts'
-import { routeLocationKey } from '../../../node_modules/vue-router/dist/vue-router'
-import { assert } from '../../../node_modules/vitest/dist/index'
 
 let ruleset: Ruleset
 let players: Players
@@ -33,7 +29,6 @@ beforeEach(() => {
 
   hand_results = {
     outcome: undefined,
-    riichi: new Set<PlayerId>(),
     tenpai: new Set<PlayerId>(),
     winner: undefined,
     deal_in: undefined,
@@ -174,7 +169,6 @@ describe('Game FinishCurrentHand', () => {
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
       winner: Winds.NORTH,
-      deal_in: Winds.EAST,
       han: 2,
       fu: 20
     })
@@ -183,7 +177,6 @@ describe('Game FinishCurrentHand', () => {
       expect.objectContaining({
         outcome: HandOutcomeEnum.TSUMO,
         winner: Winds.NORTH,
-        deal_in: Winds.EAST,
         han: 2,
         fu: 20
       })
