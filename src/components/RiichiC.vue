@@ -554,14 +554,11 @@ export default {
   top: 0;
   left: 0;
   background-color: white;
-  color: black;
 }
 
 .player_name_input {
   position: relative;
   font-size: 16px;
-  background-color: white;
-  color: black;
 }
 
 .gameboard {
@@ -573,7 +570,6 @@ export default {
   margin-top: 30px;
   margin-bottom: 30px;
   background-color: white;
-  color: black;
 }
 
 .hand_info_board {
@@ -585,8 +581,6 @@ export default {
   top: 210px;
   left: 110px;
   font-size: 16px;
-  background-color: white;
-  color: black;
 }
 
 .east_player_board,
