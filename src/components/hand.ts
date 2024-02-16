@@ -12,7 +12,7 @@ import {
   Fu
 } from './game_constants.ts'
 import { Ruleset } from './rulesets.ts'
-import { NextWindMap, Wind } from './seat_constants.ts'
+import { NextWindMap, Wind, WindsOrder } from './seat_constants.ts'
 import { PlayerId, Players } from './players.ts'
 
 export const HandOutcomeEnum = Object.freeze({
@@ -84,8 +84,10 @@ export function RemoveUnusedFieldsForHandResults({
 }
 
 export function MaybeApplyRoundUpMangan(ruleset: Ruleset, results: HandResults): HandResults {
-  if ((ruleset.round_up_mangan) && (results.outcome != HandOutcomeEnum.DRAW) &&
-      ((results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60))
+  if (
+    ruleset.round_up_mangan &&
+    results.outcome != HandOutcomeEnum.DRAW &&
+    ((results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60))
   ) {
     results.han = PointsLadder.MANGAN
     results.fu = undefined

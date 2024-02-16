@@ -1,5 +1,5 @@
 import { Hand, HandResults } from './hand.ts'
-import { Winds } from './seat_constants.ts'
+import { Winds, WindsOrder } from './seat_constants.ts'
 import { Ruleset } from './rulesets.ts'
 import { PlayerId, Players } from './players.ts'
 
@@ -136,7 +136,7 @@ export class Game {
       hand: this.current_hand.Clone(),
       players: this.players.Clone(this.ruleset)
     }
-    console.log("Saving hand to log: ", hand_log)
+    console.log('Saving hand to log: ', hand_log)
     this.log.push(hand_log)
   }
 
@@ -166,9 +166,15 @@ export class Game {
     const player_total_points = this.players.TotalPoints()
     const onhold_riichi_sticks_points = this.current_hand.riichi_sticks * this.ruleset.riichi_cost
     const expected_total_points = this.ruleset.starting_points * this.ruleset.num_players
-    const check_passed = (player_total_points + onhold_riichi_sticks_points == expected_total_points)
+    const check_passed = player_total_points + onhold_riichi_sticks_points == expected_total_points
     if (!check_passed)
-    console.warn("total points check failed! player total points = ", player_total_points, " on hold riichi sticks points = ", onhold_riichi_sticks_points,
-      " expected total points = ", expected_total_points)
+      console.warn(
+        'total points check failed! player total points = ',
+        player_total_points,
+        ' on hold riichi sticks points = ',
+        onhold_riichi_sticks_points,
+        ' expected total points = ',
+        expected_total_points
+      )
   }
 }
