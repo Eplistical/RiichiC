@@ -159,7 +159,7 @@ export class Game {
     this.state = log_to_reset.state
     this.log = this.log.slice(0, log_index)
     // make a copy and save the current finished hand so that we are ready to move forward
-    this.SaveHandLog();
+    this.SaveHandLog()
     this.SanityCheckTotalPoints()
     return true
   }
