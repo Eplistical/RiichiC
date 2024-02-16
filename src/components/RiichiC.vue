@@ -225,11 +225,11 @@
     <el-collapse v-if="GameIsFinished">
       <el-collapse-item title="统计">
         <el-table :data="GameStatsBoard" style="width: 100%" stripe>
-          <el-table-column prop="player" label="玩家" />
+          <el-table-column fixed prop="player" label="玩家" />
           <el-table-column prop="points" label="点数" />
           <el-table-column prop="riichi" label="立直" />
-          <el-table-column prop="agari" label="和牌" />
-          <el-table-column prop="deal_in" label="放铳" />
+          <el-table-column prop="agari_with_over_mangan_agari" label="和牌(大和)" />
+          <el-table-column prop="deal_in_with_over_mangan_deal_in" label="放铳(大铳)" />
           <el-table-column prop="tenpai_on_draw" label="流局听牌" />
           <el-table-column
             prop="riichi_agari_rate"
@@ -246,8 +246,6 @@
             label="立直放铳"
             :formatter="(x) => x.riichi_deal_in_rate.toFixed(2)"
           />
-          <el-table-column prop="agari_over_mangan" label="满上大和" />
-          <el-table-column prop="deal_in_over_mangan" label="满上大铳" />
         </el-table>
       </el-collapse-item>
     </el-collapse>
@@ -388,6 +386,7 @@ export default {
             row[player_id] += `[铳]`
           }
         }
+        row
         board.push(row)
       }
       return board.reverse()
@@ -469,6 +468,8 @@ export default {
         stats.riichi_agari_rate = stats.riichi ? stats.riichi_agari / stats.riichi : 0.0
         stats.riichi_tsumo_rate = stats.riichi ? stats.riichi_tsumo / stats.riichi : 0.0
         stats.riichi_deal_in_rate = stats.riichi ? stats.riichi_deal_in / stats.riichi : 0.0
+        stats.agari_with_over_mangan_agari = `${stats.agari}(${stats.agari_over_mangan})`
+        stats.deal_in_with_over_mangan_deal_in = `${stats.deal_in}(${stats.deal_in_over_mangan})`
         Object.assign(row, stats)
         board.push(row)
       }
