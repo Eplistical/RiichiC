@@ -1,5 +1,5 @@
 import { Hand, HandResults } from './hand.ts'
-import { Winds} from './seat_constants.ts'
+import { Winds } from './seat_constants.ts'
 import { Ruleset } from './rulesets.ts'
 import { PlayerId, Players } from './players.ts'
 
