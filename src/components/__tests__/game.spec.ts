@@ -29,7 +29,7 @@ beforeEach(() => {
 
   hand_results = {
     outcome: undefined,
-    tenpai: new Set<PlayerId>(),
+    tenpai: [],
     winner: undefined,
     deal_in: undefined,
     han: undefined,
@@ -128,13 +128,13 @@ describe('Game FinishCurrentHand', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.WEST, Winds.EAST])
+      tenpai: [Winds.WEST, Winds.EAST]
     })
     expect(game.current_hand.IsFinished()).toEqual(true)
     expect(game.current_hand.results).toEqual(
       expect.objectContaining({
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.WEST, Winds.EAST])
+        tenpai: [Winds.WEST, Winds.EAST]
       })
     )
   })
@@ -192,7 +192,7 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.WEST])
+      tenpai: [Winds.WEST]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -218,7 +218,7 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.EAST])
+      tenpai: [Winds.EAST]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -356,7 +356,7 @@ describe('Game SetUpNextHandOrFinishGame', () => {
       game.StartCurrentHand()
       game.FinishCurrentHand({
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>()
+        tenpai: []
       })
       game.SetUpNextHandOrFinishGame()
     }
@@ -389,7 +389,7 @@ describe('Game SetUpNextHandOrFinishGame', () => {
       game.StartCurrentHand()
       game.FinishCurrentHand({
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>()
+        tenpai: []
       })
       game.SetUpNextHandOrFinishGame()
     }
@@ -438,7 +438,7 @@ describe('Game Finish', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>()
+      tenpai: []
     })
     game.Finish()
     expect(game.state).toEqual(GameState.FINISHED)
@@ -450,7 +450,7 @@ describe('Game Finish', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>()
+      tenpai: []
     })
     game.Finish()
     expect(game.state).toEqual(GameState.FINISHED)
@@ -503,7 +503,7 @@ describe('Game SaveHandLog', () => {
       game.PlayerRiichi(Winds.WEST)
       game.FinishCurrentHand({
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.WEST])
+        tenpai: [Winds.WEST]
       })
       game.SaveHandLog()
       game.SetUpNextHandOrFinishGame()
@@ -520,7 +520,7 @@ describe('Game SaveHandLog', () => {
         has_next_hand: true,
         results: {
           outcome: HandOutcomeEnum.DRAW,
-          tenpai: new Set<PlayerId>([Winds.WEST]),
+          tenpai: [Winds.WEST],
           winner: undefined,
           deal_in: undefined,
           han: undefined,

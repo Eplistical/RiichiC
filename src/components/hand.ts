@@ -41,7 +41,7 @@ export type PointsDelta = Record<PlayerId, number>
 
 export type HandResults = {
   outcome: string | null
-  tenpai?: Set<PlayerId>
+  tenpai?: PlayerId[]
   winner?: PlayerId
   deal_in?: PlayerId
   han?: number | string
@@ -88,7 +88,7 @@ export class Hand {
     clone_instance.has_next_hand = this.has_next_hand
     clone_instance.results.outcome = this.results.outcome
     if (this.results.tenpai) {
-      clone_instance.results.tenpai = new Set<PlayerId>(this.results.tenpai)
+      clone_instance.results.tenpai = [...this.results.tenpai]
     }
     if (this.results.winner) {
       clone_instance.results.winner = this.results.winner
@@ -189,7 +189,7 @@ export class Hand {
     let honba_increase = false
     if (this.results.outcome == HandOutcomeEnum.DRAW) {
       honba_increase = true
-      if (this.results.tenpai.has(dealer_id)) {
+      if (this.results.tenpai.includes(dealer_id)) {
         renchan =
           (!all_last && ruleset.dealer_tenpai_renchan) ||
           (all_last && ruleset.all_last_dealer_tenpai_renchan)
@@ -264,7 +264,7 @@ export class Hand {
     }
     if (results.outcome == HandOutcomeEnum.DRAW) {
       Object.assign(formalized_results, {
-        tenpai: new Set<PlayerId>(results.tenpai ? results.tenpai : [])
+        tenpai: (results.tenpai ? results.tenpai : [])
       })
     } else if (results.outcome == HandOutcomeEnum.TSUMO) {
       Object.assign(formalized_results, {
@@ -308,9 +308,8 @@ export class Hand {
     }
 
     if (results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
-      // when tenpai is null/undefined, does not count it as en error, count it as nobody tenpai instead
       for (const riichi_player of this.riichi) {
-        if (results.tenpai && !results.tenpai.has(riichi_player)) {
+        if (!results.tenpai || !results.tenpai.includes(riichi_player)) {
           return [false, `立直家未听牌: ${players.GetPlayer(riichi_player).name}`]
         }
       }
@@ -508,16 +507,16 @@ export class Hand {
   ): PointsDelta {
     const tenpai = hand_results.tenpai
     const num_players = players.NumPlayers()
-    const num_tenpai = tenpai ? tenpai.size : 0
+    const num_tenpai = tenpai ? tenpai.length : 0
     const num_noten = num_players - num_tenpai
-    if (tenpai === undefined || num_tenpai === 0 || num_tenpai === num_players) {
+    if (!tenpai || num_tenpai === 0 || num_tenpai === num_players) {
       return {}
     }
     const tenpai_delta = ruleset.draw_tenpai_points / num_tenpai
     const noten_delta = -ruleset.draw_tenpai_points / num_noten
     let points_delta = {}
     for (const [player_id, player] of Object.entries(players.GetPlayerMap())) {
-      if (tenpai.has(player_id)) {
+      if (tenpai.includes(player_id)) {
         points_delta[player_id] = tenpai_delta
       } else {
         points_delta[player_id] = noten_delta

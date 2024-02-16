@@ -366,7 +366,7 @@ export default {
           if (hand.riichi.has(player_id)) {
             row[player_id] += `[立]`
           }
-          if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai.has(player_id)) {
+          if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai.includes(player_id)) {
             row[player_id] += `[听]`
           }
           if (
@@ -428,7 +428,7 @@ export default {
           if (
             hand.results.outcome == HandOutcomeEnum.DRAW &&
             hand.results.tenpai &&
-            hand.results.tenpai.has(player_id)
+            hand.results.tenpai.include(player_id)
           ) {
             stats.tenpai_on_draw += 1
           }

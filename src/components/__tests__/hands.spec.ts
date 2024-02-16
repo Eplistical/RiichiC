@@ -37,7 +37,7 @@ beforeEach(() => {
 
   hand_results = {
     outcome: undefined,
-    tenpai: new Set<PlayerId>(),
+    tenpai: [],
     winner: undefined,
     deal_in: undefined,
     han: undefined,
@@ -198,7 +198,7 @@ describe('Hand Set Up Next Hand', () => {
       riichi_sticks: 0,
       results: {
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.EAST])
+        tenpai: [Winds.EAST]
       }
     })
     const [next_hand, players_should_shift_seats] = hand.SetUpNextHand(players, ruleset)
@@ -222,7 +222,7 @@ describe('Hand Set Up Next Hand', () => {
       riichi_sticks: 2,
       results: {
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.SOUTH])
+        tenpai: [Winds.SOUTH]
       }
     })
     const [next_hand, players_should_shift_seats] = hand.SetUpNextHand(players, ruleset)
@@ -379,7 +379,7 @@ describe('Hand Set Up Next Hand', () => {
       riichi_sticks: 3,
       results: {
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.EAST])
+        tenpai: [Winds.EAST]
       }
     })
 
@@ -412,7 +412,7 @@ describe('Hand Set Up Next Hand', () => {
       riichi_sticks: 0,
       results: {
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.WEST, Winds.SOUTH, Winds.NORTH])
+        tenpai: [Winds.WEST, Winds.SOUTH, Winds.NORTH]
       }
     })
 
@@ -588,7 +588,7 @@ describe('Hand Finish', () => {
       riichi: new Set<PlayerId>([Winds.EAST, Winds.NORTH]),
       results: {
         outcome: HandOutcomeEnum.DRAW,
-        tenpai: new Set<PlayerId>([Winds.EAST])
+        tenpai: [Winds.EAST]
       }
     })
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
@@ -766,7 +766,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([])
+      tenpai: [],
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -788,7 +788,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>(tenpai)
+      tenpai: tenpai,
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -816,7 +816,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>(tenpai)
+      tenpai: tenpai,
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -842,7 +842,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>(tenpai)
+      tenpai: tenpai,
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -863,7 +863,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+      tenpai: [Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -881,7 +881,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.EAST])
+      tenpai: [Winds.EAST]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -904,7 +904,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.EAST])
+      tenpai: [Winds.EAST]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -927,7 +927,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
-      tenpai: new Set<PlayerId>([Winds.EAST])
+      tenpai: [Winds.EAST]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
@@ -1840,7 +1840,7 @@ describe('Hand Clone', () => {
         deal_in: Winds.WEST,
         han: 3,
         fu: 20,
-        tenpai: new Set<PlayerId>([Winds.SOUTH, Winds.EAST])
+        tenpai: [Winds.SOUTH, Winds.EAST]
       }
     })
     const clone = hand.Clone()
