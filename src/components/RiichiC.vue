@@ -227,7 +227,6 @@
         <el-table :data="GameStatsBoard" style="width: 100%" stripe>
           <el-table-column prop="player" label="玩家" />
           <el-table-column prop="points" label="点数" />
-          <el-table-column prop="rank" label="排名" />
           <el-table-column prop="riichi" label="立直" />
           <el-table-column prop="agari" label="和牌" />
           <el-table-column prop="deal_in" label="放铳" />
@@ -271,8 +270,6 @@ import { ref } from 'vue'
 import {
   Winds,
   WindsOrder,
-  NextWindMap,
-  LastWindMap,
   WindsDisplayTextMap
 } from './seat_constants.ts'
 import {
@@ -287,13 +284,9 @@ import {
   PointsLadderBriefDisplayMap,
   AllowedHans,
   AllowedFus,
-  RonPointsDealer,
-  RonPointsNonDealer,
-  TsumoPointsDealer,
-  TsumoPointsNonDealer
+  NumberDisplayMap,
 } from './game_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
-import { Hand, HandState } from './hand.ts'
 import { Game, GameState } from './game.ts'
 
 export default {
@@ -409,7 +402,6 @@ export default {
       // scan log to compute stats
       for (const player_id of WindsOrder) {
         let row = {}
-        row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap.wind_character[player_id]}起]`
         row.points = this.GetPlayerPoints(player_id)
         // find players rank from current hand
         if (this.game.players) {
@@ -424,6 +416,7 @@ export default {
         } else {
           row.rank = -1
         }
+        row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap.wind_character[player_id]}起][${NumberDisplayMap[row.rank]}位]`
         // loop log to compute game stats
         let stats = {
           riichi: 0,

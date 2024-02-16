@@ -22,6 +22,13 @@ export const PointsLadderBriefDisplayMap = Object.freeze({
   [PointsLadder.YAKUMAN]: '役'
 })
 
+export const NumberDisplayMap = Object.freeze({
+  [1]: "一",
+  [2]: "二",
+  [3]: "三",
+  [4]: "四",
+})
+
 export type Han = number | string
 export type Fu = number | undefined
 
