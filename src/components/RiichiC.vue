@@ -506,7 +506,9 @@ export default {
       if (!confirm(`确定结束？`)) {
         return
       }
-      this.game.Finish()
+      if (this.game.Finish()) {
+        this.hand_results_form = {}
+      }
     },
     HandlePlayerRiichi(player_id, riichi) {
       console.log(`HandlePlayerRiichi: ${player_id}, ${riichi}`)

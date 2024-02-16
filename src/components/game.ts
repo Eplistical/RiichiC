@@ -62,10 +62,10 @@ export class Game {
     this.current_hand.PlayerUnRiichi(player_id, this.players, this.ruleset)
   }
 
-  Finish() {
+  Finish(): boolean {
     if (this.state != GameState.ON_GOING) {
       console.warn(`cannot finish a game that is not on going`)
-      return
+      return false
     }
     if (!this.current_hand.IsFinished()) {
       console.warn(
@@ -74,6 +74,7 @@ export class Game {
       this.current_hand.Abandon(this.players, this.ruleset)
     }
     this.state = GameState.FINISHED
+    return true
   }
 
   StartCurrentHand() {
