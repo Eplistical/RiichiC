@@ -1,6 +1,5 @@
 import {
   PointsLadder,
-  PointsLadderDisplayMap,
   AllowedHans,
   AllowedFus,
   PointsMapKey,
@@ -93,44 +92,6 @@ export function MaybeApplyRoundUpMangan(ruleset: Ruleset, results: HandResults):
     results.fu = undefined
   }
   return results
-}
-
-export function GetPointMapKey(han: Han, fu: Fu, ruleset: Ruleset): PointsMapKey {
-  if (typeof han == 'string') {
-    if (PointsLadder.hasOwnProperty(han)) {
-      return han
-    }
-  } else {
-    if (han < 3) {
-      return [han, fu]
-    } else if (han == 3) {
-      if (fu >= 70) {
-        return PointsLadder.MANGAN
-      } else if (fu == 60 && ruleset.round_up_mangan) {
-        return PointsLadder.MANGAN
-      } else {
-        return [han, fu]
-      }
-    } else if (han == 4) {
-      if (fu >= 40) {
-        return PointsLadder.MANGAN
-      } else if (fu == 30 && ruleset.round_up_mangan) {
-        return PointsLadder.MANGAN
-      } else {
-        return [han, fu]
-      }
-    } else if (han == 5) {
-      return PointsLadder.MANGAN
-    } else if (han < 8) {
-      return PointsLadder.HANEMAN
-    } else if (han < 11) {
-      return PointsLadder.BAIMAN
-    } else if (han < 13) {
-      return PointsLadder.SANBAIMAN
-    } else {
-      return PointsLadder.YAKUMAN
-    }
-  }
 }
 
 interface HandInterface {
@@ -364,7 +325,7 @@ export class Hand {
       ) {
         return [false, `符数错误: ${this.results.fu}`]
       }
-      const key = GetPointMapKey(this.results.han, this.results.fu, ruleset)
+      const key = this.GetPointMapKey(this.results.han, this.results.fu, ruleset)
       if (!RonPointsNonDealer.hasOwnProperty(key)) {
         return [
           false,

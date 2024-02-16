@@ -1,7 +1,6 @@
 import { Ruleset } from './rulesets.ts'
 import { Seat, Winds, NextWindMap, LastWindMap, WindsOrder } from './seat_constants.ts'
-import { PointsDelta } from './hands.ts'
-import { pl } from 'element-plus/es/locale/index.js'
+import { PointsDelta } from './hand.ts'
 
 // Use beginning seat as a player's ID
 export type PlayerId = Seat

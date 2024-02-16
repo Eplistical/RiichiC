@@ -267,11 +267,7 @@
 <script>
 import { ElButton } from 'element-plus'
 import { ref } from 'vue'
-import {
-  Winds,
-  WindsOrder,
-  WindsDisplayTextMap
-} from './seat_constants.ts'
+import { Winds, WindsOrder, WindsDisplayTextMap } from './seat_constants.ts'
 import {
   HandOutcomeEnum,
   RemoveUnusedFieldsForHandResults,
@@ -284,7 +280,7 @@ import {
   PointsLadderBriefDisplayMap,
   AllowedHans,
   AllowedFus,
-  NumberDisplayMap,
+  NumberDisplayMap
 } from './game_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game, GameState } from './game.ts'
