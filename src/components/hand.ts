@@ -11,7 +11,7 @@ import {
   Fu
 } from './game_constants.ts'
 import { Ruleset } from './rulesets.ts'
-import { NextWindMap, WindType} from './seat_constants.ts'
+import { NextWindMap, WindType } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 
 export const HandOutcomeEnum = Object.freeze({
