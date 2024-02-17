@@ -1,44 +1,45 @@
 <script setup>
-import { Game } from './game';
-import { computed } from 'vue';
-import { PlayerIdsInOrder } from './players';
+import { Game } from './game'
+import { computed } from 'vue'
+import { PlayerIdsInOrder } from './players'
 
 const props = defineProps({
-    game: Game,
+  game: Game
 })
 const riichi_players = defineModel()
 
 const GameIsOnGoing = computed(() => {
-    return props.game.IsOnGoing()
+  return props.game.IsOnGoing()
 })
 
-const GameIsFinished = computed (() => {
-    return props.game.IsFinished()
+const GameIsFinished = computed(() => {
+  return props.game.IsFinished()
 })
 
 function HandlePlayerRiichi(player_id, riichi) {
-    console.log(`HandlePlayerRiichi: ${player_id}, ${riichi}`)
-    if (riichi == true) {
+  console.log(`HandlePlayerRiichi: ${player_id}, ${riichi}`)
+  if (riichi == true) {
     props.game.PlayerRiichi(player_id)
-    } else {
+  } else {
     props.game.PlayerUnRiichi(player_id)
-    }
+  }
 }
 </script>
 
 <template>
-    <div class="hand_info_board">
-        <HandInfoBoard :hand="game.current_hand" :game_finished="GameIsFinished"/>
-    </div>
+  <div class="hand_info_board">
+    <HandInfoBoard :hand="game.current_hand" :game_finished="GameIsFinished" />
+  </div>
 
-    <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
-        <PlayerBoard v-model="riichi_players"
-            :player_id="player_id" 
-            :player="game.players.GetPlayer(player_id)" 
-            :riichi_disabled="!GameIsOnGoing"
-            @riichi="HandlePlayerRiichi(player_id, $event)"
-            />
-    </div>
+  <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
+    <PlayerBoard
+      v-model="riichi_players"
+      :player_id="player_id"
+      :player="game.players.GetPlayer(player_id)"
+      :riichi_disabled="!GameIsOnGoing"
+      @riichi="HandlePlayerRiichi(player_id, $event)"
+    />
+  </div>
 </template>
 
 <style scoped>

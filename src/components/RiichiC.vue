@@ -66,7 +66,7 @@ const riichi_players = ref([])
     <div v-else>
       <!-- ongoing & finished game view -->
       <div class="gameboard">
-        <GameBoard :game="game" v-model="hand_results_form.riichi_players"/>
+        <GameBoard :game="game" v-model="hand_results_form.riichi_players" />
       </div>
       <el-divider />
     </div>
@@ -286,7 +286,7 @@ export default {
       PointsLadderDisplayMap: PointsLadderDisplayMap,
       PointsLadderBriefDisplayMap: PointsLadderBriefDisplayMap,
       AllowedHans: AllowedHans,
-      AllowedFus: AllowedFus,
+      AllowedFus: AllowedFus
     }
   },
   computed: {
