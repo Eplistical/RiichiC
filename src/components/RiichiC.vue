@@ -431,7 +431,7 @@ export default {
           if (
             hand.results.outcome == HandOutcomeEnum.DRAW &&
             hand.results.tenpai &&
-            hand.results.tenpai.include(player_id)
+            hand.results.tenpai.includes(player_id)
           ) {
             stats.tenpai_on_draw += 1
           }
