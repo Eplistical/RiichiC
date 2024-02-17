@@ -20,21 +20,17 @@ const emit = defineEmits(['startGame', 'finishGame', 'newGame'])
 </script>
 
 <template>
-  <div>
-    <div v-if="game.IsNotStarted()">
-      <el-button type="primary" @click="$emit('startGame', $event)">{{
-        StartGameButtonText
-      }}</el-button>
-    </div>
-    <div v-else-if="game.IsOnGoing()">
-      <el-button type="danger" @click="$emit('finishGame', $event)">{{
-        FinishGameButtonText
-      }}</el-button>
-    </div>
-    <div v-else-if="game.IsFinished()">
-      <el-button type="primary" @click="$emit('newGame', $event)">{{
-        NewGameButtonText
-      }}</el-button>
-    </div>
+  <div v-if="game.IsNotStarted()">
+    <el-button type="primary" @click="$emit('startGame', $event)">{{
+      StartGameButtonText
+    }}</el-button>
+  </div>
+  <div v-else-if="game.IsOnGoing()">
+    <el-button type="danger" @click="$emit('finishGame', $event)">{{
+      FinishGameButtonText
+    }}</el-button>
+  </div>
+  <div v-else-if="game.IsFinished()">
+    <el-button type="primary" @click="$emit('newGame', $event)">{{ NewGameButtonText }}</el-button>
   </div>
 </template>

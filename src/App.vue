@@ -8,6 +8,9 @@ import PlayerNameEntry from './components/PlayerNameEntry.vue'
 import RuleToggleEntry from './components/RuleToggleEntry.vue'
 import RuleNumberEntry from './components/RuleNumberEntry.vue'
 import PlayerNameConfigurationBoard from './components/PlayerNameConfigurationBoard.vue'
+import GameLogBoard from './components/GameLogBoard.vue'
+import GameStatsBoard from './components/GameStatsBoard.vue'
+import HandResultsInputBoard from './components/HandResultsInputBoard.vue'
 </script>
 
 <template>

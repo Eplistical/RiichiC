@@ -22,6 +22,36 @@ export const PointsLadderBriefDisplayMap = Object.freeze({
   [PointsLadder.YAKUMAN]: '役'
 })
 
+export enum Actions {
+  RIICHI,
+  TENPAI,
+  AGARI,
+  DEAL_IN,
+  TSUMO,
+  RON,
+  DRAW
+}
+
+export const ActionDisplayMap = Object.freeze({
+  [Actions.RIICHI]: '立直',
+  [Actions.TENPAI]: '听牌',
+  [Actions.AGARI]: '和牌',
+  [Actions.DEAL_IN]: '放铳',
+  [Actions.TSUMO]: '自摸',
+  [Actions.RON]: '荣和',
+  [Actions.DRAW]: '流局'
+})
+
+export const ActionBriefDisplayMap = Object.freeze({
+  [Actions.RIICHI]: '立',
+  [Actions.TENPAI]: '听',
+  [Actions.AGARI]: '和',
+  [Actions.DEAL_IN]: '铳',
+  [Actions.TSUMO]: '摸',
+  [Actions.RON]: '荣',
+  [Actions.DRAW]: '流'
+})
+
 export const NumberDisplayMap = Object.freeze({
   [-1]: '無',
   [0]: '零',

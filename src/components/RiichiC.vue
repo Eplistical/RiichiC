@@ -124,30 +124,9 @@
       </el-collapse-item>
     </el-collapse>
 
-    <el-collapse v-if="!GameIsNotStarted">
-      <el-collapse-item title="日志">
-        <el-table :data="GameLogBoard" style="width: 100%" stripe>
-          <el-table-column fixed prop="hand_signature" label="场" />
-          <el-table-column prop="start_game_riichi_sticks" label="开局供托" />
-          <el-table-column prop="results_summary" label="结局" />
-          <el-table-column
-            v-for="player_id in PlayerIdsInOrder"
-            :prop="player_id"
-            :label="GetPlayerName(player_id)"
-          />
-          <el-table-column label="操作">
-            <template #default="scope">
-              <el-button
-                size="small"
-                type="warning"
-                @click="HandleResetGameLog(scope.$index, scope.row)"
-                >重置</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-collapse-item>
-    </el-collapse>
+    <div v-if="!GameIsNotStarted">
+      <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
+    </div>
 
     <el-collapse v-if="GameIsFinished">
       <el-collapse-item title="统计">

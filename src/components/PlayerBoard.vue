@@ -34,19 +34,21 @@ const RiichiText = computed(() => {
 </script>
 
 <template>
-  <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
-  <div>
-    {{ PlayerPoints }}
+  <div :class="IsDealer ? 'dealer_board' : 'non_dealer_board'">
+    <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
+    <div>
+      {{ PlayerPoints }}
+    </div>
+    <el-checkbox-group fill="#f7bc45" v-model="riichi_players">
+      <el-checkbox-button
+        :label="player_id"
+        :disabled="riichi_disabled"
+        @change="$emit('riichi', $event)"
+      >
+        {{ RiichiText }}
+      </el-checkbox-button>
+    </el-checkbox-group>
   </div>
-  <el-checkbox-group fill="#f7bc45" v-model="riichi_players">
-    <el-checkbox-button
-      :label="player_id"
-      :disabled="riichi_disabled"
-      @change="$emit('riichi', $event)"
-    >
-      {{ RiichiText }}
-    </el-checkbox-button>
-  </el-checkbox-group>
 </template>
 
 <style scoped>
