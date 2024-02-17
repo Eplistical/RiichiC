@@ -39,6 +39,13 @@ const WinnerSelectionColor = ref('#289e20')
 const DealInSelectionColor = ref('#e86161')
 
 const emit = defineEmits(['submit'])
+
+function HandleWinnerSelectionChange(player_id) {
+  // when winner selection changes, make sure the same player is un-selected from deal-in
+  if (results_form.value.deal_in && results_form.value.deal_in == player_id) {
+    delete results_form.value.deal_in
+  }
+}
 </script>
 
 <template>
@@ -74,6 +81,7 @@ const emit = defineEmits(['submit'])
             :fill="WinnerSelectionColor"
             v-model="results_form.winner"
             :multi_selection="false"
+            @change="HandleWinnerSelectionChange"
           />
         </el-form-item>
 
@@ -83,6 +91,7 @@ const emit = defineEmits(['submit'])
             :fill="DealInSelectionColor"
             v-model="results_form.deal_in"
             :multi_selection="false"
+            :disabled_options="[results_form.winner]"
           />
         </el-form-item>
 
