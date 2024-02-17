@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="screen_div">
+  <div class="app_board">
     <!-- unstartd game view -->
     <div v-if="GameIsNotStarted">
       <div class="player_name_configuration_board">
@@ -128,33 +128,9 @@
       <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
     </div>
 
-    <el-collapse v-if="GameIsFinished">
-      <el-collapse-item title="统计">
-        <el-table :data="GameStatsBoard" style="width: 100%" stripe>
-          <el-table-column fixed prop="player" label="玩家" />
-          <el-table-column prop="points" label="点数" />
-          <el-table-column prop="riichi" label="立直" />
-          <el-table-column prop="agari_with_over_mangan_agari" label="和牌(大和)" />
-          <el-table-column prop="deal_in_with_over_mangan_deal_in" label="放铳(大铳)" />
-          <el-table-column prop="tenpai_on_draw" label="流局听牌" />
-          <el-table-column
-            prop="riichi_agari_rate"
-            label="立直和牌"
-            :formatter="(x) => x.riichi_agari_rate.toFixed(2)"
-          />
-          <el-table-column
-            prop="riichi_tsumo_rate"
-            label="立直自摸"
-            :formatter="(x) => x.riichi_tsumo_rate.toFixed(2)"
-          />
-          <el-table-column
-            prop="riichi_deal_in_rate"
-            label="立直放铳"
-            :formatter="(x) => x.riichi_deal_in_rate.toFixed(2)"
-          />
-        </el-table>
-      </el-collapse-item>
-    </el-collapse>
+    <div v-if="GameIsFinished">
+      <GameStatsBoard :game="game" @resetLog="HandleResetGameLog" />
+    </div>
 
     <el-divider />
 
@@ -461,7 +437,7 @@ export default {
 </script>
 
 <style scoped>
-.screen_div {
+.app_board {
   position: absolute;
   width: 100%;
   height: 100%;
