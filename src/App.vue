@@ -11,6 +11,7 @@ import PlayerNameConfigurationBoard from './components/PlayerNameConfigurationBo
 import GameLogBoard from './components/GameLogBoard.vue'
 import GameStatsBoard from './components/GameStatsBoard.vue'
 import HandResultsInputBoard from './components/HandResultsInputBoard.vue'
+import PlayersSelection from './components/PlayersSelection.vue'
 </script>
 
 <template>

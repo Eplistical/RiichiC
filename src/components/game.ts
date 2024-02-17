@@ -66,6 +66,18 @@ export class Game {
     return this.state == GameState.FINISHED
   }
 
+  GetPlayerName(player_id: PlayerId) {
+    return this.players.GetPlayer(player_id).name
+  }
+
+  GetPlayerCuurentWind(player_id: PlayerId) {
+    return this.players.GetPlayer(player_id).current_wind
+  }
+
+  GetPlayerPoints(player_id: PlayerId) {
+    return this.players.GetPlayer(player_id).points
+  }
+
   PlayerRiichi(player_id: PlayerId) {
     this.current_hand.PlayerRiichi(player_id, this.players, this.ruleset)
   }

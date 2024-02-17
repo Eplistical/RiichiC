@@ -2,7 +2,7 @@
 
 <template>
   <div class="app_board">
-    <!-- unstartd game view -->
+    <!-- Unstartd Game -->
     <div v-if="GameIsNotStarted">
       <div class="player_name_configuration_board">
         <PlayerNameConfigurationBoard v-model="player_names" :num_players="ruleset.num_players" />
@@ -12,128 +12,35 @@
         <RuleSetConfigurationBoard v-model="ruleset" />
       </div>
     </div>
+
+    <!-- On-going & Finished Game -->
     <div v-else>
-      <!-- ongoing & finished game view -->
       <div class="gameboard">
         <GameBoard :game="game" v-model="hand_results_form.riichi_players" />
       </div>
+
       <el-divider />
-    </div>
 
-    <el-collapse v-if="GameIsOnGoing">
-      <el-collapse-item title="对局结果">
-        <!-- on-going game view -->
-        <div v-if="GameIsOnGoing">
-          <el-form :model="hand_results_form">
-            <el-form-item label="">
-              <el-radio-group
-                v-for="outcome in HandOutcomeEnum"
-                v-model="hand_results_form.outcome"
-                size="default"
-              >
-                <el-radio-button :label="outcome">
-                  {{ HandOutcomeEnumDisplayTextMap[outcome] }}
-                </el-radio-button>
-              </el-radio-group>
-            </el-form-item>
+      <div class="hand_results_input_board" v-if="GameIsOnGoing">
+        <HandResultsInputBoard
+          v-model="hand_results_form"
+          :game="game"
+          @submit="SubmitHandResultsForm"
+        />
+      </div>
 
-            <el-form-item
-              label="听牌"
-              v-if="hand_results_form.outcome == HandOutcomeEnum.DRAW"
-              size="default"
-            >
-              <el-checkbox-group fill="#289e20" v-model="hand_results_form.tenpai">
-                <el-checkbox-button v-for="player_id in PlayerIdsInOrder" :label="player_id">
-                  {{ GetPlayerName(player_id) }}
-                </el-checkbox-button>
-              </el-checkbox-group>
-            </el-form-item>
+      <div class="game_log_board">
+        <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
+      </div>
 
-            <el-form-item
-              label="和牌"
-              v-if="
-                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-                hand_results_form.outcome == HandOutcomeEnum.RON
-              "
-            >
-              <el-radio-group
-                fill="#289e20"
-                v-for="player_id in PlayerIdsInOrder"
-                v-model="hand_results_form.winner"
-                size="default"
-              >
-                <el-radio-button :label="player_id">
-                  {{ GetPlayerName(player_id) }}
-                </el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-
-            <el-form-item label="点炮" v-if="hand_results_form.outcome == HandOutcomeEnum.RON">
-              <el-radio-group
-                fill="#e86161"
-                v-for="player_id in PlayerIdsInOrder"
-                v-model="hand_results_form.deal_in"
-                size="default"
-                :disabled="player_id == hand_results_form.winner"
-              >
-                <el-radio-button :label="player_id">
-                  {{ GetPlayerName(player_id) }}
-                </el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-
-            <el-form-item
-              label="番"
-              v-if="
-                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-                hand_results_form.outcome == HandOutcomeEnum.RON
-              "
-            >
-              <el-radio-group
-                v-for="han in AllowedHans"
-                v-model="hand_results_form.han"
-                size="default"
-              >
-                <el-radio-button :label="han">{{
-                  han in PointsLadderDisplayMap ? PointsLadderBriefDisplayMap[han] : han
-                }}</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item
-              label="符"
-              v-if="
-                hand_results_form.outcome == HandOutcomeEnum.TSUMO ||
-                hand_results_form.outcome == HandOutcomeEnum.RON
-              "
-            >
-              <el-radio-group
-                v-for="fu in AllowedFus[hand_results_form.han]"
-                v-model="hand_results_form.fu"
-                size="default"
-                :disabled="hand_results_form.han in PointsLadderDisplayMap"
-              >
-                <el-radio-button :label="fu" />
-              </el-radio-group>
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" @click="SubmitHandResultsForm">提交</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
-
-    <div v-if="!GameIsNotStarted">
-      <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
-    </div>
-
-    <div v-if="GameIsFinished">
-      <GameStatsBoard :game="game" @resetLog="HandleResetGameLog" />
+      <div class="game_stats_board" v-if="GameIsFinished">
+        <GameStatsBoard :game="game" />
+      </div>
     </div>
 
     <el-divider />
 
+    <!-- Game control buttons -->
     <div class="game_control_board">
       <GameControlBoard
         :game="game"
@@ -162,6 +69,7 @@ import { PlayerIdsInOrder } from './players.ts'
 import { Game, GameState } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
+import HandResultsInputBoard from './HandResultsInputBoard.vue'
 
 export default {
   name: 'RiichiC',
