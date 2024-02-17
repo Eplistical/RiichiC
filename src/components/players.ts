@@ -7,7 +7,7 @@ export type PlayerId = WindType
 export const PlayerIdsInOrder = [...WindsInOrder]
 
 // Class for a single player
-class Player {
+export class Player {
   name: string
   current_wind: WindType
   points: number

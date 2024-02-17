@@ -1,3 +1,8 @@
+<script setup>
+import { ref } from 'vue'
+const rrr = ref(false)
+const riichi_players = ref([])
+</script>
 <template>
   <div class="screen_div">
     <!-- unstartd game view -->
@@ -58,37 +63,10 @@
         </el-col>
       </el-row>
     </div>
-
-    <!-- ongoing & finished game view -->
     <div v-else>
+      <!-- ongoing & finished game view -->
       <div class="gameboard">
-        <div class="hand_info_board">
-          <div>{{ CurrentHandText }}</div>
-          <div>{{ RiichiSticksText }}</div>
-          <div v-if="GameIsFinished">[游戏已结束]</div>
-        </div>
-
-        <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
-          <div :class="IsDealer(player_id) ? `dealer_player_board` : `non_dealer_player_board`">
-            <div>
-              {{ GetPlayerName(player_id) }}[{{
-                WindsDisplayTextMap[GetPlayerCurrentWind(player_id)]
-              }}]
-            </div>
-            <div>
-              {{ GetPlayerPoints(player_id) }}
-            </div>
-          </div>
-          <el-checkbox-group fill="#f7bc45" v-model="hand_results_form.riichi">
-            <el-checkbox-button
-              :label="player_id"
-              @change="HandlePlayerRiichi(player_id, $event)"
-              :disabled="!GameIsOnGoing"
-            >
-              立直
-            </el-checkbox-button>
-          </el-checkbox-group>
-        </div>
+        <GameBoard :game="game" v-model="hand_results_form.riichi_players"/>
       </div>
       <el-divider />
     </div>
@@ -308,7 +286,7 @@ export default {
       PointsLadderDisplayMap: PointsLadderDisplayMap,
       PointsLadderBriefDisplayMap: PointsLadderBriefDisplayMap,
       AllowedHans: AllowedHans,
-      AllowedFus: AllowedFus
+      AllowedFus: AllowedFus,
     }
   },
   computed: {
@@ -551,7 +529,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .screen_div {
   position: absolute;
   width: 100%;
@@ -577,56 +555,5 @@ export default {
   margin-bottom: 30px;
   background-color: white;
   color: black;
-}
-
-.hand_info_board {
-  position: absolute;
-  border-style: solid;
-  text-align: center;
-  width: 100px;
-  height: 60px;
-  top: 210px;
-  left: 110px;
-  font-size: 16px;
-}
-
-.east_player_board,
-.south_player_board,
-.west_player_board,
-.north_player_board {
-  position: absolute;
-  text-align: center;
-  width: 100px;
-  height: 100px;
-  font-size: 20px;
-}
-
-.dealer_player_board {
-  color: #cc0000;
-}
-
-.non_dealer_player_board {
-  color: #00589a;
-}
-
-.east_player_board {
-  transform: rotate(0deg);
-  bottom: 0;
-  left: 110px;
-}
-.south_player_board {
-  transform: rotate(270deg);
-  right: 0;
-  bottom: 190px;
-}
-.west_player_board {
-  transform: rotate(180deg);
-  top: 0;
-  left: 110px;
-}
-.north_player_board {
-  transform: rotate(90deg);
-  left: 0;
-  bottom: 190px;
 }
 </style>

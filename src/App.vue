@@ -1,6 +1,9 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import RiichiC from './components/RiichiC.vue'
+import PlayerBoard from './components/PlayerBoard.vue'
+import HandInfoBoard from './components/HandInfoBoard.vue'
+import GameBoard from './components/GameBoard.vue'
 </script>
 
 <template>

@@ -54,6 +54,18 @@ export class Game {
     this.state = GameState.ON_GOING
   }
 
+  IsOnGoing() {
+    return this.state == GameState.ON_GOING
+  }
+
+  IsNotStarted() {
+    return this.state == GameState.NOT_STARTED
+  }
+
+  IsFinished() {
+    return this.state == GameState.FINISHED
+  }
+
   PlayerRiichi(player_id: PlayerId) {
     this.current_hand.PlayerRiichi(player_id, this.players, this.ruleset)
   }
