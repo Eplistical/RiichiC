@@ -1,17 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import RiichiC from './components/RiichiC.vue'
-import PlayerBoard from './components/PlayerBoard.vue'
-import HandInfoBoard from './components/HandInfoBoard.vue'
-import GameBoard from './components/GameBoard.vue'
-import PlayerNameEntry from './components/PlayerNameEntry.vue'
-import RuleToggleEntry from './components/RuleToggleEntry.vue'
-import RuleNumberEntry from './components/RuleNumberEntry.vue'
-import PlayerNameConfigurationBoard from './components/PlayerNameConfigurationBoard.vue'
-import GameLogBoard from './components/GameLogBoard.vue'
-import GameStatsBoard from './components/GameStatsBoard.vue'
-import HandResultsInputBoard from './components/HandResultsInputBoard.vue'
-import PlayersSelection from './components/PlayersSelection.vue'
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
