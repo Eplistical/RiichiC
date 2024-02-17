@@ -1,9 +1,9 @@
 import { beforeEach, describe, it, expect } from 'vitest'
 
-import { Winds, WindsOrder } from '../seat_constants.ts'
+import { Winds } from '../seat_constants.ts'
 import { Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
-import { PlayerId, Players } from '../players.ts'
+import { PlayerId, PlayerIdsInOrder, Players } from '../players.ts'
 import { PointsLadder, RonPointsDealer } from '../game_constants.ts'
 
 let ruleset: Ruleset
@@ -817,7 +817,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       expect(players.GetPlayer(player_id).points).toEqual(25000)
     }
     expect(hand.results).toEqual(hand_results)
@@ -839,7 +839,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (tenpai.includes(player_id)) {
         expect(players.GetPlayer(player_id).points).toEqual(28000)
       } else {
@@ -867,7 +867,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (tenpai.includes(player_id)) {
         expect(players.GetPlayer(player_id).points).toEqual(26500)
       } else {
@@ -893,7 +893,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (tenpai.includes(player_id)) {
         expect(players.GetPlayer(player_id).points).toEqual(26000)
       } else {
@@ -914,7 +914,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       expect(players.GetPlayer(player_id).points).toEqual(25000)
     }
     expect(hand.results).toEqual(hand_results)
@@ -932,7 +932,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == Winds.EAST) {
         expect(players.GetPlayer(player_id).points).toEqual(28000)
       } else {
@@ -955,7 +955,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == Winds.EAST) {
         expect(players.GetPlayer(player_id).points).toEqual(28000)
       } else {
@@ -978,7 +978,7 @@ describe('Hand Finish Applies Points Delta When Draw', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == Winds.EAST) {
         expect(players.GetPlayer(player_id).points).toEqual(31000)
       } else {
@@ -1039,7 +1039,7 @@ describe.each([{ deal_in: Winds.SOUTH }, { deal_in: Winds.WEST }, { deal_in: Win
       }
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
-      for (const player_id of WindsOrder) {
+      for (const player_id of PlayerIdsInOrder) {
         if (player_id == Winds.EAST) {
           expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
         } else if (player_id == deal_in) {
@@ -1069,7 +1069,7 @@ describe.each([{ deal_in: Winds.SOUTH }, { deal_in: Winds.WEST }, { deal_in: Win
       }
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
-      for (const player_id of WindsOrder) {
+      for (const player_id of PlayerIdsInOrder) {
         if (player_id == Winds.EAST) {
           expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
         } else if (player_id == deal_in) {
@@ -1123,7 +1123,7 @@ describe.each([{ deal_in: Winds.SOUTH }, { deal_in: Winds.WEST }, { deal_in: Win
         }
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           if (player_id == Winds.EAST) {
             expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
           } else if (player_id == deal_in) {
@@ -1188,7 +1188,7 @@ describe.each([{ deal_in: Winds.SOUTH }, { deal_in: Winds.WEST }, { deal_in: Win
         }
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           if (player_id == Winds.EAST) {
             expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_winner_delta)
           } else if (player_id == deal_in) {
@@ -1252,7 +1252,7 @@ describe('Hand Finish Applies Points Delta When Dealer Tsumo', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    expect(players.GetPlayers(WindsOrder).map((p) => p.points)).toEqual([
+    expect(players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
       ruleset.starting_points + expected_delta * 3,
       ruleset.starting_points - expected_delta,
       ruleset.starting_points - expected_delta,
@@ -1278,7 +1278,7 @@ describe('Hand Finish Applies Points Delta When Dealer Tsumo', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    expect(players.GetPlayers(WindsOrder).map((p) => p.points)).toEqual([
+    expect(players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
       ruleset.starting_points + expected_delta * 3,
       ruleset.starting_points - expected_delta,
       ruleset.starting_points - expected_delta,
@@ -1311,7 +1311,7 @@ describe('Hand Finish Applies Points Delta When Dealer Tsumo', () => {
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    expect(players.GetPlayers(WindsOrder).map((p) => p.points)).toEqual([
+    expect(players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
       ruleset.starting_points + expected_delta * 3,
       ruleset.starting_points - expected_delta,
       ruleset.starting_points - expected_delta,
@@ -1377,7 +1377,7 @@ describe('Hand Finish Applies Points Delta When Dealer Tsumo', () => {
       }
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
-      expect(players.GetPlayers(WindsOrder).map((p) => p.points)).toEqual([
+      expect(players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
         ruleset.starting_points + expected_winner_delta,
         ruleset.starting_points - expected_others_delta,
         ruleset.starting_points - expected_others_delta,
@@ -1447,7 +1447,7 @@ describe.each([
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == winner) {
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1477,7 +1477,7 @@ describe.each([
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == winner) {
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1515,7 +1515,7 @@ describe.each([
     }
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       if (player_id == winner) {
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1579,7 +1579,7 @@ describe.each([
       }
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
-      for (const player_id of WindsOrder) {
+      for (const player_id of PlayerIdsInOrder) {
         if (player_id == winner) {
           expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_winner_delta)
         } else if (player_id == deal_in) {
@@ -1670,7 +1670,7 @@ describe.each([{ winner: Winds.SOUTH }, { winner: Winds.WEST }, { winner: Winds.
       }
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
-      for (const player_id of WindsOrder) {
+      for (const player_id of PlayerIdsInOrder) {
         if (player_id == winner) {
           expect(players.GetPlayer(player_id).points).toEqual(
             ruleset.starting_points + expected_dealer_delta + expected_non_dealer_delta * 2
@@ -1707,7 +1707,7 @@ describe.each([{ winner: Winds.SOUTH }, { winner: Winds.WEST }, { winner: Winds.
         }
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           if (player_id == winner) {
             expect(players.GetPlayer(player_id).points).toEqual(
               25000 + expected_non_dealer_delta * 2 + expected_dealer_delta
@@ -1776,7 +1776,7 @@ describe.each([{ winner: Winds.SOUTH }, { winner: Winds.WEST }, { winner: Winds.
         }
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           if (player_id == winner) {
             expect(players.GetPlayer(player_id).points).toEqual(
               25000 + expected_non_dealer_delta * 2 + expected_dealer_delta
@@ -1854,7 +1854,7 @@ describe.each([{ winner: Winds.SOUTH }, { winner: Winds.WEST }, { winner: Winds.
         }
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           if (player_id == winner) {
             expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_winner_delta)
           } else if (player_id == Winds.EAST) {

@@ -4,7 +4,7 @@
     <div v-if="GameIsNotStarted">
       <div v-for="i in ruleset.num_players" class="player_name_input">
         <el-row>
-          <span> {{ WindsDisplayTextMap.wind_character[WindsOrder[i - 1]] }}起 </span>
+          <span> {{ WindsDisplayTextMap[WindsInOrder[i - 1]] }}起 </span>
           <el-input
             v-model="player_names[i - 1]"
             class="w-50 m-2"
@@ -68,11 +68,11 @@
           <div v-if="GameIsFinished">[游戏已结束]</div>
         </div>
 
-        <div v-for="player_id in WindsOrder" :class="`${player_id}_player_board`">
+        <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
           <div :class="IsDealer(player_id) ? `dealer_player_board` : `non_dealer_player_board`">
             <div>
               {{ GetPlayerName(player_id) }}[{{
-                WindsDisplayTextMap.wind_character[GetPlayerCurrentWind(player_id)]
+                WindsDisplayTextMap[GetPlayerCurrentWind(player_id)]
               }}]
             </div>
             <div>
@@ -116,7 +116,7 @@
               size="default"
             >
               <el-checkbox-group fill="#289e20" v-model="hand_results_form.tenpai">
-                <el-checkbox-button v-for="player_id in WindsOrder" :label="player_id">
+                <el-checkbox-button v-for="player_id in PlayerIdsInOrder" :label="player_id">
                   {{ GetPlayerName(player_id) }}
                 </el-checkbox-button>
               </el-checkbox-group>
@@ -131,7 +131,7 @@
             >
               <el-radio-group
                 fill="#289e20"
-                v-for="player_id in WindsOrder"
+                v-for="player_id in PlayerIdsInOrder"
                 v-model="hand_results_form.winner"
                 size="default"
               >
@@ -144,7 +144,7 @@
             <el-form-item label="点炮" v-if="hand_results_form.outcome == HandOutcomeEnum.RON">
               <el-radio-group
                 fill="#e86161"
-                v-for="player_id in WindsOrder"
+                v-for="player_id in PlayerIdsInOrder"
                 v-model="hand_results_form.deal_in"
                 size="default"
                 :disabled="player_id == hand_results_form.winner"
@@ -204,7 +204,7 @@
           <el-table-column prop="start_game_riichi_sticks" label="开局供托" />
           <el-table-column prop="results_summary" label="结局" />
           <el-table-column
-            v-for="player_id in WindsOrder"
+            v-for="player_id in PlayerIdsInOrder"
             :prop="player_id"
             :label="GetPlayerName(player_id)"
           />
@@ -264,7 +264,7 @@
 
 <script>
 import { ElButton } from 'element-plus'
-import { Winds, WindsOrder, WindsDisplayTextMap } from './seat_constants.ts'
+import { Winds, WindsInOrder, WindsDisplayTextMap } from './seat_constants.ts'
 import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import {
   PointsLadder,
@@ -275,6 +275,7 @@ import {
   NumberDisplayMap
 } from './game_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
+import { PlayerIdsInOrder } from './players.ts'
 import { Game, GameState } from './game.ts'
 
 export default {
@@ -298,8 +299,9 @@ export default {
       hand_results_form: {},
 
       Winds: Winds,
-      WindsOrder: WindsOrder,
+      WindsInOrder: WindsInOrder,
       WindsDisplayTextMap: WindsDisplayTextMap,
+      PlayerIdsInOrder: PlayerIdsInOrder,
       HandOutcomeEnum: HandOutcomeEnum,
       HandOutcomeEnumDisplayTextMap: HandOutcomeEnumDisplayTextMap,
       PointsLadder: PointsLadder,
@@ -320,7 +322,7 @@ export default {
       return this.game.state == GameState.FINISHED
     },
     CurrentHandText() {
-      return `${WindsDisplayTextMap.wind_character[this.game.current_hand.round_wind]}${this.game.current_hand.hand}局${this.game.current_hand.honba}本场`
+      return `${WindsDisplayTextMap[this.game.current_hand.round_wind]}${this.game.current_hand.hand}局${this.game.current_hand.honba}本场`
     },
     RiichiSticksText() {
       return `供托: ${this.game.current_hand.riichi_sticks}`
@@ -336,7 +338,7 @@ export default {
         const last_hand_players = last_log ? last_log.players : null
         let row = {}
         row.log_index = i
-        row.hand_signature = `${WindsDisplayTextMap.wind_character[hand.round_wind]}${hand.hand}-${hand.honba}`
+        row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
         row.end_game_riichi_sticks = hand.riichi_sticks
         row.start_game_riichi_sticks = last_hand ? last_hand.riichi_sticks : 0
         row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
@@ -351,7 +353,7 @@ export default {
             row.results_summary += `[${hand.results.han},${hand.results.fu}]`
           }
         }
-        for (const player_id of WindsOrder) {
+        for (const player_id of PlayerIdsInOrder) {
           const end_hand_pt = players.GetPlayer(player_id).points
           const start_hand_pt = last_hand_players
             ? last_hand_players.GetPlayer(player_id).points
@@ -391,13 +393,13 @@ export default {
       console.log('Generate GameStatsBoard')
       let board = []
       // scan log to compute stats
-      for (const player_id of WindsOrder) {
+      for (const player_id of PlayerIdsInOrder) {
         let row = {}
         row.points = this.GetPlayerPoints(player_id)
         // find players rank from current hand
         if (this.game.players) {
           const current_points = this.game.players
-            ? this.game.players.GetPlayers(WindsOrder).map((p) => p.points)
+            ? this.game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)
             : [0, 0, 0, 0]
           const pt = this.game.players.GetPlayer(player_id).points
           row.rank = current_points.reduce((acc, val) => {
@@ -406,7 +408,7 @@ export default {
         } else {
           row.rank = -1
         }
-        row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap.wind_character[player_id]}起][${NumberDisplayMap[row.rank]}位]`
+        row.player = `${this.GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}起][${NumberDisplayMap[row.rank]}位]`
         // loop log to compute game stats
         let stats = {
           riichi: 0,

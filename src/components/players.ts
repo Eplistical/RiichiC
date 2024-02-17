@@ -1,19 +1,20 @@
 import { Ruleset } from './rulesets.ts'
-import { Seat, Winds, NextWindMap, LastWindMap, WindsOrder } from './seat_constants.ts'
+import { WindType, Winds, NextWindMap, LastWindMap, WindsInOrder } from './seat_constants.ts'
 import { PointsDelta } from './hand.ts'
 
-// Use beginning seat as a player's ID
-export type PlayerId = Seat
+// Use beginning wind as a player's ID
+export type PlayerId = WindType
+export const PlayerIdsInOrder = [...WindsInOrder]
 
 // Class for a single player
 class Player {
   name: string
-  current_wind: Seat
+  current_wind: WindType
   points: number
 
-  constructor(ruleset: Ruleset, player_name: string, seat: Seat) {
+  constructor(ruleset: Ruleset, player_name: string, current_wind: WindType) {
     this.name = player_name
-    this.current_wind = seat
+    this.current_wind = current_wind
     this.points = ruleset.starting_points
   }
 
@@ -38,19 +39,19 @@ export class Players {
 
   constructor(ruleset: Ruleset, player_names: Array<string>) {
     this.player_map = {}
-    let seat: Seat = Winds.EAST
+    let wind: WindType = Winds.EAST
     for (let i = 0; i < ruleset.num_players; ++i) {
-      this.player_map[seat] = new Player(ruleset, player_names[i], seat)
-      seat = NextWindMap[seat]
+      this.player_map[wind] = new Player(ruleset, player_names[i], wind)
+      wind = NextWindMap[wind]
     }
   }
 
   Clone(ruleset: Ruleset): Players {
     let clone_instance = new Players(
       ruleset,
-      this.GetPlayers(WindsOrder).map((p) => p.name)
+      this.GetPlayers(PlayerIdsInOrder).map((p) => p.name)
     )
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       clone_instance.player_map[player_id] = this.player_map[player_id].Clone(ruleset)
     }
     return clone_instance

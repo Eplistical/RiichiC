@@ -1,5 +1,4 @@
-export type Seat = string
-export type Wind = string
+export type WindType = string
 
 export const Winds = Object.freeze({
   EAST: 'east',
@@ -8,27 +7,25 @@ export const Winds = Object.freeze({
   NORTH: 'north'
 })
 
-export const WindsOrder = [Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]
+export const WindsInOrder: Array<WindType> = [Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]
 
-export const NextWindMap = Object.freeze({
+export const NextWindMap: Record<WindType, WindType> = Object.freeze({
   [Winds.EAST]: Winds.SOUTH,
   [Winds.SOUTH]: Winds.WEST,
   [Winds.WEST]: Winds.NORTH,
   [Winds.NORTH]: Winds.EAST
 })
 
-export const LastWindMap = Object.freeze({
+export const LastWindMap: Record<WindType, WindType> = Object.freeze({
   [Winds.EAST]: Winds.NORTH,
   [Winds.SOUTH]: Winds.EAST,
   [Winds.WEST]: Winds.SOUTH,
   [Winds.NORTH]: Winds.WEST
 })
 
-export const WindsDisplayTextMap = Object.freeze({
-  wind_character: {
-    [Winds.EAST]: '東',
-    [Winds.SOUTH]: '南',
-    [Winds.WEST]: '西',
-    [Winds.NORTH]: '北'
-  }
+export const WindsDisplayTextMap: Record<WindType, string> = Object.freeze({
+  [Winds.EAST]: '東',
+  [Winds.SOUTH]: '南',
+  [Winds.WEST]: '西',
+  [Winds.NORTH]: '北'
 })

@@ -11,8 +11,8 @@ import {
   Fu
 } from './game_constants.ts'
 import { Ruleset } from './rulesets.ts'
-import { NextWindMap, Wind, WindsOrder } from './seat_constants.ts'
-import { PlayerId, Players } from './players.ts'
+import { NextWindMap, WindType} from './seat_constants.ts'
+import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -49,7 +49,7 @@ export type HandResults = {
 }
 
 interface HandInterface {
-  round_wind: Wind
+  round_wind: WindType
   hand: number
   honba: number
   riichi_sticks: number
@@ -57,7 +57,7 @@ interface HandInterface {
 
 export class Hand {
   results: HandResults
-  round_wind: Wind
+  round_wind: WindType
   hand: number
   honba: number
   riichi: Set<PlayerId>
@@ -147,7 +147,7 @@ export class Hand {
     if (this.state != HandState.ON_GOING) {
       return false
     }
-    for (const player_id of WindsOrder) {
+    for (const player_id of PlayerIdsInOrder) {
       this.PlayerUnRiichi(player_id, players, ruleset)
     }
     this.state = HandState.ABANDONED
