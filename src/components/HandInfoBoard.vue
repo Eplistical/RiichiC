@@ -35,6 +35,7 @@ const GameFinishedText = computed(() => {
 
 <style scoped>
 .game_finished_div {
-  font-size: 12px;
+  font-size: 11px;
+  color: red;
 }
 </style>

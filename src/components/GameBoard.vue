@@ -51,7 +51,7 @@ function HandlePlayerRiichi(player_id, riichi) {
   width: 100px;
   top: calc(50% - 35px);
   left: calc(50% - 50px);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .east_player_board,

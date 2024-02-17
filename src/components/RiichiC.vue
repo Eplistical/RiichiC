@@ -1,67 +1,16 @@
-<script setup>
-import { ref } from 'vue'
-const rrr = ref(false)
-const riichi_players = ref([])
-</script>
+<script setup></script>
+
 <template>
   <div class="screen_div">
     <!-- unstartd game view -->
     <div v-if="GameIsNotStarted">
-      <div v-for="i in ruleset.num_players" class="player_name_input">
-        <el-row>
-          <span> {{ WindsDisplayTextMap[WindsInOrder[i - 1]] }}起 </span>
-          <el-input
-            v-model="player_names[i - 1]"
-            class="w-50 m-2"
-            size="large"
-            clearable
-            placeholder="玩家名"
-          />
-        </el-row>
+      <div class="player_name_configuration_board">
+        <PlayerNameConfigurationBoard v-model="player_names" :num_players="ruleset.num_players" />
       </div>
-      <el-button type="primary" @click="SetUpGame">开始游戏</el-button>
-      <el-divider> 规则 </el-divider>
-      <el-row>
-        <el-col :span="12"> 半庄战 </el-col>
-        <el-col :span="12">
-          <el-switch
-            v-model="ruleset.last_round_wind"
-            active-text="半庄战"
-            :active-value="Winds.SOUTH"
-            inactive-text="东风战"
-            :inactive-value="Winds.EAST"
-          />
-        </el-col>
-      </el-row>
 
-      <el-row>
-        <el-col :span="12"> 开局点数 </el-col>
-        <el-col :span="12">
-          <el-input-number v-model="ruleset.starting_points" placeholder="开局点数" :step="5000" />
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12"> 本场点数 </el-col>
-        <el-col :span="12">
-          <el-input-number v-model="ruleset.honba_points" placeholder="本场点数" :step="300" />
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12"> 流局罚符 </el-col>
-        <el-col :span="12">
-          <el-input-number
-            v-model="ruleset.draw_tenpai_points"
-            placeholder="流局罚符"
-            :step="600"
-          />
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12"> 切上满贯 </el-col>
-        <el-col :span="12">
-          <el-switch v-model="ruleset.round_up_mangan" active-text="开" inactive-text="关" />
-        </el-col>
-      </el-row>
+      <div class="ruleset_configuration_board">
+        <RuleSetConfigurationBoard v-model="ruleset" />
+      </div>
     </div>
     <div v-else>
       <!-- ongoing & finished game view -->
@@ -230,12 +179,13 @@ const riichi_players = ref([])
 
     <el-divider />
 
-    <div v-if="GameIsOnGoing">
-      <el-button type="danger" @click="FinishGame">结束游戏</el-button>
-    </div>
-
-    <div v-if="GameIsFinished">
-      <el-button type="primary" @click="SetUpNewGame">新对局</el-button>
+    <div class="game_control_board">
+      <GameControlBoard
+        :game="game"
+        @startGame="StartGame"
+        @finishGame="FinishGame"
+        @newGame="SetUpNewGame"
+      />
     </div>
   </div>
 </template>
@@ -255,6 +205,8 @@ import {
 import { MLeagueRuleset } from './rulesets.ts'
 import { PlayerIdsInOrder } from './players.ts'
 import { Game, GameState } from './game.ts'
+import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
+import GameBoard from './GameBoard.vue'
 
 export default {
   name: 'RiichiC',
@@ -452,9 +404,9 @@ export default {
     }
   },
   methods: {
-    SetUpGame() {
+    StartGame() {
       console.log(
-        `Set up game with players ${JSON.stringify(this.player_names)} and ruleset ${JSON.stringify(this.ruleset)}`
+        `Start game with players ${JSON.stringify(this.player_names)} and ruleset ${JSON.stringify(this.ruleset)}`
       )
       this.game.InitGame({ ruleset: this.ruleset, player_names: this.player_names })
       this.game.Start()
