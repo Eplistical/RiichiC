@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onDeactivated } from 'vue'
+import { Winds, WindsInOrder, WindsDisplayTextMap } from './seat_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
@@ -13,13 +14,54 @@ function preventRefresh(event) {
 
 onMounted(() => {
   window.addEventListener('beforeunload', preventRefresh)
+  LoadFromStorage()
 })
 
 onDeactivated(() => {
   window.removeEventListener('beforeunload', preventRefresh)
 })
 
+function SaveToStorage() {
+  const to_save = {
+    player_starting_winds: player_starting_winds.value,
+    player_names: player_names.value,
+    ruleset: ruleset.value,
+    game: game.value,
+    timestamp: new Date()
+  }
+  localStorage.setItem('data', JSON.stringify(to_save))
+}
+
+function LoadFromStorage() {
+  console.log('Load from storage')
+  let data = localStorage.getItem('data')
+  data = data ? JSON.parse(data) : undefined
+  if (data) {
+    if ('player_starting_winds' in data) {
+      player_starting_winds.value = data.player_starting_winds
+      console.log('Loaded player_starting_winds=', player_starting_winds.value)
+    }
+    if ('player_names' in data) {
+      player_names.value = data.player_names
+      console.log('Loaded player_names=', player_names.value)
+    }
+    if ('ruleset' in data) {
+      ruleset.value = data.ruleset
+      console.log('Loaded ruleset=', ruleset.value)
+    }
+    if ('game' in data) {
+      game.value = Game.ParseFromObject(data.game)
+      console.log('Loaded game=', game.value)
+    }
+    if ('timestamp' in data) {
+      console.log('storage timestamp=', data.timestamp)
+    }
+  }
+  console.log('Load from storage Done')
+}
+
 const player_names = ref(['赤木', '原田', '瓦西子', '天'])
+const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
@@ -35,10 +77,26 @@ const ConfirmSetUpNewGameText = computed(() => {
 })
 
 function StartGame() {
-  console.log('Start game with players: ', player_names.value, ' and ruleset: ', ruleset.value)
-  game.value.InitGame({ ruleset: ruleset.value, player_names: player_names.value })
+  console.log(
+    'Start game with players: ',
+    player_names.value,
+    ', player starting winds: ',
+    player_starting_winds.value,
+    ' and ruleset: ',
+    ruleset.value
+  )
+  const [success, msg] = game.value.InitGame({
+    ruleset: ruleset.value,
+    player_names: player_names.value,
+    player_starting_winds: player_starting_winds.value
+  })
+  if (!success) {
+    alert(msg)
+    return
+  }
   game.value.Start()
   game.value.StartCurrentHand()
+  SaveToStorage()
 }
 
 function SetUpNewGame() {
@@ -46,6 +104,7 @@ function SetUpNewGame() {
     return
   }
   game.value = new Game()
+  SaveToStorage()
 }
 
 function FinishGame() {
@@ -56,16 +115,19 @@ function FinishGame() {
   if (game.value.Finish()) {
     hand_results_form.value = {}
   }
+  SaveToStorage()
 }
 
 function SubmitHandResultsForm() {
   console.log('SubmitHandResultsForm')
   const hand_finished = game.value.FinishCurrentHand(hand_results_form.value)
+  console.log('hand_finished = ', hand_finished)
   if (hand_finished) {
     game.value.SaveHandLog()
     game.value.SetUpNextHandOrFinishGame()
     game.value.StartCurrentHand()
     hand_results_form.value = {}
+    SaveToStorage()
   }
 }
 
@@ -83,6 +145,7 @@ function HandleResetGameLog(index, row) {
     game.value.SetUpNextHandOrFinishGame()
     game.value.StartCurrentHand()
     hand_results_form.value = {}
+    SaveToStorage()
   }
 }
 </script>
@@ -92,7 +155,11 @@ function HandleResetGameLog(index, row) {
     <!-- Unstartd Game -->
     <div v-if="game.IsNotStarted()">
       <div class="player_name_configuration_board">
-        <PlayerNameConfigurationBoard v-model="player_names" :num_players="ruleset.num_players" />
+        <PlayerNameConfigurationBoard
+          v-model:player_names="player_names"
+          v-model:player_starting_winds="player_starting_winds"
+          :num_players="ruleset.num_players"
+        />
       </div>
       <div class="ruleset_configuration_board">
         <RuleSetConfigurationBoard v-model="ruleset" />

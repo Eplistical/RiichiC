@@ -1,7 +1,8 @@
 import { Hand, HandResults } from './hand.ts'
-import { Winds } from './seat_constants.ts'
+import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
 import { Ruleset } from './rulesets.ts'
 import { PlayerId, Players } from './players.ts'
+import RuleSetConfigurationBoardVue from './RuleSetConfigurationBoard.vue'
 
 export enum GameState {
   NOT_STARTED,
@@ -18,6 +19,7 @@ type GameLog = {
 interface GameInterface {
   ruleset: Ruleset
   player_names: string[]
+  player_starting_winds: WindType[]
 }
 
 export class Game {
@@ -33,7 +35,35 @@ export class Game {
     this.log = []
   }
 
-  InitGame({ ruleset, player_names }: GameInterface) {
+  // Parses an object to create a Game instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
+  static ParseFromObject(obj: any): Game {
+    let parsed_instance = new Game()
+    parsed_instance.state = obj.state
+    parsed_instance.ruleset = obj.ruleset
+    if ('players' in obj) {
+      parsed_instance.players = Players.ParseFromObject(obj.ruleset, obj.players)
+    }
+    if ('current_hand' in obj) {
+      parsed_instance.current_hand = Hand.ParseFromObject(obj.current_hand)
+    }
+    if ('log' in obj) {
+      for (let log of obj.log) {
+        parsed_instance.log.push({
+          state: log.state,
+          hand: Hand.ParseFromObject(log.hand),
+          players: Players.ParseFromObject(obj.ruleset, log.players)
+        })
+      }
+    }
+    return parsed_instance
+  }
+
+  InitGame({ ruleset, player_names, player_starting_winds }: GameInterface): [boolean, string] {
+    const [valid, msg] = this.ValidatePlayerStartingWinds(player_starting_winds, ruleset)
+    if (!valid) {
+      return [valid, msg]
+    }
+    const player_names_in_order = this.GetPlayerNamesInOrder(player_names, player_starting_winds)
     this.state = GameState.NOT_STARTED
     this.ruleset = ruleset
     this.current_hand = new Hand({
@@ -42,8 +72,9 @@ export class Game {
       honba: 0,
       riichi_sticks: 0
     })
-    this.players = new Players(this.ruleset, player_names)
+    this.players = new Players(this.ruleset, player_names_in_order)
     this.log = []
+    return [true, '']
   }
 
   Start() {
@@ -202,5 +233,37 @@ export class Game {
         ' expected total points = ',
         expected_total_points
       )
+  }
+
+  // Validates player starting winds
+  private ValidatePlayerStartingWinds(
+    player_starting_winds: WindType[],
+    ruleset: Ruleset
+  ): [boolean, string] {
+    if (player_starting_winds.length != ruleset.num_players) {
+      return [
+        false,
+        `开局风位数量错误: ${JSON.stringify(player_starting_winds)}, ${player_starting_winds.length}, ${ruleset.num_players}`
+      ]
+    }
+    for (let i = 0; i < ruleset.num_players; ++i) {
+      const wind = WindsInOrder[i]
+      if (!player_starting_winds.includes(wind)) {
+        return [false, `找不到起家: ${WindsDisplayTextMap[wind]}`]
+      }
+    }
+    return [true, '']
+  }
+
+  // Permutes player names to make them in order of winds. Winds must be validated before calling this method.
+  private GetPlayerNamesInOrder(
+    player_names: string[],
+    player_starting_winds: WindType[]
+  ): string[] {
+    let player_names_in_order = []
+    for (let wind of WindsInOrder) {
+      player_names_in_order.push(player_names[player_starting_winds.indexOf(wind)])
+    }
+    return player_names_in_order
   }
 }

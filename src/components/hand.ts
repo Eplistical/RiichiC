@@ -10,9 +10,10 @@ import {
   Han,
   Fu
 } from './game_constants.ts'
-import { Ruleset } from './rulesets.ts'
-import { NextWindMap, WindType } from './seat_constants.ts'
+import { LeftOverRiichiSticks, Ruleset } from './rulesets.ts'
+import { NextWindMap, WindType, Winds, WindsInOrder } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
+import { W } from '../../node_modules/vitest/dist/reporters-1evA5lom'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -60,7 +61,7 @@ export class Hand {
   round_wind: WindType
   hand: number
   honba: number
-  riichi: Set<PlayerId>
+  riichi: PlayerId[]
   riichi_sticks: number
   state: HandState
   has_next_hand: boolean
@@ -71,7 +72,7 @@ export class Hand {
     this.hand = hand
     this.honba = honba
     this.riichi_sticks = riichi_sticks
-    this.riichi = new Set<PlayerId>()
+    this.riichi = []
     this.has_next_hand = true
     this.CleanUpResults()
   }
@@ -83,7 +84,7 @@ export class Hand {
       honba: this.honba,
       riichi_sticks: this.riichi_sticks
     })
-    clone_instance.riichi = new Set<PlayerId>(this.riichi)
+    clone_instance.riichi = [...this.riichi]
     clone_instance.state = this.state
     clone_instance.has_next_hand = this.has_next_hand
     clone_instance.results.outcome = this.results.outcome
@@ -103,6 +104,23 @@ export class Hand {
       clone_instance.results.fu = this.results.fu
     }
     return clone_instance
+  }
+
+  // Parses an object to create a Hand instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
+  static ParseFromObject(obj: any): Hand {
+    let parsed_instance = new Hand({
+      round_wind: obj.round_wind,
+      hand: obj.hand,
+      honba: obj.honba,
+      riichi_sticks: obj.riichi_sticks
+    })
+    parsed_instance.state = obj.state
+    parsed_instance.riichi = [...obj.riichi]
+    parsed_instance.has_next_hand = obj.has_next_hand
+    if ('results' in obj) {
+      parsed_instance.results = { ...obj.results }
+    }
+    return parsed_instance
   }
 
   Start(): boolean {
@@ -204,23 +222,26 @@ export class Hand {
 
     if (should_finish_game) {
       this.has_next_hand = false
+      if (this.results.outcome == HandOutcomeEnum.DRAW) {
+        this.MaybeAssignLeftOverRiichiSticks(players, ruleset)
+      }
       return undefined
     }
     return this.CreateNextHand(renchan, honba_increase, players, ruleset)
   }
 
   PlayerRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (!this.riichi.has(player_id)) {
+    if (!this.riichi.includes(player_id)) {
       this.riichi_sticks += 1
-      this.riichi.add(player_id)
+      this.riichi.push(player_id)
       players.GetPlayer(player_id).ApplyPointsDelta(-ruleset.riichi_cost)
     }
   }
 
   PlayerUnRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (this.riichi.has(player_id)) {
+    if (this.riichi.includes(player_id)) {
       this.riichi_sticks -= 1
-      this.riichi.delete(player_id)
+      this.riichi.splice(this.riichi.indexOf(player_id), 1)
       players.GetPlayer(player_id).ApplyPointsDelta(ruleset.riichi_cost)
     }
   }
@@ -523,5 +544,39 @@ export class Hand {
       }
     }
     return points_delta
+  }
+
+  // Handle leftover riichi sticks of a game. This method assumes the hand is all last, not renchan, and the reuslt is draw.
+  private MaybeAssignLeftOverRiichiSticks(players: Players, ruleset: Ruleset) {
+    if (this.riichi_sticks == 0) {
+      return
+    }
+
+    if (ruleset.left_over_riichi_sticks == LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS) {
+      let max_pt = undefined
+      let top_players = undefined
+      for (let wind of WindsInOrder) {
+        const pt = players.GetPlayer(wind).points
+        if (max_pt == undefined || pt > max_pt) {
+          max_pt = pt
+          top_players = [wind]
+        } else if (pt == max_pt) {
+          top_players.push(wind)
+        }
+      }
+      const num_top_players = top_players.length
+      const leftover_riichi_sticks_points = this.riichi_sticks * ruleset.riichi_cost
+      let leftover_riichi_points_delta = {}
+      if (num_top_players == 3 && leftover_riichi_sticks_points % 3 != 0) {
+        leftover_riichi_points_delta[top_players[0]] = leftover_riichi_sticks_points * 0.4
+        leftover_riichi_points_delta[top_players[1]] = leftover_riichi_sticks_points * 0.3
+        leftover_riichi_points_delta[top_players[2]] = leftover_riichi_sticks_points * 0.3
+      } else {
+        for (const player_id of top_players) {
+          leftover_riichi_points_delta[player_id] = leftover_riichi_sticks_points / num_top_players
+        }
+      }
+      players.ApplyPointsDelta(leftover_riichi_points_delta)
+    }
   }
 }

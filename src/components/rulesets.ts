@@ -1,5 +1,17 @@
 import { Winds } from './seat_constants.ts'
 
+export enum LeftOverRiichiSticks {
+  // nobody gets left-over riichi sticks
+  ABANDONED,
+
+  // left-over riichi sticks go to player(s) whose rank is 1
+  // when there is 1 top player -> the player gets all leftover
+  // when there are 2 top players -> each player gets 50% of sticks
+  // when there are 3 top players, and the leftover cannot be divided by 3 -> the player with first starting wind gets 40%, other two players gets 30%
+  // when there are 4 top players -> each player gets 25% of sticks
+  SPLIT_AMONG_TOP_PLAYERS
+}
+
 export type Ruleset = {
   num_players: 3 | 4
   starting_points: number
@@ -12,6 +24,7 @@ export type Ruleset = {
   dealer_tenpai_renchan: boolean
   all_last_dealer_win_renchan: boolean
   all_last_dealer_tenpai_renchan: boolean
+  left_over_riichi_sticks: LeftOverRiichiSticks
 }
 
 export const MLeagueRuleset: Ruleset = Object.freeze({
@@ -25,5 +38,6 @@ export const MLeagueRuleset: Ruleset = Object.freeze({
   last_round_wind: Winds.SOUTH,
   dealer_tenpai_renchan: true,
   all_last_dealer_win_renchan: true,
-  all_last_dealer_tenpai_renchan: true
+  all_last_dealer_tenpai_renchan: true,
+  left_over_riichi_sticks: LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
 })

@@ -86,7 +86,7 @@ const GameStatsBoard = computed(() => {
     }
     props.game.log.forEach((log) => {
       const hand = log.hand
-      const player_riichi = log.hand.riichi && log.hand.riichi.has(player_id)
+      const player_riichi = log.hand.riichi && log.hand.riichi.includes(player_id)
       if (player_riichi) {
         stats.riichi += 1
       }
