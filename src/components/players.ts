@@ -1,6 +1,7 @@
 import { Ruleset } from './rulesets.ts'
 import { WindType, Winds, NextWindMap, LastWindMap, WindsInOrder } from './seat_constants.ts'
 import { PointsDelta } from './hand.ts'
+import { parse } from '../../../../Library/Caches/typescript/5.3/node_modules/parse5/dist/index'
 
 // Use beginning wind as a player's ID
 export type PlayerId = WindType
@@ -18,10 +19,18 @@ export class Player {
     this.points = ruleset.starting_points
   }
 
+  // Makes a clone from another Ruleset instance
   Clone(ruleset: Ruleset): Player {
     let clone_instance = new Player(ruleset, this.name, this.current_wind)
     clone_instance.points = this.points
     return clone_instance
+  }
+
+  // Makes a Player instance from an object, this method does not verify the object fields. It is the caller's responsiblity to make sure the input object is a valid one.
+  static ParseFromObject(ruleset: Ruleset, obj: any): Player {
+    let parsed_instance = new Player(ruleset, obj.name, obj.current_wind)
+    parsed_instance.points = obj.points
+    return parsed_instance
   }
 
   IsDealer(): boolean {
@@ -55,6 +64,21 @@ export class Players {
       clone_instance.player_map[player_id] = this.player_map[player_id].Clone(ruleset)
     }
     return clone_instance
+  }
+
+  // Makes a Players instance from an object, this method does not verify the object fields. It is the caller's responsiblity to make sure the input object is a valid one.
+  static ParseFromObject(ruleset: Ruleset, obj: any): Players {
+    let player_names_in_order = []
+    for (let i = 0; i < ruleset.num_players; ++i) {
+      const wind = WindsInOrder[i]
+      player_names_in_order.push(obj.player_map[wind].name)
+    }
+    let parsed_instance = new Players(ruleset, player_names_in_order)
+    for (let i = 0; i < ruleset.num_players; ++i) {
+      const wind = WindsInOrder[i]
+      parsed_instance.GetPlayerMap()[wind] = Player.ParseFromObject(ruleset, obj.player_map[wind])
+    }
+    return parsed_instance
   }
 
   NumPlayers(): number {

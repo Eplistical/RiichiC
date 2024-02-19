@@ -1908,6 +1908,32 @@ describe('Hand Clone', () => {
   })
 })
 
+describe('Hand Parse From Object', () => {
+  it('should copy all fields correctly', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 3,
+      honba: 2,
+      riichi: [Winds.NORTH, Winds.WEST],
+      riichi_sticks: 1,
+      has_next_hand: true,
+      results: {
+        outcome: HandOutcomeEnum.TSUMO,
+        winner: Winds.EAST,
+        deal_in: Winds.WEST,
+        han: 3,
+        fu: 20,
+        tenpai: [Winds.SOUTH, Winds.EAST]
+      }
+    })
+    const obj = JSON.parse(JSON.stringify(hand))
+    const parsed = Hand.ParseFromObject(hand)
+    expect(parsed).toEqual(hand)
+    expect(parsed).not.toBe(hand)
+  })
+})
+
 describe('Hand Abandon', () => {
   it('should ignore an un-started hand', () => {
     hand.state = HandState.NOT_STARTED

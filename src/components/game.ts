@@ -2,6 +2,7 @@ import { Hand, HandResults } from './hand.ts'
 import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
 import { Ruleset } from './rulesets.ts'
 import { PlayerId, Players } from './players.ts'
+import RuleSetConfigurationBoardVue from './RuleSetConfigurationBoard.vue'
 
 export enum GameState {
   NOT_STARTED,
@@ -32,6 +33,29 @@ export class Game {
     this.state = GameState.NOT_STARTED
     this.ruleset = undefined
     this.log = []
+  }
+
+  // Parses an object to create a Game instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
+  static ParseFromObject(obj: any): Game {
+    let parsed_instance = new Game()
+    parsed_instance.state = obj.state
+    parsed_instance.ruleset = obj.ruleset
+    if ('players' in obj) {
+      parsed_instance.players = Players.ParseFromObject(obj.ruleset, obj.players)
+    }
+    if ('current_hand' in obj) {
+      parsed_instance.current_hand = Hand.ParseFromObject(obj.current_hand)
+    }
+    if ('log' in obj) {
+      for (let log of obj.log) {
+        parsed_instance.log.push({
+          state: log.state,
+          hand: Hand.ParseFromObject(log.hand),
+          players: Players.ParseFromObject(obj.ruleset, log.players)
+        })
+      }
+    }
+    return parsed_instance
   }
 
   InitGame({ ruleset, player_names, player_starting_winds }: GameInterface): [boolean, string] {
@@ -216,8 +240,6 @@ export class Game {
     player_starting_winds: WindType[],
     ruleset: Ruleset
   ): [boolean, string] {
-    console.log(player_starting_winds)
-    console.log(player_starting_winds.length)
     if (player_starting_winds.length != ruleset.num_players) {
       return [
         false,

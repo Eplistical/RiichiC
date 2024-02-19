@@ -738,3 +738,69 @@ describe('Game SaveHandLog', () => {
     )
   })
 })
+
+describe('Game ParseFromLog', () => {
+  it('Should work correctly for unstarted game', () => {
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    expect(game.IsNotStarted()).toBe(true)
+    const obj = JSON.parse(JSON.stringify(game))
+    const parsed = Game.ParseFromObject(obj)
+    expect(parsed).toEqual(game)
+    expect(parsed).not.toBe(game)
+  })
+
+  it('Should work correctly for on-going hand', () => {
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    for (let i = 0; i < 6; ++i) {
+      game.StartCurrentHand()
+      game.PlayerRiichi(Winds.WEST)
+      game.FinishCurrentHand({
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: [Winds.WEST]
+      })
+      game.SaveHandLog()
+      game.SetUpNextHandOrFinishGame()
+    }
+    expect(game.IsOnGoing()).toBe(true)
+    const obj = JSON.parse(JSON.stringify(game))
+    const parsed = Game.ParseFromObject(obj)
+    expect(parsed).toEqual(game)
+    expect(parsed).not.toBe(game)
+  })
+
+  it('Should work correctly for finished hand', () => {
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    // finish the game
+    for (let i = 0; i < 9; ++i) {
+      game.StartCurrentHand()
+      game.FinishCurrentHand({
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      })
+      game.SaveHandLog()
+      game.SetUpNextHandOrFinishGame()
+    }
+    expect(game.IsFinished()).toBe(true)
+    const obj = JSON.parse(JSON.stringify(game))
+    const parsed = Game.ParseFromObject(obj)
+    expect(parsed).toEqual(game)
+    expect(parsed).not.toBe(game)
+  })
+})

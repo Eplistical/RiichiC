@@ -11,8 +11,9 @@ import {
   Fu
 } from './game_constants.ts'
 import { Ruleset } from './rulesets.ts'
-import { NextWindMap, WindType } from './seat_constants.ts'
+import { NextWindMap, WindType, WindsInOrder } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
+import { W } from '../../node_modules/vitest/dist/reporters-1evA5lom'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -103,6 +104,23 @@ export class Hand {
       clone_instance.results.fu = this.results.fu
     }
     return clone_instance
+  }
+
+  // Parses an object to create a Hand instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
+  static ParseFromObject(obj: any): Hand {
+    let parsed_instance = new Hand({
+      round_wind: obj.round_wind,
+      hand: obj.hand,
+      honba: obj.honba,
+      riichi_sticks: obj.riichi_sticks
+    })
+    parsed_instance.state = obj.state
+    parsed_instance.riichi = [...obj.riichi]
+    parsed_instance.has_next_hand = obj.has_next_hand
+    if ('results' in obj) {
+      parsed_instance.results = { ...obj.results }
+    }
+    return parsed_instance
   }
 
   Start(): boolean {

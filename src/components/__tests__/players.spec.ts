@@ -181,4 +181,20 @@ describe('Players', () => {
     expect(clone).toEqual(players)
     expect(clone).not.toBe(players)
   })
+
+  it('should parse from object correctly', () => {
+    let players = new Players(ruleset, ['P1', 'P2', 'P3', 'P4'])
+    players.ShiftSeats()
+    players.ShiftSeats()
+    players.ApplyPointsDelta({
+      [Winds.EAST]: 4000,
+      [Winds.SOUTH]: -1000,
+      [Winds.WEST]: -2000,
+      [Winds.NORTH]: -1000
+    })
+    const obj = JSON.parse(JSON.stringify(players))
+    const parsed = Players.ParseFromObject(ruleset, obj)
+    expect(parsed).toEqual(players)
+    expect(parsed).not.toBe(players)
+  })
 })
