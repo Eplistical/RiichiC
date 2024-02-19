@@ -600,7 +600,7 @@ describe('Hand Finish', () => {
   ])('should accept valid draw results $riichi $tenpai', ({ riichi, tenpai }) => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
-      riichi: riichi,
+      riichi: riichi
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
