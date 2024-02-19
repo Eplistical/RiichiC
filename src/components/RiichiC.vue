@@ -22,7 +22,6 @@ onDeactivated(() => {
 })
 
 function SaveToStorage() {
-  console.log('Save to storage')
   const to_save = {
     player_starting_winds: player_starting_winds.value,
     player_names: player_names.value,
@@ -31,7 +30,6 @@ function SaveToStorage() {
     timestamp: new Date()
   }
   localStorage.setItem('data', JSON.stringify(to_save))
-  console.log('Saved', to_save)
 }
 
 function LoadFromStorage() {

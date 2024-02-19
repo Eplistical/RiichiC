@@ -1,7 +1,7 @@
 import { beforeEach, describe, it, expect } from 'vitest'
 
-import { Winds } from '../seat_constants.ts'
-import { Ruleset } from '../rulesets.ts'
+import { Winds, WindsInOrder } from '../seat_constants.ts'
+import { LeftOverRiichiSticks, Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from '../players.ts'
 import { PointsLadder, RonPointsDealer } from '../game_constants.ts'
@@ -426,6 +426,157 @@ describe('Hand Set Up Next Hand', () => {
     expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
     expect(hand.has_next_hand).toEqual(false)
   })
+
+  it('should handle leftover riichi sticks correctly with abandon rule', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 3,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 28000
+    players.GetPlayer(Winds.SOUTH).points = 23000
+    players.GetPlayer(Winds.WEST).points = 23000
+    players.GetPlayer(Winds.NORTH).points = 23000
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.ABANDONED
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([28000, 23000, 23000, 23000])
+  })
+
+  it('should handle leftover riichi sticks correctly with splitting rule, 1 top player', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 3,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 28000
+    players.GetPlayer(Winds.SOUTH).points = 23000
+    players.GetPlayer(Winds.WEST).points = 23000
+    players.GetPlayer(Winds.NORTH).points = 23000
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([31000, 23000, 23000, 23000])
+  })
+
+  it('should handle leftover riichi sticks correctly with splitting rule, 2 top players', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 3,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 27000
+    players.GetPlayer(Winds.SOUTH).points = 27000
+    players.GetPlayer(Winds.WEST).points = 21500
+    players.GetPlayer(Winds.NORTH).points = 21500
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([28500, 28500, 21500, 21500])
+  })
+
+  it('should handle leftover riichi sticks correctly with splitting rule, 3 top players', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 3,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 25000
+    players.GetPlayer(Winds.SOUTH).points = 25000
+    players.GetPlayer(Winds.WEST).points = 25000
+    players.GetPlayer(Winds.NORTH).points = 22000
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([26000, 26000, 26000, 22000])
+  })
+
+  it('should handle leftover riichi sticks correctly with splitting rule, 3 top players, cannot divide', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 2,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 23000
+    players.GetPlayer(Winds.SOUTH).points = 25000
+    players.GetPlayer(Winds.WEST).points = 25000
+    players.GetPlayer(Winds.NORTH).points = 25000
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([23000, 25800, 25600, 25600])
+  })
+
+  it('should handle leftover riichi sticks correctly with splitting rule, 4 top players', () => {
+    // all last dealer noten
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 4,
+      riichi_sticks: 4,
+      results: {
+        outcome: HandOutcomeEnum.DRAW,
+        tenpai: []
+      }
+    })
+    players.GetPlayer(Winds.EAST).points = 24000
+    players.GetPlayer(Winds.SOUTH).points = 24000
+    players.GetPlayer(Winds.WEST).points = 24000
+    players.GetPlayer(Winds.NORTH).points = 24000
+
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
+    expect(hand.has_next_hand).toBe(false)
+    expect(
+      players.GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH]).map((p) => p.points)
+    ).toEqual([25000, 25000, 25000, 25000])
+  })
+
   it('should work for all last draw dealer ron', () => {
     Object.assign(hand, {
       state: HandState.FINISHED,

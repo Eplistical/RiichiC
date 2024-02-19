@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Winds } from './seat_constants.ts'
+import { LeftOverRiichiSticks } from './rulesets'
 
 const ruleset = defineModel()
 
@@ -37,6 +38,16 @@ const LastRoundWindActiveText = computed(() => {
 const LastRoundWindInactiveText = computed(() => {
   return `东风战`
 })
+
+const LeftOverRiichiSticksTitleText = computed(() => {
+  return `游戏结束剩余供托`
+})
+const LeftOverRiichiSticksActiveText = computed(() => {
+  return `首位获得`
+})
+const LeftOverRiichiSticksInactiveText = computed(() => {
+  return `丢弃`
+})
 </script>
 
 <template>
@@ -71,5 +82,13 @@ const LastRoundWindInactiveText = computed(() => {
     :inactive_text="RoundUpManganInactiveText"
     :active_value="true"
     :inactive_value="false"
+  />
+  <RuleToggleEntry
+    v-model="ruleset.left_over_riichi_sticks"
+    :title="LeftOverRiichiSticksTitleText"
+    :active_text="LeftOverRiichiSticksActiveText"
+    :inactive_text="LeftOverRiichiSticksInactiveText"
+    :active_value="LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS"
+    :inactive_value="LeftOverRiichiSticks.ABANDONED"
   />
 </template>
