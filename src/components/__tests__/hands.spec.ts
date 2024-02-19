@@ -56,7 +56,7 @@ describe('Hand Construction', () => {
     expect(hand.IsNotStarted()).toBe(true)
     expect(hand.round_wind).toEqual(Winds.EAST)
     expect(hand.hand).toBe(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>())
+    expect(hand.riichi).toEqual([])
     expect(hand.riichi_sticks).toEqual(0)
     expect(hand.has_next_hand).toEqual(true)
     expect(hand.results).toEqual({
@@ -93,26 +93,26 @@ describe('Hand Works On Riichi Event', () => {
     hand.PlayerRiichi(Winds.EAST, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.EAST]))
+    expect(hand.riichi).toEqual([Winds.EAST])
     expect(players.GetPlayer(Winds.EAST).points).toEqual(24000)
 
     hand.PlayerRiichi(Winds.WEST, players, ruleset)
     expect(hand.riichi_sticks).toEqual(2)
     expect(hand.riichi).toHaveLength(2)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.EAST, Winds.WEST]))
+    expect(hand.riichi).toEqual([Winds.EAST, Winds.WEST])
     expect(players.GetPlayer(Winds.EAST).points).toEqual(24000)
   })
   it("should do nothing on riichi when a player has already riichi'ed ", () => {
     hand.PlayerRiichi(Winds.EAST, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.EAST]))
+    expect(hand.riichi).toEqual([Winds.EAST])
     expect(players.GetPlayer(Winds.EAST).points).toEqual(24000)
 
     hand.PlayerRiichi(Winds.EAST, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.EAST]))
+    expect(hand.riichi).toEqual([Winds.EAST])
     expect(players.GetPlayer(Winds.EAST).points).toEqual(24000)
   })
   it('should work for player unriichi', () => {
@@ -120,21 +120,21 @@ describe('Hand Works On Riichi Event', () => {
     hand.PlayerRiichi(Winds.NORTH, players, ruleset)
     expect(hand.riichi_sticks).toEqual(2)
     expect(hand.riichi).toHaveLength(2)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.SOUTH, Winds.NORTH]))
+    expect(hand.riichi).toEqual([Winds.SOUTH, Winds.NORTH])
     expect(players.GetPlayer(Winds.SOUTH).points).toEqual(24000)
     expect(players.GetPlayer(Winds.NORTH).points).toEqual(24000)
 
     hand.PlayerUnRiichi(Winds.SOUTH, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.NORTH]))
+    expect(hand.riichi).toEqual([Winds.NORTH])
     expect(players.GetPlayer(Winds.SOUTH).points).toEqual(25000)
     expect(players.GetPlayer(Winds.NORTH).points).toEqual(24000)
 
     hand.PlayerUnRiichi(Winds.NORTH, players, ruleset)
     expect(hand.riichi_sticks).toEqual(0)
     expect(hand.riichi).toHaveLength(0)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([]))
+    expect(hand.riichi).toEqual([])
     expect(players.GetPlayer(Winds.SOUTH).points).toEqual(25000)
     expect(players.GetPlayer(Winds.NORTH).points).toEqual(25000)
   })
@@ -142,13 +142,13 @@ describe('Hand Works On Riichi Event', () => {
     hand.PlayerRiichi(Winds.NORTH, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.NORTH]))
+    expect(hand.riichi).toEqual([Winds.NORTH])
     expect(players.GetPlayer(Winds.NORTH).points).toEqual(24000)
 
     hand.PlayerUnRiichi(Winds.EAST, players, ruleset)
     expect(hand.riichi_sticks).toEqual(1)
     expect(hand.riichi).toHaveLength(1)
-    expect(hand.riichi).toEqual(new Set<PlayerId>([Winds.NORTH]))
+    expect(hand.riichi).toEqual([Winds.NORTH])
     expect(players.GetPlayer(Winds.EAST).points).toEqual(25000)
     expect(players.GetPlayer(Winds.NORTH).points).toEqual(24000)
   })
@@ -582,7 +582,7 @@ describe('Hand Finish', () => {
   ])('should reject riichi noten on draw $riichi $tenpai', ({ riichi, tenpai }) => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
-      riichi: new Set<PlayerId>(riichi)
+      riichi: riichi
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
@@ -600,7 +600,7 @@ describe('Hand Finish', () => {
   ])('should accept valid draw results $riichi $tenpai', ({ riichi, tenpai }) => {
     Object.assign(hand, {
       state: HandState.ON_GOING,
-      riichi: new Set<PlayerId>(riichi)
+      riichi: riichi,
     })
     hand_results = {
       outcome: HandOutcomeEnum.DRAW,
@@ -1878,7 +1878,7 @@ describe('Hand Clone', () => {
       round_wind: Winds.SOUTH,
       hand: 3,
       honba: 2,
-      riichi: new Set<PlayerId>([Winds.NORTH, Winds.WEST]),
+      riichi: [Winds.NORTH, Winds.WEST],
       riichi_sticks: 1,
       has_next_hand: true,
       results: {
@@ -1955,7 +1955,7 @@ describe('Hand Abandon', () => {
     expect(hand.Abandon(players, ruleset)).toBe(true)
     expect(hand.IsAbandoned()).toBe(true)
     expect(hand.riichi_sticks).toBe(4)
-    expect(hand.riichi.size).toBe(0)
+    expect(hand.riichi.length).toBe(0)
     expect(players.GetPlayer(Winds.WEST).points).toBe(25000)
     expect(players.GetPlayer(Winds.SOUTH).points).toBe(25000)
   })

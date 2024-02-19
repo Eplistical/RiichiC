@@ -699,7 +699,7 @@ describe('Game SaveHandLog', () => {
         round_wind: Winds.EAST,
         hand: 3,
         honba: 5,
-        riichi: new Set<PlayerId>([Winds.WEST]),
+        riichi: [Winds.WEST],
         riichi_sticks: 6,
         has_next_hand: true,
         results: {

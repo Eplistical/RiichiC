@@ -69,7 +69,7 @@ const GameLogTable = computed(() => {
       } else if (pt_delta < 0) {
         row[player_id] += `(${pt_delta})`
       }
-      if (hand.riichi.has(player_id)) {
+      if (hand.riichi.includes(player_id)) {
         row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
       }
       if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai.includes(player_id)) {

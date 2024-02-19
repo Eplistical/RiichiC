@@ -60,7 +60,7 @@ export class Hand {
   round_wind: WindType
   hand: number
   honba: number
-  riichi: Set<PlayerId>
+  riichi: PlayerId[]
   riichi_sticks: number
   state: HandState
   has_next_hand: boolean
@@ -71,7 +71,7 @@ export class Hand {
     this.hand = hand
     this.honba = honba
     this.riichi_sticks = riichi_sticks
-    this.riichi = new Set<PlayerId>()
+    this.riichi = []
     this.has_next_hand = true
     this.CleanUpResults()
   }
@@ -83,7 +83,7 @@ export class Hand {
       honba: this.honba,
       riichi_sticks: this.riichi_sticks
     })
-    clone_instance.riichi = new Set<PlayerId>(this.riichi)
+    clone_instance.riichi = [...this.riichi]
     clone_instance.state = this.state
     clone_instance.has_next_hand = this.has_next_hand
     clone_instance.results.outcome = this.results.outcome
@@ -210,17 +210,17 @@ export class Hand {
   }
 
   PlayerRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (!this.riichi.has(player_id)) {
+    if (!this.riichi.includes(player_id)) {
       this.riichi_sticks += 1
-      this.riichi.add(player_id)
+      this.riichi.push(player_id)
       players.GetPlayer(player_id).ApplyPointsDelta(-ruleset.riichi_cost)
     }
   }
 
   PlayerUnRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
-    if (this.riichi.has(player_id)) {
+    if (this.riichi.includes(player_id)) {
       this.riichi_sticks -= 1
-      this.riichi.delete(player_id)
+      this.riichi.splice(this.riichi.indexOf(player_id), 1)
       players.GetPlayer(player_id).ApplyPointsDelta(ruleset.riichi_cost)
     }
   }
