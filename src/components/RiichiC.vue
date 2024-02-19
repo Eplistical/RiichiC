@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onDeactivated } from 'vue'
+import { Winds, WindsInOrder, WindsDisplayTextMap } from './seat_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
@@ -20,6 +21,7 @@ onDeactivated(() => {
 })
 
 const player_names = ref(['赤木', '原田', '瓦西子', '天'])
+const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
@@ -35,8 +37,23 @@ const ConfirmSetUpNewGameText = computed(() => {
 })
 
 function StartGame() {
-  console.log('Start game with players: ', player_names.value, ' and ruleset: ', ruleset.value)
-  game.value.InitGame({ ruleset: ruleset.value, player_names: player_names.value })
+  console.log(
+    'Start game with players: ',
+    player_names.value,
+    ', player starting winds: ',
+    player_starting_winds.value,
+    ' and ruleset: ',
+    ruleset.value
+  )
+  const [success, msg] = game.value.InitGame({
+    ruleset: ruleset.value,
+    player_names: player_names.value,
+    player_starting_winds: player_starting_winds.value
+  })
+  if (!success) {
+    alert(msg)
+    return
+  }
   game.value.Start()
   game.value.StartCurrentHand()
 }
@@ -92,7 +109,11 @@ function HandleResetGameLog(index, row) {
     <!-- Unstartd Game -->
     <div v-if="game.IsNotStarted()">
       <div class="player_name_configuration_board">
-        <PlayerNameConfigurationBoard v-model="player_names" :num_players="ruleset.num_players" />
+        <PlayerNameConfigurationBoard
+          v-model:player_names="player_names"
+          v-model:player_starting_winds="player_starting_winds"
+          :num_players="ruleset.num_players"
+        />
       </div>
       <div class="ruleset_configuration_board">
         <RuleSetConfigurationBoard v-model="ruleset" />
