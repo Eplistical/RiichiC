@@ -35,8 +35,23 @@ function SaveToStorage() {
 function LoadFromStorage() {
   console.log('Load from storage')
   let data = localStorage.getItem('data')
+  const current_time = new Date()
   data = data ? JSON.parse(data) : undefined
   if (data) {
+    if (data.timestamp) {
+      const t = new Date(data.timestamp)
+      if (current_time - t > 1000 * 60 * 60 /*1h*/) {
+        console.log(
+          'storage timestamp=',
+          data.timestamp,
+          ' current time=',
+          current_time,
+          ' cache is too old, not loading'
+        )
+        localStorage.removeItem('data')
+        return
+      }
+    }
     if ('player_starting_winds' in data) {
       player_starting_winds.value = data.player_starting_winds
       console.log('Loaded player_starting_winds=', player_starting_winds.value)
@@ -52,9 +67,6 @@ function LoadFromStorage() {
     if ('game' in data) {
       game.value = Game.ParseFromObject(data.game)
       console.log('Loaded game=', game.value)
-    }
-    if ('timestamp' in data) {
-      console.log('storage timestamp=', data.timestamp)
     }
   }
   console.log('Load from storage Done')
