@@ -60,28 +60,28 @@ function HandlePlayerRiichi(player_id, riichi) {
 .north_player_board {
   position: absolute;
   text-align: center;
-  width: 100px;
+  width: 240px;
   height: 100px;
   font-size: 20px;
 }
 .east_player_board {
   transform: rotate(0deg);
   bottom: 0;
-  left: calc(50% - 50px);
+  left: calc(50% - 120px);
 }
 .south_player_board {
   transform: rotate(270deg);
-  right: 0;
+  right: -70px;
   bottom: calc(50% - 50px);
 }
 .west_player_board {
   transform: rotate(180deg);
   top: 0;
-  left: calc(50% - 50px);
+  left: calc(50% - 120px);
 }
 .north_player_board {
   transform: rotate(90deg);
-  left: 0;
+  left: -70px;
   bottom: calc(50% - 50px);
 }
 </style>
