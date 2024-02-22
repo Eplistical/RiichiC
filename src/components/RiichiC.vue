@@ -79,7 +79,7 @@ const game = ref(new Game())
 const hand_results_form = ref({})
 
 function ConfirmResetGameLogText(row) {
-  return `回到[${row.hand_signature}结束]并进入下一局？`
+  return `回到[${row.hand_signature}结束]并清空此后所有记录？`
 }
 const ConfirmFinishGameText = computed(() => {
   return `确定结束？`

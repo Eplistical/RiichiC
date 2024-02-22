@@ -111,6 +111,7 @@ function GetPlayerName(player_id) {
         <el-table-column :label="OperationLabelText">
           <template #default="scope">
             <el-button
+              v-if="scope.$index > 0"
               size="small"
               type="warning"
               @click="$emit('resetLog', scope.$index, scope.row)"
