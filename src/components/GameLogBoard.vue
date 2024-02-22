@@ -28,7 +28,7 @@ const OperationLabelText = computed(() => {
   return `操作`
 })
 const ResetButtonText = computed(() => {
-  return `重置`
+  return `回溯`
 })
 
 const GameLogTable = computed(() => {

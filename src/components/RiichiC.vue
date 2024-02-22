@@ -78,9 +78,9 @@ const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
 
-const ConfirmResetGameLogText = computed(() => {
-  return `确定重置？`
-})
+function ConfirmResetGameLogText(row) {
+  return `回到[${row.hand_signature}结束]并进入下一局？`
+}
 const ConfirmFinishGameText = computed(() => {
   return `确定结束？`
 })
@@ -145,7 +145,7 @@ function SubmitHandResultsForm() {
 
 function HandleResetGameLog(index, row) {
   console.log('HandleResetGameLog: ', index, ' ', row)
-  if (!confirm(ConfirmResetGameLogText.value)) {
+  if (!confirm(ConfirmResetGameLogText(row))) {
     return
   }
   if (row.log_index >= game.value.log.length) {
