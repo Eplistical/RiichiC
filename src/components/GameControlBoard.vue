@@ -36,6 +36,9 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame']
   <div v-else-if="game.IsFinished()">
     <el-row>
       <el-col :span="6">
+        <el-button type="primary" @click="$emit('newGame', $event)">{{ NewGameButtonText }}</el-button>
+      </el-col>
+      <el-col :span="6">
       <download-excel 
       type="xlsx"
       :fields="game.GenerateGameLogTableFieldsForExport()"
@@ -45,9 +48,6 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame']
       >
         <el-button type="primary">{{ ExportResultButtonText }}</el-button>
       </download-excel>
-      </el-col>
-      <el-col :span="6">
-        <el-button type="primary" @click="$emit('newGame', $event)">{{ NewGameButtonText }}</el-button>
       </el-col>
     </el-row>
   </div>
