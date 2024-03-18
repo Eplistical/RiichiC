@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onDeactivated } from 'vue'
-import { Winds, WindsInOrder, WindsDisplayTextMap } from './seat_constants.ts'
+import { Winds } from './seat_constants.ts'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'

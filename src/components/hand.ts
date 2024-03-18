@@ -222,9 +222,6 @@ export class Hand {
 
     if (should_finish_game) {
       this.has_next_hand = false
-      if (this.results.outcome == HandOutcomeEnum.DRAW) {
-        this.MaybeAssignLeftOverRiichiSticks(players, ruleset)
-      }
       return undefined
     }
     return this.CreateNextHand(renchan, honba_increase, players, ruleset)
@@ -544,39 +541,5 @@ export class Hand {
       }
     }
     return points_delta
-  }
-
-  // Handle leftover riichi sticks of a game. This method assumes the hand is all last, not renchan, and the reuslt is draw.
-  private MaybeAssignLeftOverRiichiSticks(players: Players, ruleset: Ruleset) {
-    if (this.riichi_sticks == 0) {
-      return
-    }
-
-    if (ruleset.left_over_riichi_sticks == LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS) {
-      let max_pt = undefined
-      let top_players = undefined
-      for (let wind of WindsInOrder) {
-        const pt = players.GetPlayer(wind).points
-        if (max_pt == undefined || pt > max_pt) {
-          max_pt = pt
-          top_players = [wind]
-        } else if (pt == max_pt) {
-          top_players.push(wind)
-        }
-      }
-      const num_top_players = top_players.length
-      const leftover_riichi_sticks_points = this.riichi_sticks * ruleset.riichi_cost
-      let leftover_riichi_points_delta = {}
-      if (num_top_players == 3 && leftover_riichi_sticks_points % 3 != 0) {
-        leftover_riichi_points_delta[top_players[0]] = leftover_riichi_sticks_points * 0.4
-        leftover_riichi_points_delta[top_players[1]] = leftover_riichi_sticks_points * 0.3
-        leftover_riichi_points_delta[top_players[2]] = leftover_riichi_sticks_points * 0.3
-      } else {
-        for (const player_id of top_players) {
-          leftover_riichi_points_delta[player_id] = leftover_riichi_sticks_points / num_top_players
-        }
-      }
-      players.ApplyPointsDelta(leftover_riichi_points_delta)
-    }
   }
 }

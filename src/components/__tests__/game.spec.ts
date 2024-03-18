@@ -1,10 +1,10 @@
 import { beforeEach, describe, it, expect } from 'vitest'
 
 import { WindType, Winds, WindsInOrder } from '../seat_constants.ts'
-import { Ruleset } from '../rulesets.ts'
+import { LeftOverRiichiSticks, Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
 import { Game, GameState } from '../game.ts'
-import { PlayerId, Players } from '../players.ts'
+import { PlayerId, PlayerIdsInOrder, Players } from '../players.ts'
 import { PointsLadder } from '../game_constants.ts'
 
 let ruleset: Ruleset
@@ -137,7 +137,7 @@ describe('Game Init', () => {
     { starting_winds: [Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.WEST] },
     { starting_winds: [Winds.EAST, Winds.WEST, Winds.WEST, Winds.NORTH] },
     { starting_winds: [Winds.NORTH, Winds.SOUTH, Winds.WEST, Winds.NORTH] },
-    { starting_winds: [Winds.EAST, Winds.SOUTH, Winds.SOUTh, Winds.NORTH] }
+    { starting_winds: [Winds.EAST, Winds.SOUTH, Winds.SOUTH, Winds.NORTH] }
   ])(
     'should reject invalid starting winds $starting_winds',
     ({ starting_winds, expected_players_in_order }) => {
@@ -602,6 +602,8 @@ describe('Game Finish', () => {
     })
     game.Finish()
     expect(game.state).toEqual(GameState.FINISHED)
+    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
   it('Should ignore an finished game', () => {
     let game = new Game()
@@ -621,6 +623,187 @@ describe('Game Finish', () => {
     game.Finish()
     expect(game.state).toEqual(GameState.FINISHED)
   })
+
+  it('Should assign left-over riichi sticks correctly with 1 top player', () => {
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    game.StartCurrentHand()
+    game.PlayerRiichi(Winds.SOUTH)
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: [Winds.SOUTH]
+    })
+    game.Finish()
+    expect(game.state).toEqual(GameState.FINISHED)
+    expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+      24000, 28000, 24000, 24000
+    ])
+    expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([2, 1, 2, 2])
+    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
+  })
+
+  it('Should assign left-over riichi sticks correctly with 2 top players', () => {
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    game.StartCurrentHand()
+    game.PlayerRiichi(Winds.SOUTH)
+    game.PlayerRiichi(Winds.NORTH)
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: [Winds.SOUTH, Winds.NORTH]
+    })
+    game.Finish()
+    expect(game.state).toEqual(GameState.FINISHED)
+    expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+      23500, 26500, 23500, 26500
+    ])
+    expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([3, 1, 3, 1])
+    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
+  })
+
+  it('Should assign left-over riichi sticks correctly with 3 top players dividable', () => {
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    game.StartCurrentHand()
+    game.PlayerRiichi(Winds.SOUTH)
+    game.PlayerRiichi(Winds.NORTH)
+    game.PlayerRiichi(Winds.WEST)
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: [Winds.SOUTH, Winds.NORTH, Winds.WEST]
+    })
+    game.Finish()
+    expect(game.state).toEqual(GameState.FINISHED)
+    expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+      22000, 26000, 26000, 26000
+    ])
+    expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([4, 1, 1, 1])
+    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
+  })
+
+  it('Should assign left-over riichi sticks correctly with 3 top players not dividable', () => {
+    ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    // East 1-0 => [23000, 29000, 24000, 24000]
+    game.StartCurrentHand()
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: Winds.SOUTH,
+      han: 3,
+      fu: 30
+    })
+    game.SaveHandLog()
+    game.SetUpNextHandOrFinishGame()
+    // East 2-0 => [24000, 26000, 24000, 24000], sticks on-hold: 2
+    game.StartCurrentHand()
+    game.PlayerRiichi(Winds.WEST)
+    game.PlayerRiichi(Winds.NORTH)
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: [Winds.EAST, Winds.WEST, Winds.NORTH]
+    })
+    game.SaveHandLog()
+    game.SetUpNextHandOrFinishGame()
+    // East 3-1 => [25000, 23000, 25000, 25000], sticks on-hold: 2
+    game.StartCurrentHand()
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.DRAW,
+      tenpai: [Winds.EAST, Winds.WEST, Winds.NORTH]
+    })
+    game.SaveHandLog()
+    game.SetUpNextHandOrFinishGame()
+    // finish the game, leftover riichi sticks(2000) should be splitted to EAST(800), WEST(600), NORTH(600)
+    // while all 3 of them will have rank=1
+    game.Finish()
+    expect(game.state).toEqual(GameState.FINISHED)
+    expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+      25800, 23000, 25600, 25600
+    ])
+    expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([1, 4, 1, 1])
+    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
+  })
+})
+
+it('Should assign left-over riichi sticks correctly with 4 top players', () => {
+  ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+  let game = new Game()
+  game.InitGame({
+    ruleset: ruleset,
+    player_names: player_names,
+    player_starting_winds: player_starting_winds
+  })
+  game.Start()
+  game.StartCurrentHand()
+  game.PlayerRiichi(Winds.SOUTH)
+  game.PlayerRiichi(Winds.NORTH)
+  game.PlayerRiichi(Winds.WEST)
+  game.PlayerRiichi(Winds.EAST)
+  game.FinishCurrentHand({
+    outcome: HandOutcomeEnum.DRAW,
+    tenpai: [Winds.SOUTH, Winds.NORTH, Winds.WEST, Winds.EAST]
+  })
+  game.Finish()
+  expect(game.state).toEqual(GameState.FINISHED)
+  expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+    25000, 25000, 25000, 25000
+  ])
+  expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([1, 1, 1, 1])
+  expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+  expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
+})
+
+it('Should abandon left-over riichi sticks when ruleset enforce it', () => {
+  ruleset.left_over_riichi_sticks = LeftOverRiichiSticks.ABANDONED
+  let game = new Game()
+  game.InitGame({
+    ruleset: ruleset,
+    player_names: player_names,
+    player_starting_winds: player_starting_winds
+  })
+  game.Start()
+  game.StartCurrentHand()
+  game.PlayerRiichi(Winds.SOUTH)
+  game.PlayerRiichi(Winds.NORTH)
+  game.FinishCurrentHand({
+    outcome: HandOutcomeEnum.DRAW,
+    tenpai: [Winds.SOUTH, Winds.NORTH]
+  })
+  game.Finish()
+  expect(game.state).toEqual(GameState.FINISHED)
+  expect(game.players.GetPlayers(PlayerIdsInOrder).map((p) => p.points)).toEqual([
+    23500, 25500, 23500, 25500
+  ])
+  expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([3, 1, 3, 1])
+  expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+  expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(2)
 })
 
 describe('Game SaveHandLog', () => {

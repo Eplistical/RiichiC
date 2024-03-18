@@ -24,10 +24,10 @@ const RiichiLabelText = computed(() => {
   return '立直'
 })
 const AgariSummaryLabelText = computed(() => {
-  return '和/大和/立直后和'
+  return '和/大和/立直和'
 })
 const DealInSummaryLabelText = computed(() => {
-  return '铳/大铳/立直后铳'
+  return '铳/大铳/立直铳'
 })
 const TenpaiOnDrawSummaryLabelText = computed(() => {
   return '流听'
@@ -53,23 +53,18 @@ function GetPlayerPoints(player_id) {
   return props.game.players.GetPlayer(player_id).points
 }
 
+function GetPlayerRank(player_id) {
+  return props.game.players.player_rank[player_id]
+}
+
 const GameStatsBoard = computed(() => {
   console.log('Generate GameStatsBoard')
   let table = []
   // scan log to compute stats
   for (const player_id of PlayerIdsInOrder) {
     // find players rank and points from current hand
-    let points = -1
-    let rank = -1
-    if (props.game.players) {
-      const current_points = props.game.players
-        ? PlayerIdsInOrder.map((p) => GetPlayerPoints(p))
-        : [0, 0, 0, 0]
-      points = GetPlayerPoints(player_id)
-      rank = current_points.reduce((acc, val) => {
-        return val > points ? acc + 1 : acc
-      }, 1)
-    }
+    const points = GetPlayerPoints(player_id)
+    const rank = GetPlayerRank(player_id)
     // loop log to compute game stats
     let stats = {
       riichi: 0,

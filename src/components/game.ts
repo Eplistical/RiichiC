@@ -1,8 +1,7 @@
 import { Hand, HandResults } from './hand.ts'
 import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
-import { Ruleset } from './rulesets.ts'
+import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
 import { PlayerId, Players } from './players.ts'
-import RuleSetConfigurationBoardVue from './RuleSetConfigurationBoard.vue'
 
 export enum GameState {
   NOT_STARTED,
@@ -14,6 +13,8 @@ type GameLog = {
   state: GameState
   hand: Hand
   players: Players
+  // When true, the log represents delta for left-over riichi sticks assignment after a game is finished.
+  assign_left_over_riichi: Boolean
 }
 
 interface GameInterface {
@@ -51,7 +52,8 @@ export class Game {
         parsed_instance.log.push({
           state: log.state,
           hand: Hand.ParseFromObject(log.hand),
-          players: Players.ParseFromObject(obj.ruleset, log.players)
+          players: Players.ParseFromObject(obj.ruleset, log.players),
+          assign_left_over_riichi: log.assign_left_over_riichi
         })
       }
     }
@@ -129,6 +131,8 @@ export class Game {
       this.current_hand.Abandon(this.players, this.ruleset)
     }
     this.state = GameState.FINISHED
+    this.players.ComputeAndStorePlayersRank()
+    this.AssignLeftOverRiichiSticks()
     return true
   }
 
@@ -189,9 +193,26 @@ export class Game {
     const hand_log = {
       state: this.state,
       hand: this.current_hand.Clone(),
-      players: this.players.Clone(this.ruleset)
+      players: this.players.Clone(this.ruleset),
+      assign_left_over_riichi: false
     }
     console.log('Saving hand to log: ', hand_log)
+    this.log.push(hand_log)
+  }
+
+  SaveLogForLeftOverRiichiSticks() {
+    if (!this.IsFinished()) {
+      console.warn(`cannot update log for leftover riichi sticks when game state = ${this.state}`)
+      return
+    }
+    this.SanityCheckTotalPoints()
+    const hand_log = {
+      state: this.state,
+      hand: this.current_hand.Clone(),
+      players: this.players.Clone(this.ruleset),
+      assign_left_over_riichi: true
+    }
+    console.log('Saving hand to log for leftover riihci sticks: ', hand_log)
     this.log.push(hand_log)
   }
 
@@ -265,5 +286,45 @@ export class Game {
       player_names_in_order.push(player_names[player_starting_winds.indexOf(wind)])
     }
     return player_names_in_order
+  }
+
+  // Assign left over riichi sticks after a game is finsihed.
+  // This method requires the game to be finished, and the current_hand will be considered as the last hand.
+  private AssignLeftOverRiichiSticks() {
+    // do nothing if the game is not yet finished.
+    if (!this.IsFinished()) {
+      console.log('game not finished, will not assign leftover riichi sticks. Return')
+      return
+    }
+    // Split left-over riichi sticks among top players.
+    if (this.ruleset.left_over_riichi_sticks == LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS && this.current_hand.riichi_sticks > 0) {
+      let max_pt = undefined
+      let top_players = undefined
+      for (let wind of WindsInOrder) {
+        const pt = this.players.GetPlayer(wind).points
+        if (max_pt == undefined || pt > max_pt) {
+          max_pt = pt
+          top_players = [wind]
+        } else if (pt == max_pt) {
+          top_players.push(wind)
+        }
+      }
+      const num_top_players = top_players.length
+      const leftover_riichi_sticks_points =
+        this.current_hand.riichi_sticks * this.ruleset.riichi_cost
+      let leftover_riichi_points_delta = {}
+      if (num_top_players == 3 && leftover_riichi_sticks_points % 3 != 0) {
+        leftover_riichi_points_delta[top_players[0]] = leftover_riichi_sticks_points * 0.4
+        leftover_riichi_points_delta[top_players[1]] = leftover_riichi_sticks_points * 0.3
+        leftover_riichi_points_delta[top_players[2]] = leftover_riichi_sticks_points * 0.3
+      } else {
+        for (const player_id of top_players) {
+          leftover_riichi_points_delta[player_id] = leftover_riichi_sticks_points / num_top_players
+        }
+      }
+      this.players.ApplyPointsDelta(leftover_riichi_points_delta)
+      this.current_hand.riichi_sticks = 0
+    }
+    this.SaveLogForLeftOverRiichiSticks()
   }
 }

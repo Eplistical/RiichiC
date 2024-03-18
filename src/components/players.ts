@@ -1,7 +1,6 @@
 import { Ruleset } from './rulesets.ts'
 import { WindType, Winds, NextWindMap, LastWindMap, WindsInOrder } from './seat_constants.ts'
 import { PointsDelta } from './hand.ts'
-import { parse } from '../../../../Library/Caches/typescript/5.3/node_modules/parse5/dist/index'
 
 // Use beginning wind as a player's ID
 export type PlayerId = WindType
@@ -45,12 +44,15 @@ export class Player {
 // Class for all players in a game.
 export class Players {
   player_map: Record<PlayerId, Player>
+  player_rank: Record<PlayerId, number>
 
   constructor(ruleset: Ruleset, player_names: Array<string>) {
     this.player_map = {}
+    this.player_rank = {}
     let wind: WindType = Winds.EAST
     for (let i = 0; i < ruleset.num_players; ++i) {
       this.player_map[wind] = new Player(ruleset, player_names[i], wind)
+      this.player_rank[wind] = 0
       wind = NextWindMap[wind]
     }
   }
@@ -62,6 +64,7 @@ export class Players {
     )
     for (const player_id of PlayerIdsInOrder) {
       clone_instance.player_map[player_id] = this.player_map[player_id].Clone(ruleset)
+      clone_instance.player_rank[player_id] = this.player_rank[player_id]
     }
     return clone_instance
   }
@@ -77,6 +80,7 @@ export class Players {
     for (let i = 0; i < ruleset.num_players; ++i) {
       const wind = WindsInOrder[i]
       parsed_instance.GetPlayerMap()[wind] = Player.ParseFromObject(ruleset, obj.player_map[wind])
+      parsed_instance.player_rank[wind] = obj.player_rank[wind]
     }
     return parsed_instance
   }
@@ -124,6 +128,16 @@ export class Players {
   ShiftSeats() {
     for (let [player_id, player] of Object.entries(this.player_map)) {
       player.current_wind = LastWindMap[player.current_wind]
+    }
+  }
+
+  ComputeAndStorePlayersRank() {
+    const current_points = this.GetPlayers(PlayerIdsInOrder).map((p) => p.points)
+    for (let player_id of PlayerIdsInOrder) {
+      const points = this.GetPlayer(player_id).points
+      this.player_rank[player_id] = current_points.reduce((acc, val) => {
+        return val > points ? acc + 1 : acc
+      }, 1)
     }
   }
 }

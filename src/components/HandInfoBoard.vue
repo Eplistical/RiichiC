@@ -1,6 +1,6 @@
 <script setup>
 import { Hand } from './hand'
-import { Winds, WindsDisplayTextMap } from './seat_constants'
+import { WindsDisplayTextMap } from './seat_constants'
 import { computed } from 'vue'
 
 const props = defineProps({

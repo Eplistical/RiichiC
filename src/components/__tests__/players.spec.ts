@@ -1,11 +1,8 @@
 import { describe, it, expect } from 'vitest'
 
-import { mount } from '@vue/test-utils'
 import { Winds } from '../seat_constants.ts'
 import { Players } from '../players.ts'
 import { Ruleset } from '../rulesets.ts'
-import { treeEmits } from 'element-plus/es/components/tree-v2/src/virtual-tree.js'
-import { RuleTester } from 'eslint'
 
 const ruleset: Ruleset = {
   num_players: 4,
@@ -45,6 +42,7 @@ describe('Players', () => {
       false,
       false
     ])
+    expect(Object.values(players.player_rank)).toEqual([0, 0, 0, 0])
   })
   it('should get player correctly', () => {
     let players = new Players(ruleset, ['P1', 'P2', 'P3', 'P4'])
@@ -192,9 +190,35 @@ describe('Players', () => {
       [Winds.WEST]: -2000,
       [Winds.NORTH]: -1000
     })
+    players.ComputeAndStorePlayersRank()
     const obj = JSON.parse(JSON.stringify(players))
     const parsed = Players.ParseFromObject(ruleset, obj)
     expect(parsed).toEqual(players)
     expect(parsed).not.toBe(players)
+  })
+
+  it.each([
+    { points_delta: [5000, 3000, -3000, -5000], expected_rank: [1, 2, 3, 4] },
+    { points_delta: [-5000, 3000, -3000, 5000], expected_rank: [4, 2, 3, 1] },
+    { points_delta: [3000, 3000, -4000, -2000], expected_rank: [1, 1, 4, 3] },
+    { points_delta: [3000, -3000, -3000, 3000], expected_rank: [1, 3, 3, 1] },
+    { points_delta: [-1000, -1000, -1000, 3000], expected_rank: [2, 2, 2, 1] },
+    { points_delta: [1000, 1000, 1000, -3000], expected_rank: [1, 1, 1, 4] },
+    { points_delta: [0, 0, 0, 0], expected_rank: [1, 1, 1, 1] }
+  ])('should compute ranks correctly', ({ points_delta, expected_rank }) => {
+    let players = new Players(ruleset, ['P1', 'P2', 'P3', 'P4'])
+    players.ApplyPointsDelta({
+      [Winds.EAST]: points_delta[0],
+      [Winds.SOUTH]: points_delta[1],
+      [Winds.WEST]: points_delta[2],
+      [Winds.NORTH]: points_delta[3]
+    })
+    players.ComputeAndStorePlayersRank()
+    expect(players.player_rank).toEqual({
+      [Winds.EAST]: expected_rank[0],
+      [Winds.SOUTH]: expected_rank[1],
+      [Winds.WEST]: expected_rank[2],
+      [Winds.NORTH]: expected_rank[3]
+    })
   })
 })

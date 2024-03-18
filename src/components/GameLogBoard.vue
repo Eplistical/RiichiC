@@ -19,7 +19,7 @@ const HandSignatureLabelText = computed(() => {
   return `场`
 })
 const StartGameRiichiSticksLabelText = computed(() => {
-  return `开局供托`
+  return `供托`
 })
 const HandResultsSummaryLabelText = computed(() => {
   return `结局`
@@ -29,6 +29,12 @@ const OperationLabelText = computed(() => {
 })
 const ResetButtonText = computed(() => {
   return `回溯`
+})
+const EndGameText = computed(() => {
+  return `终局`
+})
+const AssignLeftOverRiichiSticksText = computed(() => {
+  return `供托分配`
 })
 
 const GameLogTable = computed(() => {
@@ -42,21 +48,27 @@ const GameLogTable = computed(() => {
     const last_hand_players = last_log ? last_log.players : null
     let row = {}
     row.log_index = i
-    row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
-    row.end_game_riichi_sticks = hand.riichi_sticks
     row.start_game_riichi_sticks = last_hand ? last_hand.riichi_sticks : 0
-    row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
 
-    if (
-      hand.results.outcome == HandOutcomeEnum.RON ||
-      hand.results.outcome == HandOutcomeEnum.TSUMO
-    ) {
-      if (typeof hand.results.han == 'string') {
-        row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han]}]`
-      } else {
-        row.results_summary += `[${hand.results.han},${hand.results.fu}]`
+    if (log.assign_left_over_riichi) {
+      row.hand_signature = EndGameText
+      row.results_summary = AssignLeftOverRiichiSticksText
+    }
+    else {
+      row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
+      row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
+      if (
+        hand.results.outcome == HandOutcomeEnum.RON ||
+        hand.results.outcome == HandOutcomeEnum.TSUMO
+      ) {
+        if (typeof hand.results.han == 'string') {
+          row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han]}]`
+        } else {
+          row.results_summary += `[${hand.results.han},${hand.results.fu}]`
+        }
       }
     }
+
     for (const player_id of PlayerIdsInOrder) {
       const end_hand_pt = players.GetPlayer(player_id).points
       const start_hand_pt = last_hand_players
