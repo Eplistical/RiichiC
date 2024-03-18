@@ -30,77 +30,9 @@ const OperationLabelText = computed(() => {
 const ResetButtonText = computed(() => {
   return `回溯`
 })
-const EndGameText = computed(() => {
-  return `终局`
-})
-const AssignLeftOverRiichiSticksText = computed(() => {
-  return `供托分配`
-})
 
 const GameLogTable = computed(() => {
-  let table = []
-  for (let i = 0; i < props.game.log.length; ++i) {
-    const log = props.game.log[i]
-    const hand = log.hand
-    const players = log.players
-    const last_log = i > 0 ? props.game.log[i - 1] : null
-    const last_hand = last_log ? last_log.hand : null
-    const last_hand_players = last_log ? last_log.players : null
-    let row = {}
-    row.log_index = i
-    row.start_game_riichi_sticks = last_hand ? last_hand.riichi_sticks : 0
-
-    if (log.assign_left_over_riichi) {
-      row.hand_signature = EndGameText
-      row.results_summary = AssignLeftOverRiichiSticksText
-    }
-    else {
-      row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
-      row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
-      if (
-        hand.results.outcome == HandOutcomeEnum.RON ||
-        hand.results.outcome == HandOutcomeEnum.TSUMO
-      ) {
-        if (typeof hand.results.han == 'string') {
-          row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han]}]`
-        } else {
-          row.results_summary += `[${hand.results.han},${hand.results.fu}]`
-        }
-      }
-    }
-
-    for (const player_id of PlayerIdsInOrder) {
-      const end_hand_pt = players.GetPlayer(player_id).points
-      const start_hand_pt = last_hand_players
-        ? last_hand_players.GetPlayer(player_id).points
-        : props.game.ruleset.starting_points
-      const pt_delta = end_hand_pt - start_hand_pt
-      row[player_id] = `${end_hand_pt}`
-      if (pt_delta > 0) {
-        row[player_id] += `(+${pt_delta})`
-      } else if (pt_delta < 0) {
-        row[player_id] += `(${pt_delta})`
-      }
-      if (hand.riichi.includes(player_id)) {
-        row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
-      }
-      if (hand.results.outcome == HandOutcomeEnum.DRAW && hand.results.tenpai.includes(player_id)) {
-        row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI]}]`
-      }
-      if (
-        (hand.results.outcome == HandOutcomeEnum.TSUMO ||
-          hand.results.outcome == HandOutcomeEnum.RON) &&
-        hand.results.winner == player_id
-      ) {
-        row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI]}]`
-      }
-      if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
-        row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN]}]`
-      }
-    }
-    table.push(row)
-  }
-  return table.reverse()
+  return props.game.GenerateGameLogTable()
 })
 
 function GetPlayerName(player_id) {

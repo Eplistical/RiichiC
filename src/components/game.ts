@@ -1,7 +1,8 @@
-import { Hand, HandResults } from './hand.ts'
+import { Hand, HandResults, HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
 import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
-import { PlayerId, Players } from './players.ts'
+import { Player, PlayerId, PlayerIdsInOrder, Players } from './players.ts'
+import { ActionBriefDisplayMap, Actions, PointsLadderBriefDisplayMap } from './game_constants'
 
 export enum GameState {
   NOT_STARTED,
@@ -240,6 +241,101 @@ export class Game {
     return true
   }
 
+  // Generate an object for game log for display/export purpose
+  GenerateGameLogTable() {
+    let table = []
+    for (let i = 0; i < this.log.length; ++i) {
+      const log = this.log[i]
+      const hand = log.hand
+      const players = log.players
+      const last_log = i > 0 ? this.log[i - 1] : null
+      const last_hand = last_log ? last_log.hand : null
+      const last_hand_players = last_log ? last_log.players : null
+      let row = {
+        log_index: i,
+        start_game_riichi_sticks: last_hand ? last_hand.riichi_sticks : 0,
+        hand_signature: null,
+        results_summary: null
+      }
+
+      if (log.assign_left_over_riichi) {
+        row.hand_signature = `终局`
+        row.results_summary = `供托分配`
+      } else {
+        row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
+        row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
+        if (
+          hand.results.outcome == HandOutcomeEnum.RON ||
+          hand.results.outcome == HandOutcomeEnum.TSUMO
+        ) {
+          if (typeof hand.results.han == 'string') {
+            row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han]}]`
+          } else {
+            row.results_summary += `[${hand.results.han},${hand.results.fu}]`
+          }
+        }
+      }
+      for (const player_id of PlayerIdsInOrder) {
+        const end_hand_pt = players.GetPlayer(player_id).points
+        const start_hand_pt = last_hand_players
+          ? last_hand_players.GetPlayer(player_id).points
+          : this.ruleset.starting_points
+        const pt_delta = end_hand_pt - start_hand_pt
+        row[player_id] = `${end_hand_pt}`
+        if (pt_delta > 0) {
+          row[player_id] += `(+${pt_delta})`
+        } else if (pt_delta < 0) {
+          row[player_id] += `(${pt_delta})`
+        }
+        if (hand.riichi.includes(player_id)) {
+          row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
+        }
+        if (
+          hand.results.outcome == HandOutcomeEnum.DRAW &&
+          hand.results.tenpai.includes(player_id)
+        ) {
+          row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI]}]`
+        }
+        if (
+          (hand.results.outcome == HandOutcomeEnum.TSUMO ||
+            hand.results.outcome == HandOutcomeEnum.RON) &&
+          hand.results.winner == player_id
+        ) {
+          row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI]}]`
+        }
+        if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
+          row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN]}]`
+        }
+      }
+      table.push(row)
+    }
+    return table.reverse()
+  }
+
+  // Generate JSON fields for game log headers for export purpose
+  GenerateGameLogTableFieldsForExport() {
+    let fields = {
+      [`场`]: 'hand_signature',
+      [`供托`]: 'start_game_riichi_sticks',
+      [`结局`]: 'results_summary'
+    }
+    for (let player_id of PlayerIdsInOrder) {
+      fields[this.GetPlayerName(player_id)] = player_id
+    }
+    return fields
+  }
+
+  // Generate file name for exported game log file (without file extension)
+  GenerateGameLogFileNameForExport() {
+    const now = new Date()
+    let result = `${now.getFullYear()}${now.getMonth().toString().padStart(2, '0')}${now.getDay().toString().padStart(2, '0')}`
+    result += `-${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`
+    for (let player_id of PlayerIdsInOrder) {
+      result += '-' + this.GetPlayerName(player_id)
+    }
+    return result
+  }
+
   private SanityCheckTotalPoints() {
     const player_total_points = this.players.TotalPoints()
     const onhold_riichi_sticks_points = this.current_hand.riichi_sticks * this.ruleset.riichi_cost
@@ -297,7 +393,10 @@ export class Game {
       return
     }
     // Split left-over riichi sticks among top players.
-    if (this.ruleset.left_over_riichi_sticks == LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS && this.current_hand.riichi_sticks > 0) {
+    if (
+      this.ruleset.left_over_riichi_sticks == LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS &&
+      this.current_hand.riichi_sticks > 0
+    ) {
       let max_pt = undefined
       let top_players = undefined
       for (let wind of WindsInOrder) {
