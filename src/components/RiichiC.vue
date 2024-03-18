@@ -40,7 +40,7 @@ function LoadFromStorage() {
   if (data) {
     if (data.timestamp) {
       const t = new Date(data.timestamp)
-      if (current_time - t > 1000 * 60 * 60 /*1h*/) {
+      if (current_time - t > 1000 * 60 * 60 * 12/*12h*/) {
         console.log(
           'storage timestamp=',
           data.timestamp,
