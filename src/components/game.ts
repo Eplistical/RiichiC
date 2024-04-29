@@ -127,7 +127,7 @@ export class Game {
     }
     if (!this.current_hand.IsFinished()) {
       console.warn(
-        'finishe game when the current hand is not finished, the current hand will be abandoned.'
+        'finish game when the current hand is not finished, the current hand will be abandoned.'
       )
       this.current_hand.Abandon(this.players, this.ruleset)
     }
@@ -287,24 +287,26 @@ export class Game {
         } else if (pt_delta < 0) {
           row[player_id] += `(${pt_delta})`
         }
-        if (hand.riichi.includes(player_id)) {
-          row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
-        }
-        if (
-          hand.results.outcome == HandOutcomeEnum.DRAW &&
-          hand.results.tenpai.includes(player_id)
-        ) {
-          row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI]}]`
-        }
-        if (
-          (hand.results.outcome == HandOutcomeEnum.TSUMO ||
-            hand.results.outcome == HandOutcomeEnum.RON) &&
-          hand.results.winner == player_id
-        ) {
-          row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI]}]`
-        }
-        if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
-          row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN]}]`
+        if (!log.assign_left_over_riichi) {
+          if (hand.riichi.includes(player_id)) {
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
+          }
+          if (
+            hand.results.outcome == HandOutcomeEnum.DRAW &&
+            hand.results.tenpai.includes(player_id)
+          ) {
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI]}]`
+          }
+          if (
+            (hand.results.outcome == HandOutcomeEnum.TSUMO ||
+              hand.results.outcome == HandOutcomeEnum.RON) &&
+            hand.results.winner == player_id
+          ) {
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI]}]`
+          }
+          if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN]}]`
+          }
         }
       }
       table.push(row)

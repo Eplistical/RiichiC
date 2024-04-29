@@ -80,6 +80,11 @@ const GameStatsBoard = computed(() => {
       tenpai_on_draw: 0
     }
     props.game.log.forEach((log) => {
+      if (log.assign_left_over_riichi) {
+        // do not take the assign_left_over_riichi meta-hand into stats
+        return;
+      }
+
       const hand = log.hand
       const player_riichi = log.hand.riichi && log.hand.riichi.includes(player_id)
       if (player_riichi) {
