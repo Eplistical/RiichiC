@@ -3,7 +3,9 @@ export const PointsLadder = Object.freeze({
   HANEMAN: 'HANEMAN',
   BAIMAN: 'BAIMAN',
   SANBAIMAN: 'SANBAIMAN',
-  YAKUMAN: 'YAKUMAN'
+  YAKUMAN: 'YAKUMAN',
+  DOUBLE_YAKUMAN: 'DOUBLE_YAKUMAN',
+  TRIPLE_YAKUMAN: 'TRIPLE_YAKUMAN'
 })
 
 export const PointsLadderDisplayMap = Object.freeze({
@@ -11,7 +13,9 @@ export const PointsLadderDisplayMap = Object.freeze({
   [PointsLadder.HANEMAN]: '跳满',
   [PointsLadder.BAIMAN]: '倍满',
   [PointsLadder.SANBAIMAN]: '三倍满',
-  [PointsLadder.YAKUMAN]: '役满'
+  [PointsLadder.YAKUMAN]: '役满',
+  [PointsLadder.DOUBLE_YAKUMAN]: '双倍役满',
+  [PointsLadder.TRIPLE_YAKUMAN]: '三倍役满'
 })
 
 export const PointsLadderBriefDisplayMap = Object.freeze({
@@ -19,7 +23,9 @@ export const PointsLadderBriefDisplayMap = Object.freeze({
   [PointsLadder.HANEMAN]: '跳',
   [PointsLadder.BAIMAN]: '倍',
   [PointsLadder.SANBAIMAN]: '三',
-  [PointsLadder.YAKUMAN]: '役'
+  [PointsLadder.YAKUMAN]: '役',
+  [PointsLadder.DOUBLE_YAKUMAN]: '双役',
+  [PointsLadder.TRIPLE_YAKUMAN]: '三役'
 })
 
 export enum Actions {
@@ -109,7 +115,9 @@ export const RonPointsNonDealer: Record<PointsMapKey, number> = Object.freeze({
   [PointsLadder.HANEMAN]: 12000,
   [PointsLadder.BAIMAN]: 16000,
   [PointsLadder.SANBAIMAN]: 24000,
-  [PointsLadder.YAKUMAN]: 32000
+  [PointsLadder.YAKUMAN]: 32000,
+  [PointsLadder.DOUBLE_YAKUMAN]: 64000,
+  [PointsLadder.TRIPLE_YAKUMAN]: 96000
 })
 
 export const RonPointsDealer = Object.freeze({
@@ -147,7 +155,9 @@ export const RonPointsDealer = Object.freeze({
   [PointsLadder.HANEMAN]: 18000,
   [PointsLadder.BAIMAN]: 24000,
   [PointsLadder.SANBAIMAN]: 36000,
-  [PointsLadder.YAKUMAN]: 48000
+  [PointsLadder.YAKUMAN]: 48000,
+  [PointsLadder.DOUBLE_YAKUMAN]: 96000,
+  [PointsLadder.TRIPLE_YAKUMAN]: 144000
 })
 
 export const TsumoPointsNonDealer = Object.freeze({
@@ -188,7 +198,9 @@ export const TsumoPointsNonDealer = Object.freeze({
   [PointsLadder.HANEMAN]: [3000, 6000],
   [PointsLadder.BAIMAN]: [4000, 8000],
   [PointsLadder.SANBAIMAN]: [6000, 12000],
-  [PointsLadder.YAKUMAN]: [8000, 16000]
+  [PointsLadder.YAKUMAN]: [8000, 16000],
+  [PointsLadder.DOUBLE_YAKUMAN]: [16000, 32000],
+  [PointsLadder.TRIPLE_YAKUMAN]: [24000, 48000]
 })
 
 export const TsumoPointsDealer = Object.freeze({
@@ -229,5 +241,7 @@ export const TsumoPointsDealer = Object.freeze({
   [PointsLadder.HANEMAN]: 6000,
   [PointsLadder.BAIMAN]: 8000,
   [PointsLadder.SANBAIMAN]: 12000,
-  [PointsLadder.YAKUMAN]: 16000
+  [PointsLadder.YAKUMAN]: 16000,
+  [PointsLadder.DOUBLE_YAKUMAN]: 32000,
+  [PointsLadder.TRIPLE_YAKUMAN]: 48000
 })
