@@ -11,8 +11,9 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
+    base: '/RiichiC/', // for github page
     proxy: {
-      '/upload_game_api': {
+      '/record_game_api': {
         target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
         changeOrigin: true,
         secure: false,
@@ -47,5 +48,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  base: "/RiichiC/",
 })
