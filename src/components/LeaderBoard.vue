@@ -86,7 +86,6 @@ function getDefaultDateRange() {
 }
 
 function getGameRecordTable(game) {
-  console.log('getGameRecordTable: ', game)
   let table = []
   for (const wind of WindsInOrder) {
     const row = {
@@ -150,14 +149,6 @@ const ComputedLeaderBoard = computed(() => {
     }
     // find max top 2 rate
     if (top2_rate > max_top2_rate) {
-      console.log(
-        '???',
-        top2_rate,
-        max_top2_rate,
-        top2_rate > max_top2_rate,
-        typeof top2_rate,
-        typeof max_top2_rate
-      )
       max_top2_rate = top2_rate
       max_top2_rate_idx = [idx]
     } else if (top2_rate == max_top2_rate) {
@@ -187,7 +178,6 @@ const ComputedLeaderBoard = computed(() => {
     table.push(row)
     idx += 1
   }
-  console.log('!!!', max_top2_rate, max_top2_rate_idx)
 
   for (let i of max_top1_rate_idx) {
     table[i].max_top1_rate = true
