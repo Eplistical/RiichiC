@@ -38,8 +38,6 @@ const GamePointsWithUmaColumnText = ref('精算')
 const GameDetailsColumnText = ref('立/和/铳')
 const TotalGameCountText = ref('总场次')
 
-const URL = 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws'
-
 onMounted(() => {
   if (init_date.value == false) {
     date_range.value = getDefaultDateRange()
@@ -50,14 +48,14 @@ onMounted(() => {
 
 function fetchLeaderBoard(start_date, end_date, player_name) {
   console.log(`FetchLeaderBoard range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(URL + `?action=get_stats&start_date=${start_date}&end_date=${end_date}`)
+  return useFetch(`/get_stats_api?action=get_stats&start_date=${start_date}&end_date=${end_date}`)
     .get()
     .json().data
 }
 
 function fetchGames(start_date, end_date, player_name) {
   console.log(`fetchGames range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(URL + `?action=list_games&start_date=${start_date}&end_date=${end_date}`)
+  return useFetch(`/list_games_api?action=list_games&start_date=${start_date}&end_date=${end_date}`)
     .get()
     .json().data
 }
@@ -216,6 +214,9 @@ const ComputedLeaderBoard = computed(() => {
       <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
     </el-row>
 
+    <el-text type="danger">
+      内测中，数据是编的
+    </el-text>
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
     <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
       <el-table-column fixed prop="name" :label="NameColumnText" />
