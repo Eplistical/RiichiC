@@ -10,8 +10,8 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/RiichiC/', // for github page
   server: {
-    base: '/RiichiC/', // for github page
     proxy: {
       '/record_game_api': {
         target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
