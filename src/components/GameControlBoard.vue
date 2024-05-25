@@ -18,15 +18,27 @@ const ExportResultButtonText = computed(() => {
 const NewGameButtonText = computed(() => {
   return '新对局'
 })
+const ToLeaderBoardText = computed(() => {
+  return '历史排名'
+})
 
-const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame'])
+const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame', 'toLeaderBoard'])
 </script>
 
 <template>
   <div v-if="game.IsNotStarted()">
-    <el-button type="primary" @click="$emit('startGame', $event)">{{
-      StartGameButtonText
-    }}</el-button>
+    <el-row>
+      <el-col :span="6">
+        <el-button type="primary" @click="$emit('startGame', $event)">{{
+          StartGameButtonText
+        }}</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button type="primary" @click="$emit('toLeaderBoard', $event)">{{
+          ToLeaderBoardText
+        }}</el-button>
+      </el-col>
+    </el-row>
   </div>
   <div v-else-if="game.IsOnGoing()">
     <el-button type="danger" @click="$emit('finishGame', $event)">{{
@@ -36,18 +48,20 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame']
   <div v-else-if="game.IsFinished()">
     <el-row>
       <el-col :span="6">
-        <el-button type="primary" @click="$emit('newGame', $event)">{{ NewGameButtonText }}</el-button>
+        <el-button type="primary" @click="$emit('newGame', $event)">{{
+          NewGameButtonText
+        }}</el-button>
       </el-col>
       <el-col :span="6">
-      <download-excel 
-      type="xlsx"
-      :fields="game.GenerateGameLogTableFieldsForExport()"
-      :data="game.GenerateGameLogTable()"
-      :name="`${game.GenerateGameLogFileNameForExport()}.xlsx`"
-      worksheet="日志"
-      >
-        <el-button type="primary">{{ ExportResultButtonText }}</el-button>
-      </download-excel>
+        <download-excel
+          type="xlsx"
+          :fields="game.GenerateGameLogTableFieldsForExport()"
+          :data="game.GenerateGameLogTable()"
+          :name="`${game.GenerateGameLogFileNameForExport()}.xlsx`"
+          worksheet="日志"
+        >
+          <el-button type="primary">{{ ExportResultButtonText }}</el-button>
+        </download-excel>
       </el-col>
     </el-row>
   </div>

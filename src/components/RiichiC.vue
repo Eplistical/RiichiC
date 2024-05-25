@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
+import { AppMode } from './app_constants'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
@@ -40,7 +41,7 @@ function LoadFromStorage() {
   if (data) {
     if (data.timestamp) {
       const t = new Date(data.timestamp)
-      if (current_time - t > 1000 * 60 * 60 * 12/*12h*/) {
+      if (current_time - t > 1000 * 60 * 60 * 12 /*12h*/) {
         console.log(
           'storage timestamp=',
           data.timestamp,
@@ -77,6 +78,7 @@ const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NO
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
+const app_mode = ref(AppMode.LEADER_BOARD)
 
 function ConfirmResetGameLogText(row) {
   return `回到[${row.hand_signature}结束]并清空此后所有记录？`
@@ -130,6 +132,14 @@ function FinishGame() {
   SaveToStorage()
 }
 
+function EnterLeaderBoardMode() {
+  app_mode.value = AppMode.LEADER_BOARD
+}
+
+function EnterGameMode() {
+  app_mode.value = AppMode.GAME
+}
+
 function SubmitHandResultsForm() {
   console.log('SubmitHandResultsForm')
   const hand_finished = game.value.FinishCurrentHand(hand_results_form.value)
@@ -164,54 +174,62 @@ function HandleResetGameLog(index, row) {
 
 <template>
   <div class="app_board">
-    <!-- Unstartd Game -->
-    <div v-if="game.IsNotStarted()">
-      <div class="player_name_configuration_board">
-        <PlayerNameConfigurationBoard
-          v-model:player_names="player_names"
-          v-model:player_starting_winds="player_starting_winds"
-          :num_players="ruleset.num_players"
-        />
+    <div v-if="app_mode == AppMode.GAME">
+      <!-- Unstartd Game -->
+      <div v-if="game.IsNotStarted()">
+        <div class="player_name_configuration_board">
+          <PlayerNameConfigurationBoard
+            v-model:player_names="player_names"
+            v-model:player_starting_winds="player_starting_winds"
+            :num_players="ruleset.num_players"
+          />
+        </div>
+        <div class="ruleset_configuration_board">
+          <RuleSetConfigurationBoard v-model="ruleset" />
+        </div>
       </div>
-      <div class="ruleset_configuration_board">
-        <RuleSetConfigurationBoard v-model="ruleset" />
-      </div>
-    </div>
 
-    <!-- On-going & Finished Game -->
-    <div v-else>
-      <div class="gameboard">
-        <GameBoard :game="game" v-model="hand_results_form.riichi_players" />
+      <!-- On-going & Finished Game -->
+      <div v-else>
+        <div class="gameboard">
+          <GameBoard :game="game" v-model="hand_results_form.riichi_players" />
+        </div>
+
+        <el-divider />
+
+        <div class="hand_results_input_board" v-if="game.IsOnGoing()">
+          <HandResultsInputBoard
+            v-model="hand_results_form"
+            :game="game"
+            @submit="SubmitHandResultsForm"
+          />
+        </div>
+
+        <div class="game_log_board">
+          <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
+        </div>
+        <div class="game_stats_board" v-if="game.IsFinished()">
+          <GameStatsBoard :game="game" />
+        </div>
       </div>
 
       <el-divider />
 
-      <div class="hand_results_input_board" v-if="game.IsOnGoing()">
-        <HandResultsInputBoard
-          v-model="hand_results_form"
+      <!-- Game control buttons -->
+      <div class="game_control_board">
+        <GameControlBoard
           :game="game"
-          @submit="SubmitHandResultsForm"
+          @startGame="StartGame"
+          @finishGame="FinishGame"
+          @newGame="SetUpNewGame"
+          @toLeaderBoard="EnterLeaderBoardMode"
         />
       </div>
-
-      <div class="game_log_board">
-        <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
-      </div>
-      <div class="game_stats_board" v-if="game.IsFinished()">
-        <GameStatsBoard :game="game" />
-      </div>
     </div>
-
-    <el-divider />
-
-    <!-- Game control buttons -->
-    <div class="game_control_board">
-      <GameControlBoard
-        :game="game"
-        @startGame="StartGame"
-        @finishGame="FinishGame"
-        @newGame="SetUpNewGame"
-      />
+    <div v-else-if="app_mode == AppMode.LEADER_BOARD">
+      <div class="leader_board">
+        <LeaderBoard class="leader_board" @toGame="EnterGameMode" />
+      </div>
     </div>
   </div>
 </template>

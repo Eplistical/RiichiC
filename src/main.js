@@ -6,8 +6,8 @@ import router from './router'
 
 const app = createApp(App)
 
-import JsonExcel from "vue-json-excel3";
-app.component("downloadExcel", JsonExcel);
+import JsonExcel from 'vue-json-excel3'
+app.component('downloadExcel', JsonExcel)
 
 app.use(router)
 app.mount('#app')

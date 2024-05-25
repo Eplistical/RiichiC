@@ -82,7 +82,7 @@ const GameStatsBoard = computed(() => {
     props.game.log.forEach((log) => {
       if (log.assign_left_over_riichi) {
         // do not take the assign_left_over_riichi meta-hand into stats
-        return;
+        return
       }
 
       const hand = log.hand
