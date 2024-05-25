@@ -10,9 +10,9 @@ export const LIST_GAMES_API = API_URL
 export const RECORD_GAME_API = API_URL
 */
 
-export const GET_STATS_API = '/get_stats_api'
-export const LIST_GAMES_API = '/list_games_api'
-export const RECORD_GAME_API = '/record_game_api'
+export const GET_STATS_API = 'get_stats_api'
+export const LIST_GAMES_API = 'list_games_api'
+export const RECORD_GAME_API = 'record_game_api'
 
 /*
 export const GET_STATS_API = 'RiichiC/get_stats_api'
