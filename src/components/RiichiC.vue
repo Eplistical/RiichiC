@@ -24,6 +24,7 @@ onDeactivated(() => {
 
 function SaveToStorage() {
   const to_save = {
+    app_mode: app_mode.value,
     player_starting_winds: player_starting_winds.value,
     player_names: player_names.value,
     ruleset: ruleset.value,
@@ -52,6 +53,10 @@ function LoadFromStorage() {
         localStorage.removeItem('data')
         return
       }
+    }
+    if ('app_mode' in data) {
+      app_mode.value = data.app_mode
+      console.log('Loaded app_mode=', app_mode.value)
     }
     if ('player_starting_winds' in data) {
       player_starting_winds.value = data.player_starting_winds
@@ -134,10 +139,12 @@ function FinishGame() {
 
 function EnterLeaderBoardMode() {
   app_mode.value = AppMode.LEADER_BOARD
+  SaveToStorage()
 }
 
 function EnterGameMode() {
   app_mode.value = AppMode.GAME
+  SaveToStorage()
 }
 
 function SubmitHandResultsForm() {
