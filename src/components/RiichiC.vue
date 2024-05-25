@@ -83,7 +83,7 @@ const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NO
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
-const app_mode = ref(AppMode.LEADER_BOARD)
+const app_mode = ref(AppMode.GAME)
 
 function ConfirmResetGameLogText(row) {
   return `回到[${row.hand_signature}结束]并清空此后所有记录？`
@@ -134,6 +134,12 @@ function FinishGame() {
   if (game.value.Finish()) {
     hand_results_form.value = {}
   }
+  SaveToStorage()
+}
+
+function GameUploaded(game_id) {
+  console.log('GameUploaded, ', game_id)
+  game.value.SetGameId(game_id)
   SaveToStorage()
 }
 
@@ -216,7 +222,7 @@ function HandleResetGameLog(index, row) {
           <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
         </div>
         <div class="game_stats_board" v-if="game.IsFinished()">
-          <GameStatsBoard :game="game" />
+          <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
         </div>
       </div>
 

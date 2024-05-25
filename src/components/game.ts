@@ -25,6 +25,9 @@ interface GameInterface {
 }
 
 export class Game {
+  // game id will be populated once after the game stats are uploaded.
+  game_id: string | undefined
+  game_date: Date
   state: GameState
   ruleset: Ruleset | undefined
   players: Players | undefined
@@ -32,6 +35,8 @@ export class Game {
   log: GameLog[]
 
   constructor() {
+    this.game_id = undefined
+    this.game_date = new Date()
     this.state = GameState.NOT_STARTED
     this.ruleset = undefined
     this.log = []
@@ -40,6 +45,8 @@ export class Game {
   // Parses an object to create a Game instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
   static ParseFromObject(obj: any): Game {
     let parsed_instance = new Game()
+    parsed_instance.game_id = obj.game_id
+    parsed_instance.game_date = new Date(obj.game_date)
     parsed_instance.state = obj.state
     parsed_instance.ruleset = obj.ruleset
     if ('players' in obj) {
@@ -98,6 +105,18 @@ export class Game {
 
   IsFinished() {
     return this.state == GameState.FINISHED
+  }
+
+  Uploaded() {
+    return !(this.game_id == undefined)
+  }
+
+  SetGameId(game_id) {
+    if (this.game_id == undefined) {
+      this.game_id = game_id
+      return true
+    }
+    return false
   }
 
   GetPlayerName(player_id: PlayerId) {

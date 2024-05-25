@@ -10,6 +10,16 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      '/upload_game_api': {
+        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/upload_game_api/, '')
+      }
+    }
+  },
   plugins: [
     vue(),
     vueJsx(),

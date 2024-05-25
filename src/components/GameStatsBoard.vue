@@ -1,11 +1,14 @@
 <script setup>
 import { Game } from './game'
 import { PlayerIdsInOrder } from './players'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { WindsDisplayTextMap } from './seat_constants'
 import { NumberDisplayMap } from './game_constants'
 import { HandOutcomeEnum } from './hand'
+import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
+
+const emit = defineEmits(['gameUploaded'])
 
 const props = defineProps({
   game: Game
@@ -33,6 +36,10 @@ const TenpaiOnDrawSummaryLabelText = computed(() => {
   return '流听'
 })
 
+const UploadGameStatsButtonText = ref('上传结果')
+
+const game_stats = ref({})
+
 function GetPlayerSummary(player_id, rank) {
   return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}起][${NumberDisplayMap[rank]}位]`
 }
@@ -57,16 +64,65 @@ function GetPlayerRank(player_id) {
   return props.game.players.player_rank[player_id]
 }
 
-const GameStatsBoard = computed(() => {
-  console.log('Generate GameStatsBoard')
-  let table = []
-  // scan log to compute stats
+function UploadGameStats() {
+  console.log('UploadGameStats: ', game_stats.value)
+  if (!game_stats.value) {
+    console.warn('Invalid game stats to upload:', game_stats.value)
+    alert('数据丢失，无法上传')
+    return
+  }
+  if (props.game.Uploaded()) {
+    alert('本局游戏已经上传，无需多次上传')
+    return
+  }
+  const token = prompt('请输入上传口令')
+  console.log('game date = ', props.game.game_date, typeof props.game.game_date)
+  const game_date =
+    props.game.game_date.getFullYear() * 10000 +
+    (props.game.game_date.getMonth() + 1) * 100 +
+    props.game.game_date.getDate()
+  const data_to_post = {
+    action: 'record_game',
+    token: token,
+    game: {
+      game_date: game_date
+    }
+  }
+  for (const player_id of PlayerIdsInOrder) {
+    const stats = game_stats.value[player_id]
+    data_to_post.game[player_id] = {
+      name: GetPlayerName(player_id),
+      points: stats.points,
+      riichi: stats.riichi,
+      agari: stats.agari,
+      deal_in: stats.deal_in
+    }
+  }
+  console.log('Game data to post: ', data_to_post)
+  const { data, onFetchResponse, onFetchError } = useFetch('/upload_game_api/data')
+    .post(data_to_post)
+    .text()
+  onFetchResponse((response) => {
+    const game_id = JSON.parse(data.value).game_id
+    alert(`数据上传成功! 游戏ID: ${game_id}`)
+    emit('gameUploaded', game_id)
+  })
+  onFetchError((error) => {
+    alert(`数据上传失败: ${data.value}`)
+  })
+}
+
+function ComputeGameStats() {
+  console.log('ComputeGameStats')
   for (const player_id of PlayerIdsInOrder) {
     // find players rank and points from current hand
     const points = GetPlayerPoints(player_id)
     const rank = GetPlayerRank(player_id)
     // loop log to compute game stats
     let stats = {
+      points: points,
+      rank: rank,
+
       riichi: 0,
 
       agari: 0,
@@ -116,9 +172,19 @@ const GameStatsBoard = computed(() => {
         }
       }
     })
+    game_stats.value[player_id] = stats
+  }
+}
+
+const GameStatsBoard = computed(() => {
+  console.log('Generate GameStatsBoard')
+  ComputeGameStats()
+  let table = []
+  for (const player_id of PlayerIdsInOrder) {
+    const stats = game_stats.value[player_id]
     const row = {
-      player_summary: GetPlayerSummary(player_id, rank),
-      points: points,
+      player_summary: GetPlayerSummary(player_id, stats.rank),
+      points: stats.points,
       riichi: stats.riichi,
       agari_summary: GetPlayerAgariSummary(player_id, stats),
       deal_in_summary: GetPlayerDealInSummary(player_id, stats),
@@ -141,6 +207,10 @@ const GameStatsBoard = computed(() => {
         <el-table-column prop="deal_in_summary" :label="DealInSummaryLabelText" />
         <el-table-column prop="tenpai_on_draw" :label="TenpaiOnDrawSummaryLabelText" />
       </el-table>
+      <el-divider />
+      <el-button v-if="props.game.IsFinished()" type="success" @click="UploadGameStats">
+        {{ UploadGameStatsButtonText }}</el-button
+      >
     </el-collapse-item>
   </el-collapse>
 </template>

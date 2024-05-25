@@ -17,8 +17,10 @@ const LeaderBoardTitleText = ref('排行榜')
 const GameRecordsTitleText = ref('具体场次')
 const ToGameText = ref('返回')
 
+const StartDateText = ref('开始日期')
+const EndDateText = ref('结束日期')
+
 const NameColumnText = ref('选手')
-const RankColumnText = ref('顺位')
 const PointsWithUmaColumnText = ref('积分')
 const PointsColumnText = ref('素点')
 const GamesCountText = ref('试合')
@@ -29,17 +31,12 @@ const Top3RateColumnText = ref('避四率')
 const MaxPointsColumnText = ref('最高得点')
 const AvgPointsColumnText = ref('场均得点')
 
-const GameDateColumnText = ref('游戏编号')
-const EastColumnText = ref('東起')
-const SouthColumnText = ref('南起')
-const WestColumnText = ref('西起')
-const NorthColumnText = ref('北起')
-
 const GamePlayerColumnText = ref('选手')
 const GameRankColumnText = ref('点数顺位')
 const GamePointsColumnText = ref('点数')
 const GamePointsWithUmaColumnText = ref('精算')
 const GameDetailsColumnText = ref('立/和/铳')
+const TotalGameCountText = ref('总场次')
 
 const URL = 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws'
 
@@ -126,7 +123,7 @@ const ComputedLeaderBoard = computed(() => {
       name: `[${idx + 1}]${stats.player_name}`,
       points_with_uma: (stats.points_sum_with_uma - 25000 * stats.games_count) / 1000,
       points: (stats.points_sum - 25000 * stats.games_count) / 1000,
-      games_count: `${stats.games_count} [${stats.place_count_map[1]}|${stats.place_count_map[2]}|${stats.place_count_map[3]}|${stats.place_count_map[4]}]`,
+      games_count: `${stats.games_count}[${stats.place_count_map[1]}|${stats.place_count_map[2]}|${stats.place_count_map[3]}|${stats.place_count_map[4]}]`,
       avg_rank: (stats.rank_sum / stats.games_count).toFixed(2),
       top1_rate: `${top1_rate.toFixed(1)}%`,
       top2_rate: `${top2_rate.toFixed(1)}%`,
@@ -202,14 +199,25 @@ const ComputedLeaderBoard = computed(() => {
   <div>
     <el-divider> {{ DateRangeTitleText }} </el-divider>
     <el-row>
-      <el-date-picker v-model="date_range" type="daterange" range-separator="至" size="large" />
+      <el-col :span="6">
+        {{ StartDateText }}
+      </el-col>
+      <el-col :span="18">
+        <el-date-picker v-model="date_range[0]" type="date" />
+      </el-col>
+      <el-col :span="6">
+        {{ EndDateText }}
+      </el-col>
+      <el-col :span="18">
+        <el-date-picker v-model="date_range[1]" type="date" />
+      </el-col>
     </el-row>
     <el-row>
       <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
     </el-row>
 
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
-    <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe>
+    <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
       <el-table-column fixed prop="name" :label="NameColumnText" />
       <el-table-column prop="points_with_uma" :label="PointsWithUmaColumnText">
         <template #default="scope">
@@ -266,16 +274,21 @@ const ComputedLeaderBoard = computed(() => {
     </el-table>
     <el-divider />
     <el-collapse>
-      <el-collapse-item :title="GameRecordsTitleText">
+      <el-collapse-item
+        :title="`${TotalGameCountText}: ${raw_games.value && !raw_games.value.value ? raw_games.value.count : 0}`"
+      >
         <div v-if="raw_games.value && !raw_games.value.value">
           <div v-for="i in raw_games.value.count">
             <el-text type="primary">
-              {{ `${raw_games.value.games[i - 1].game_date}-${i - 1}` }}
+              {{
+                `[${raw_games.value.games[i - 1].game_date}] ${raw_games.value.games[i - 1].game_id}`
+              }}
             </el-text>
             <el-table
               :data="getGameRecordTable(raw_games.value.games[i - 1])"
               style="width: 100%"
               stripe
+              table-layout="auto"
             >
               <el-table-column prop="player" :label="GamePlayerColumnText" />
               <el-table-column prop="rank" :label="GameRankColumnText" />
