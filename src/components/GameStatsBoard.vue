@@ -7,6 +7,7 @@ import { NumberDisplayMap } from './game_constants'
 import { HandOutcomeEnum } from './hand'
 import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
+import { RECORD_GAME_API } from './app_constants'
 
 const emit = defineEmits(['gameUploaded'])
 
@@ -99,7 +100,7 @@ function UploadGameStats() {
     }
   }
   console.log('Game data to post: ', data_to_post)
-  const { data, onFetchResponse, onFetchError } = useFetch('/upload_game_api/data')
+  const { data, onFetchResponse, onFetchError } = useFetch(RECORD_GAME_API)
     .post(data_to_post)
     .text()
   onFetchResponse((response) => {

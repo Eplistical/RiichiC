@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useFetch } from '@vueuse/core'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { NumberDisplayMap } from './game_constants'
+import { GET_STATS_API, LIST_GAMES_API } from './app_constants';
 
 const emit = defineEmits(['toGame'])
 
@@ -48,14 +49,14 @@ onMounted(() => {
 
 function fetchLeaderBoard(start_date, end_date, player_name) {
   console.log(`FetchLeaderBoard range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(`/get_stats_api?action=get_stats&start_date=${start_date}&end_date=${end_date}`)
+  return useFetch(`${GET_STATS_API}?action=get_stats&start_date=${start_date}&end_date=${end_date}`)
     .get()
     .json().data
 }
 
 function fetchGames(start_date, end_date, player_name) {
   console.log(`fetchGames range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(`/list_games_api?action=list_games&start_date=${start_date}&end_date=${end_date}`)
+  return useFetch(`${LIST_GAMES_API}?action=list_games&start_date=${start_date}&end_date=${end_date}`)
     .get()
     .json().data
 }
