@@ -16,7 +16,7 @@ const RefreshDataText = ref('刷新数据')
 const DateRangeTitleText = ref('统计范围')
 const LeaderBoardTitleText = ref('排行榜')
 const GameRecordsTitleText = ref('具体场次')
-const ToGameText = ref('返回')
+const ToGameText = ref('返回游戏')
 
 const StartDateText = ref('开始日期')
 const EndDateText = ref('结束日期')
@@ -98,6 +98,12 @@ function getGameRecordTable(game) {
   return table
 }
 
+function GenerateGameLabel(game) {
+  const timestamp = game.record_timestamp
+  const id = game.game_id
+  return `[${timestamp.substr(0, timestamp.length - 3)}] ${id.substr(0, 8)}`
+}
+
 const ComputedLeaderBoard = computed(() => {
   console.log('Generate ComputedLeaderBoard')
   let table = []
@@ -171,7 +177,7 @@ const ComputedLeaderBoard = computed(() => {
       max_avg_points = avg_points
       max_avg_points_idx = [idx]
     } else if (avg_points == max_avg_points) {
-      max_avg_points.push(idx)
+      max_avg_points_idx.push(idx)
     }
     table.push(row)
     idx += 1
@@ -199,6 +205,7 @@ const ComputedLeaderBoard = computed(() => {
 <template>
   <div>
     <el-divider> {{ DateRangeTitleText }} </el-divider>
+    <el-space wrap>
     <el-row>
       <el-col :span="6">
         {{ StartDateText }}
@@ -206,6 +213,8 @@ const ComputedLeaderBoard = computed(() => {
       <el-col :span="18">
         <el-date-picker v-model="date_range[0]" type="date" />
       </el-col>
+    </el-row>
+    <el-row>
       <el-col :span="6">
         {{ EndDateText }}
       </el-col>
@@ -215,7 +224,9 @@ const ComputedLeaderBoard = computed(() => {
     </el-row>
     <el-row>
       <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
+      <el-button type="primary" @click="$emit('toGame', $event)">{{ ToGameText }}</el-button>
     </el-row>
+    </el-space>
 
     <el-text type="danger"> 内测中，数据是编的 </el-text>
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
@@ -282,8 +293,8 @@ const ComputedLeaderBoard = computed(() => {
         <div v-if="raw_games.value && !raw_games.value.value">
           <div v-for="i in raw_games.value.count">
             <el-text type="primary">
-              {{
-                `[${raw_games.value.games[i - 1].game_date}] ${raw_games.value.games[i - 1].game_id}`
+              {{ 
+                GenerateGameLabel(raw_games.value.games[i - 1])
               }}
             </el-text>
             <el-table
@@ -303,8 +314,5 @@ const ComputedLeaderBoard = computed(() => {
       </el-collapse-item>
     </el-collapse>
     <el-divider />
-    <el-row>
-      <el-button type="primary" @click="$emit('toGame', $event)">{{ ToGameText }}</el-button>
-    </el-row>
   </div>
 </template>
