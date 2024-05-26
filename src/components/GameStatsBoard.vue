@@ -78,7 +78,7 @@ function UploadGameStats() {
   }
   const token = prompt('请输入上传口令')
   if (token == undefined || token == null) {
-    return 
+    return
   }
   console.log('game date = ', props.game.game_date, typeof props.game.game_date)
   const game_date =
