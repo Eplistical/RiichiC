@@ -89,8 +89,8 @@ function getGameRecordTable(game) {
     const row = {
       player: `[${WindsDisplayTextMap[wind]}]${game[wind].name}`,
       rank: `${NumberDisplayMap[game[wind].rank]}位`,
-      points: `${game[wind].points}`,
-      points_with_uma: `${((game[wind].points_with_uma - 25000) / 1000).toFixed(1)}`,
+      points: game[wind].points,
+      points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
       game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}`
     }
     table.push(row)
@@ -221,14 +221,14 @@ const ComputedLeaderBoard = computed(() => {
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
     <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
       <el-table-column fixed prop="name" :label="NameColumnText" />
-      <el-table-column prop="points_with_uma" :label="PointsWithUmaColumnText">
+      <el-table-column prop="points_with_uma" :label="PointsWithUmaColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.points_with_uma >= 0 ? `success` : `danger`">
             {{ scope.row.points_with_uma }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="points" :label="PointsColumnText">
+      <el-table-column prop="points" :label="PointsColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.points >= 0 ? `success` : `danger`">
             {{ scope.row.points }}

@@ -88,7 +88,6 @@ const app_mode = ref(AppMode.GAME)
 function HasDuplication(arr) {
   let seen = []
   for (const x of arr) {
-    console.log('>>>', x, seen, seen.includes(x))
     if (seen.includes(x) == true) {
       return {
         duplicated: true,
