@@ -78,12 +78,30 @@ function LoadFromStorage() {
   console.log('Load from storage Done')
 }
 
-const player_names = ref(['赤木', '原田', '瓦西子', '天'])
+const player_names = ref([undefined, undefined, undefined, undefined])
 const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
 const app_mode = ref(AppMode.GAME)
+
+function HasDuplication(arr) {
+  let seen = []
+  for (const x of arr) {
+    console.log('>>>', x, seen, seen.includes(x))
+    if (seen.includes(x) == true) {
+      return {
+        duplicated: true,
+        item: x
+      }
+    }
+    seen.push(x)
+  }
+  return {
+    duplicated: false,
+    item: null
+  }
+}
 
 function ConfirmResetGameLogText(row) {
   return `回到[${row.hand_signature}结束]并清空此后所有记录？`
@@ -96,6 +114,11 @@ const ConfirmSetUpNewGameText = computed(() => {
 })
 
 function StartGame() {
+  let { duplicated, item } = HasDuplication(player_names.value)
+  if (duplicated == true) {
+    alert(`玩家重复: ${item}`)
+    return
+  }
   console.log(
     'Start game with players: ',
     player_names.value,

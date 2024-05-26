@@ -11,46 +11,6 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/RiichiC/', // for github page
-  server: {
-    proxy: {
-      '/record_game_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/record_game_api/, '')
-      },
-      '/list_games_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/list_games_api/, '')
-      },
-      '/get_stats_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/get_stats_api/, '')
-      },
-      'RiichiC/record_game_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/\/record_game_api/, '')
-      },
-      'RiichiC/list_games_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/\/list_games_api/, '')
-      },
-      'RiichiC/get_stats_api': {
-        target: 'https://uf7tin6si3sgnif7truyy3rrwm0kzqjd.lambda-url.us-east-2.on.aws',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/\/get_stats_api/, '')
-      },
-    }
-  },
   plugins: [
     vue(),
     vueJsx(),

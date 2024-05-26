@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useFetch } from '@vueuse/core'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { NumberDisplayMap } from './game_constants'
-import { GET_STATS_API, LIST_GAMES_API } from './app_constants';
+import { GET_STATS_API, LIST_GAMES_API } from './app_constants'
 
 const emit = defineEmits(['toGame'])
 
@@ -56,7 +56,9 @@ function fetchLeaderBoard(start_date, end_date, player_name) {
 
 function fetchGames(start_date, end_date, player_name) {
   console.log(`fetchGames range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(`${LIST_GAMES_API}?action=list_games&start_date=${start_date}&end_date=${end_date}`)
+  return useFetch(
+    `${LIST_GAMES_API}?action=list_games&start_date=${start_date}&end_date=${end_date}`
+  )
     .get()
     .json().data
 }
@@ -215,9 +217,7 @@ const ComputedLeaderBoard = computed(() => {
       <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
     </el-row>
 
-    <el-text type="danger">
-      内测中，数据是编的
-    </el-text>
+    <el-text type="danger"> 内测中，数据是编的 </el-text>
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
     <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
       <el-table-column fixed prop="name" :label="NameColumnText" />

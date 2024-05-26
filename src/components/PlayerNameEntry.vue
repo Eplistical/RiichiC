@@ -2,6 +2,10 @@
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { computed } from 'vue'
 
+const props = defineProps({
+  registered_players: Array
+})
+
 const player_name = defineModel('player_name')
 const player_starting_wind = defineModel('player_starting_wind')
 
@@ -20,10 +24,7 @@ function StartigWindText(wind) {
       {{ StartigWindText(wind) }}
     </el-radio-button>
   </el-radio-group>
-  <el-input
-    v-model="player_name"
-    size="default"
-    clearable
-    :placeholder="PlayerNameInputPlaceHolderText"
-  />
+  <el-select v-model="player_name" filterable allow-create>
+    <el-option v-for="player in registered_players" :key="player" :label="player" :value="player" />
+  </el-select>
 </template>
