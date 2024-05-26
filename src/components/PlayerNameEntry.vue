@@ -14,16 +14,18 @@ const PlayerNameInputPlaceHolderText = computed(() => {
 })
 
 function StartigWindText(wind) {
-  return `${WindsDisplayTextMap[wind]}起`
+  return `${WindsDisplayTextMap[wind]}`
 }
 </script>
 
 <template>
-  <el-radio-group v-for="wind in WindsInOrder" v-model="player_starting_wind">
-    <el-radio-button :label="wind">
-      {{ StartigWindText(wind) }}
-    </el-radio-button>
-  </el-radio-group>
+  <el-space wrap>
+    <el-radio-group v-for="wind in WindsInOrder" v-model="player_starting_wind">
+      <el-radio-button :label="wind">
+        {{ StartigWindText(wind) }}
+      </el-radio-button>
+    </el-radio-group>
+  </el-space>
   <el-select v-model="player_name" filterable allow-create>
     <el-option v-for="player in registered_players" :key="player" :label="player" :value="player" />
   </el-select>

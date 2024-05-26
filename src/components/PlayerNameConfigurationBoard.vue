@@ -35,11 +35,11 @@ function GetRegisteredPlayers() {
 
 <template>
   <el-divider>{{ PlayerNameDividerText }}</el-divider>
-  <el-row v-for="i in num_players">
+  <div v-for="i in num_players">
     <PlayerNameEntry
       v-model:player_name="player_names[i - 1]"
       v-model:player_starting_wind="player_starting_winds[i - 1]"
       :registered_players="registered_players"
     />
-  </el-row>
+  </div>
 </template>

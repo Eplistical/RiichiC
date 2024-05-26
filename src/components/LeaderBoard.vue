@@ -15,8 +15,7 @@ const date_range = ref([])
 const RefreshDataText = ref('刷新数据')
 const DateRangeTitleText = ref('统计范围')
 const LeaderBoardTitleText = ref('排行榜')
-const GameRecordsTitleText = ref('具体场次')
-const ToGameText = ref('返回')
+const ToGameText = ref('返回主界面')
 
 const StartDateText = ref('开始日期')
 const EndDateText = ref('结束日期')
@@ -197,25 +196,32 @@ const ComputedLeaderBoard = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div class="app_board">
     <el-divider> {{ DateRangeTitleText }} </el-divider>
-    <el-row>
-      <el-col :span="6">
-        {{ StartDateText }}
-      </el-col>
-      <el-col :span="18">
-        <el-date-picker v-model="date_range[0]" type="date" />
-      </el-col>
-      <el-col :span="6">
-        {{ EndDateText }}
-      </el-col>
-      <el-col :span="18">
-        <el-date-picker v-model="date_range[1]" type="date" />
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
-    </el-row>
+    <el-space wrap>
+      <el-row>
+        <el-col :span="6">
+          {{ StartDateText }}
+        </el-col>
+        <el-col :span="18">
+          <el-date-picker v-model="date_range[0]" type="date" />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="6">
+          {{ EndDateText }}
+        </el-col>
+        <el-col :span="18">
+          <el-date-picker v-model="date_range[1]" type="date" />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
+        <el-button type="primary" tag="a" href="/" rel="noopener noreferrer">
+          {{ ToGameText }}
+        </el-button>
+      </el-row>
+    </el-space>
 
     <el-text type="danger"> 内测中，数据是编的 </el-text>
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
@@ -283,7 +289,7 @@ const ComputedLeaderBoard = computed(() => {
           <div v-for="i in raw_games.value.count">
             <el-text type="primary">
               {{
-                `[${raw_games.value.games[i - 1].game_date}] ${raw_games.value.games[i - 1].game_id}`
+                `[${raw_games.value.games[i - 1].game_date}] ${raw_games.value.games[i - 1].game_id} [${raw_games.value.games[i - 1].record_timestamp}]`
               }}
             </el-text>
             <el-table
@@ -303,8 +309,17 @@ const ComputedLeaderBoard = computed(() => {
       </el-collapse-item>
     </el-collapse>
     <el-divider />
-    <el-row>
-      <el-button type="primary" @click="$emit('toGame', $event)">{{ ToGameText }}</el-button>
-    </el-row>
   </div>
 </template>
+
+<style scoped>
+.app_board {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: white;
+  color: black;
+}
+</style>
