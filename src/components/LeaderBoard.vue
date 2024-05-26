@@ -97,6 +97,12 @@ function getGameRecordTable(game) {
   return table
 }
 
+function GenerateGameLabel(game) {
+  const timestamp = game.record_timestamp
+  const game_id = game.game_id
+  return `[${timestamp.substr(0, timestamp.length - 3)}] ${game_id.substr(0, 8)}`
+}
+
 const ComputedLeaderBoard = computed(() => {
   console.log('Generate ComputedLeaderBoard')
   let table = []
@@ -288,9 +294,7 @@ const ComputedLeaderBoard = computed(() => {
         <div v-if="raw_games.value && !raw_games.value.value">
           <div v-for="i in raw_games.value.count">
             <el-text type="primary">
-              {{
-                `[${raw_games.value.games[i - 1].game_date}] ${raw_games.value.games[i - 1].game_id} [${raw_games.value.games[i - 1].record_timestamp}]`
-              }}
+              {{ GenerateGameLabel(raw_games.value.games[i - 1]) }}
             </el-text>
             <el-table
               :data="getGameRecordTable(raw_games.value.games[i - 1])"
