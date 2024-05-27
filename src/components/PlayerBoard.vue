@@ -1,44 +1,116 @@
 <script setup>
-import { Player } from './players'
-import { Winds, WindsDisplayTextMap } from './seat_constants'
+import { Players } from './players'
+import { LastWindMap, NextWindMap, Winds, WindsDisplayTextMap } from './seat_constants'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
   player_id: String,
-  player: Player,
+  players: Players,
   riichi_disabled: Boolean
 })
 
 const riichi_players = defineModel()
 const emit = defineEmits(['riichi'])
+const show_point_diff = ref(false)
+const display_mode_timeout_id = ref(undefined)
+
+function GetCurPlayer() {
+  return props.players.GetPlayer(props.player_id)
+}
+
+function GetRightPlayer() {
+  return props.players.GetPlayer(NextWindMap[props.player_id])
+}
+
+function GetLeftPlayer() {
+  return props.players.GetPlayer(LastWindMap[props.player_id])
+}
+
+function GetOppoPlayer() {
+  return props.players.GetPlayer(NextWindMap[NextWindMap[props.player_id]])
+}
 
 const PlayerName = computed(() => {
-  return props.player.name
+  return GetCurPlayer().name
 })
 
 const PlayerCurrentWind = computed(() => {
-  return WindsDisplayTextMap[props.player.current_wind]
+  return WindsDisplayTextMap[GetCurPlayer().current_wind]
 })
 
 const PlayerPoints = computed(() => {
-  return props.player.points
+  return GetCurPlayer().points
+})
+
+function FormatPointsDiff(diff) {
+  return `${(diff / 1000).toFixed(1)}k`
+}
+
+const OppoPlayerPointsDiff = computed(() => {
+  const pt = GetCurPlayer().points
+  const oppo_diff = pt - GetOppoPlayer().points
+  return FormatPointsDiff(oppo_diff)
+})
+
+const LeftPlayerPointsDiff = computed(() => {
+  const pt = GetCurPlayer().points
+  const left_diff = pt - GetLeftPlayer().points
+  return FormatPointsDiff(left_diff)
+})
+
+const RightPlayerPointsDiff = computed(() => {
+  const pt = GetCurPlayer().points
+  const right_diff = pt - GetRightPlayer().points
+  return FormatPointsDiff(right_diff)
 })
 
 const IsDealer = computed(() => {
-  return props.player.current_wind == Winds.EAST
+  return GetCurPlayer().current_wind == Winds.EAST
 })
 
 const RiichiText = computed(() => {
   return '立直'
 })
+
+function ToggleDisplayMode() {
+  console.log(`ToggleDisplayMode`)
+  show_point_diff.value = !show_point_diff.value
+  if (show_point_diff.value == true) {
+    if (display_mode_timeout_id.value != undefined) {
+      clearTimeout(display_mode_timeout_id.value)
+    }
+    display_mode_timeout_id.value = setTimeout(function () {
+      show_point_diff.value = false
+    }, 2000)
+  }
+}
 </script>
 
 <template>
   <div :class="IsDealer ? 'dealer_board' : 'non_dealer_board'">
-    <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
-    <div>
-      {{ PlayerPoints }}
+    <div class="player_info_div" v-on:click="ToggleDisplayMode()">
+      <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
+
+      <div v-if="!show_point_diff">
+        {{ PlayerPoints }}
+      </div>
+      <div v-else>
+        <el-row>
+          <el-col :span="3" />
+          <el-col :span="6">
+            {{ LeftPlayerPointsDiff }}
+          </el-col>
+          <el-col :span="6">
+            {{ OppoPlayerPointsDiff }}
+          </el-col>
+          <el-col :span="6">
+            {{ RightPlayerPointsDiff }}
+          </el-col>
+          <el-col :span="3" />
+        </el-row>
+      </div>
     </div>
+
     <el-checkbox-group fill="#f7bc45" v-model="riichi_players">
       <el-checkbox-button
         :label="player_id"

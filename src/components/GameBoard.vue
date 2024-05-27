@@ -35,7 +35,7 @@ function HandlePlayerRiichi(player_id, riichi) {
     <PlayerBoard
       v-model="riichi_players"
       :player_id="player_id"
-      :player="game.players.GetPlayer(player_id)"
+      :players="game.players"
       :riichi_disabled="!GameIsOnGoing"
       @riichi="HandlePlayerRiichi(player_id, $event)"
     />

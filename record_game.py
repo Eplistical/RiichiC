@@ -42,8 +42,8 @@ def run(args):
     "north": args.north,
   }
 
-  print("game to upload:")
-  pprint(game)
+  #print("game to upload:")
+  #pprint(game)
 
   resp = requests.post(URL, json={
     "action": "record_game",
