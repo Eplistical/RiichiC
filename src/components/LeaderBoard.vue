@@ -99,9 +99,7 @@ function getGameRecordTable(game) {
 }
 
 function GenerateGameLabel(game) {
-  const timestamp = game.record_timestamp
-  const id = game.game_id
-  return `[${timestamp.substr(0, timestamp.length - 3)}] ${id.substr(0, 8)}`
+  return `[${game.game_date}] ${game.game_id.substr(0, 8)}`
 }
 
 const ComputedLeaderBoard = computed(() => {
@@ -206,26 +204,26 @@ const ComputedLeaderBoard = computed(() => {
   <div>
     <el-divider> {{ DateRangeTitleText }} </el-divider>
     <el-space wrap>
-    <el-row>
-      <el-col :span="6">
-        {{ StartDateText }}
-      </el-col>
-      <el-col :span="18">
-        <el-date-picker v-model="date_range[0]" type="date" />
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="6">
-        {{ EndDateText }}
-      </el-col>
-      <el-col :span="18">
-        <el-date-picker v-model="date_range[1]" type="date" />
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
-      <el-button type="primary" @click="$emit('toGame', $event)">{{ ToGameText }}</el-button>
-    </el-row>
+      <el-row>
+        <el-col :span="6">
+          {{ StartDateText }}
+        </el-col>
+        <el-col :span="18">
+          <el-date-picker v-model="date_range[0]" type="date" />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="6">
+          {{ EndDateText }}
+        </el-col>
+        <el-col :span="18">
+          <el-date-picker v-model="date_range[1]" type="date" />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-button type="primary" @click="RefreshData">{{ RefreshDataText }}</el-button>
+        <el-button type="primary" @click="$emit('toGame', $event)">{{ ToGameText }}</el-button>
+      </el-row>
     </el-space>
 
     <el-text type="danger"> 内测中</el-text>
@@ -293,9 +291,7 @@ const ComputedLeaderBoard = computed(() => {
         <div v-if="raw_games.value && !raw_games.value.value">
           <div v-for="i in raw_games.value.count">
             <el-text type="primary">
-              {{ 
-                GenerateGameLabel(raw_games.value.games[i - 1])
-              }}
+              {{ GenerateGameLabel(raw_games.value.games[i - 1]) }}
             </el-text>
             <el-table
               :data="getGameRecordTable(raw_games.value.games[i - 1])"
