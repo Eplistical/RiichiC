@@ -129,12 +129,12 @@ const ComputedLeaderBoard = computed(() => {
       points_with_uma: (stats.points_sum_with_uma - 25000 * stats.games_count) / 1000,
       points: (stats.points_sum - 25000 * stats.games_count) / 1000,
       games_count: `${stats.games_count}[${stats.place_count_map[1]}|${stats.place_count_map[2]}|${stats.place_count_map[3]}|${stats.place_count_map[4]}]`,
-      avg_rank: (stats.rank_sum / stats.games_count).toFixed(2),
-      top1_rate: `${top1_rate.toFixed(1)}%`,
-      top2_rate: `${top2_rate.toFixed(1)}%`,
-      top3_rate: `${top3_rate.toFixed(1)}%`,
+      avg_rank: stats.rank_sum / stats.games_count,
+      top1_rate: top1_rate,
+      top2_rate: top2_rate,
+      top3_rate: top3_rate,
       max_points: stats.max_points,
-      avg_points: avg_points.toFixed(0),
+      avg_points: avg_points,
 
       max_top1_rate: false,
       max_top2_rate: false,
@@ -198,6 +198,14 @@ const ComputedLeaderBoard = computed(() => {
   }
   return table
 })
+
+function AvgRankFormatter(row, col) {
+  return row.avg_rank.toFixed(2)
+}
+
+function RateFormatter(rate) {
+  return `${rate.toFixed(1)}%`
+}
 </script>
 
 <template>
@@ -245,40 +253,45 @@ const ComputedLeaderBoard = computed(() => {
         </template>
       </el-table-column>
       <el-table-column prop="games_count" :label="GamesCountText" />
-      <el-table-column prop="avg_rank" :label="AvgRankColumnText" />
-      <el-table-column prop="top1_rate" :label="Top1RateColumnText">
+      <el-table-column
+        prop="avg_rank"
+        :label="AvgRankColumnText"
+        :formatter="AvgRankFormatter"
+        sortable
+      />
+      <el-table-column prop="top1_rate" :label="Top1RateColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.max_top1_rate == true ? `success` : ``">
-            {{ scope.row.top1_rate }}
+            {{ RateFormatter(scope.row.top1_rate) }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="top2_rate" :label="Top2RateColumnText">
+      <el-table-column prop="top2_rate" :label="Top2RateColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.max_top2_rate == true ? `success` : ``">
-            {{ scope.row.top2_rate }}
+            {{ RateFormatter(scope.row.top2_rate) }}
           </el-text>
         </template>
       </el-table-column>
 
-      <el-table-column prop="top3_rate" :label="Top3RateColumnText">
+      <el-table-column prop="top3_rate" :label="Top3RateColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.max_top3_rate == true ? `success` : ``">
-            {{ scope.row.top3_rate }}
+            {{ RateFormatter(scope.row.top3_rate) }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="max_points" :label="MaxPointsColumnText">
+      <el-table-column prop="max_points" :label="MaxPointsColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.max_max_points == true ? `success` : ``">
             {{ scope.row.max_points }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="avg_points" :label="AvgPointsColumnText">
+      <el-table-column prop="avg_points" :label="AvgPointsColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.max_avg_points == true ? `success` : ``">
-            {{ scope.row.avg_points }}
+            {{ scope.row.avg_points.toFixed(0) }}
           </el-text>
         </template>
       </el-table-column>
