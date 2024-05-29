@@ -31,6 +31,8 @@ const Top2RateColumnText = ref('连对率')
 const Top3RateColumnText = ref('避四率')
 const MaxPointsColumnText = ref('最高得点')
 const AvgPointsColumnText = ref('场均得点')
+const AvgAgariPtColumnText = ref('平均和点')
+const AvgDealInPtColumnText = ref('平均铳点')
 
 const GamePlayerColumnText = ref('选手')
 const GameRankColumnText = ref('点数顺位')
@@ -135,6 +137,9 @@ const ComputedLeaderBoard = computed(() => {
       top3_rate: top3_rate,
       max_points: stats.max_points,
       avg_points: avg_points,
+
+      avg_agari_points: stats.agari_sum == 0 ? 0 : stats.agari_pt_sum / stats.agari_sum,
+      avg_deal_in_points: stats.deal_in_sum == 0 ? 0 : -stats.deal_in_pt_sum / stats.deal_in_sum,
 
       max_top1_rate: false,
       max_top2_rate: false,
@@ -293,6 +298,16 @@ function RateFormatter(rate) {
           <el-text :type="scope.row.max_avg_points == true ? `success` : ``">
             {{ scope.row.avg_points.toFixed(0) }}
           </el-text>
+        </template>
+      </el-table-column>
+      <el-table-column prop="avg_agari_points" :label="AvgAgariPtColumnText" sortable>
+        <template #default="scope">
+          {{ scope.row.avg_agari_points.toFixed(0) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" sortable>
+        <template #default="scope">
+          {{ scope.row.avg_deal_in_points.toFixed(0) }}
         </template>
       </el-table-column>
     </el-table>
