@@ -13,7 +13,6 @@ import {
 import { LeftOverRiichiSticks, Ruleset } from './rulesets.ts'
 import { NextWindMap, WindType, Winds, WindsInOrder } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
-import { W } from '../../node_modules/vitest/dist/reporters-1evA5lom'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -47,6 +46,7 @@ export type HandResults = {
   deal_in?: PlayerId
   han?: number | string
   fu?: number
+  points_delta?: PointsDelta
 }
 
 interface HandInterface {
@@ -150,8 +150,8 @@ export class Hand {
     // save validated results
     this.results = validated_and_formalized_results
     // Apply points change and clean up riichi sticks
-    const points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
-    players.ApplyPointsDelta(points_delta)
+    this.results.points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
+    players.ApplyPointsDelta(this.results.points_delta)
     if (this.results.outcome != HandOutcomeEnum.DRAW) {
       this.riichi_sticks = 0
     }

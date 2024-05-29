@@ -137,10 +137,12 @@ function ComputeGameStats() {
       agari: 0,
       agari_over_mangan: 0,
       agari_after_riichi: 0,
+      agari_pt_sum: 0,
 
       deal_in: 0,
       deal_in_over_mangan: 0,
       deal_in_after_riichi: 0,
+      deal_in_pt_sum: 0,
 
       tenpai_on_draw: 0
     }
