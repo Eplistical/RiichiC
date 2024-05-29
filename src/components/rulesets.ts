@@ -41,3 +41,17 @@ export const MLeagueRuleset: Ruleset = Object.freeze({
   all_last_dealer_tenpai_renchan: true,
   left_over_riichi_sticks: LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
 })
+
+export function RulesetsAreEqual(rule1, rule2) {
+  if (Object.keys(rule1).length != Object.keys(rule2).length) {
+    console.log('!!! ', Object.keys(rule1).length, Object.keys(rule2).length)
+    return false
+  }
+  for (const key of Object.keys(rule1)) {
+    if (!(key in rule2) || rule2[key] != rule1[key]) {
+      console.log('!!! ', key, rule1[key], rule2[key])
+      return false
+    }
+  }
+  return true
+}

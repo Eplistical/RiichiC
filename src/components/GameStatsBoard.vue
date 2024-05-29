@@ -1,13 +1,14 @@
 <script setup>
 import { Game } from './game'
 import { PlayerIdsInOrder } from './players'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { WindsDisplayTextMap } from './seat_constants'
 import { NumberDisplayMap } from './game_constants'
 import { HandOutcomeEnum } from './hand'
 import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
 import { RECORD_GAME_API } from './app_constants'
+import { MLeagueRuleset, RulesetsAreEqual } from './rulesets'
 
 const emit = defineEmits(['gameUploaded'])
 
@@ -70,6 +71,10 @@ function UploadGameStats() {
   if (!game_stats.value) {
     console.warn('Invalid game stats to upload:', game_stats.value)
     alert('数据丢失，无法上传')
+    return
+  }
+  if (!RulesetsAreEqual(props.game.ruleset, MLeagueRuleset)) {
+    alert('非默认游戏规则，无法上传')
     return
   }
   if (props.game.Uploaded()) {
