@@ -891,7 +891,13 @@ describe('Game SaveHandLog', () => {
           winner: undefined,
           deal_in: undefined,
           han: undefined,
-          fu: undefined
+          fu: undefined,
+          points_delta: {
+            [Winds.EAST]: -1000,
+            [Winds.SOUTH]: -1000,
+            [Winds.WEST]: 3000,
+            [Winds.NORTH]: -1000
+          }
         }
       })
     )
