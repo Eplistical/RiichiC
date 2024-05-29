@@ -38,6 +38,10 @@ const TenpaiOnDrawSummaryLabelText = computed(() => {
   return '流听'
 })
 
+const ActionSummaryLabelText = ref(`立/和/铳/听`)
+const AvgAgariPtSummaryLabelText = ref(`均和`)
+const AvgDealInPtSummaryLabelText = ref(`均铳`)
+
 const UploadGameStatsButtonText = ref('上传结果')
 
 const game_stats = ref({})
@@ -52,6 +56,18 @@ function GetPlayerAgariSummary(player_id, stats) {
 
 function GetPlayerDealInSummary(player_id, stats) {
   return `${stats.deal_in}/${stats.deal_in_over_mangan}/${stats.deal_in_after_riichi}`
+}
+
+function GetActionSummary(stats) {
+  return `${stats.riichi}/${stats.agari}/${stats.deal_in}/${stats.tenpai_on_draw}`
+}
+
+function GetAvgAgariPtSummary(stats) {
+  return stats.agari == 0 ? 0 : Math.round(stats.agari_pt_sum / stats.agari)
+}
+
+function GetAvgDealInPtSummary(stats) {
+  return stats.deal_in == 0 ? 0 : Math.round(-stats.deal_in_pt_sum / stats.deal_in)
 }
 
 function GetPlayerName(player_id) {
@@ -104,7 +120,9 @@ function UploadGameStats() {
       points: stats.points,
       riichi: stats.riichi,
       agari: stats.agari,
-      deal_in: stats.deal_in
+      deal_in: stats.deal_in,
+      agari_pt_sum: stats.agari_pt_sum,
+      deal_in_pt_sum: stats.deal_in_pt_sum
     }
   }
   console.log('Game data to post: ', data_to_post)
@@ -166,6 +184,7 @@ function ComputeGameStats() {
       }
       if (hand.results.outcome != HandOutcomeEnum.DRAW && hand.results.winner == player_id) {
         stats.agari += 1
+        stats.agari_pt_sum += hand.results.points_delta[player_id]
         if (player_riichi) {
           stats.agari_after_riichi += 1
         }
@@ -175,6 +194,7 @@ function ComputeGameStats() {
       }
       if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
         stats.deal_in += 1
+        stats.deal_in_pt_sum += hand.results.points_delta[player_id]
         if (player_riichi) {
           stats.deal_in_after_riichi += 1
         }
@@ -196,9 +216,15 @@ const GameStatsBoard = computed(() => {
     const row = {
       player_summary: GetPlayerSummary(player_id, stats.rank),
       points: stats.points,
-      riichi: stats.riichi,
-      agari_summary: GetPlayerAgariSummary(player_id, stats),
-      deal_in_summary: GetPlayerDealInSummary(player_id, stats),
+      //riichi: stats.riichi,
+      //agari_summary: GetPlayerAgariSummary(player_id, stats),
+      //deal_in_summary: GetPlayerDealInSummary(player_id, stats),
+      action_summary: GetActionSummary(stats),
+      //avg_agari_pt: (stats.agari > 0) ? (Math.abs(stats.agari_pt_sum / stats.agari)) : 0,
+      //avg_deal_in_pt: (stats.deal_in > 0) ? (Math.abs(stats.deal_in_pt_sum / stats.deal_in)) : 0,
+      //avg_pt_summary: GetAvgPtSummary(stats),
+      avg_agari_pt_summary: GetAvgAgariPtSummary(stats),
+      avg_deal_in_pt_summary: GetAvgDealInPtSummary(stats),
       tenpai_on_draw: stats.tenpai_on_draw
     }
     table.push(row)
@@ -210,13 +236,12 @@ const GameStatsBoard = computed(() => {
 <template>
   <el-collapse>
     <el-collapse-item :title="StatsTitleText">
-      <el-table :data="GameStatsBoard" style="width: 100%" stripe>
+      <el-table :data="GameStatsBoard" style="width: 100%" stripe table-layout="auto">
         <el-table-column fixed prop="player_summary" :label="PlayerSummaryLabelText" />
         <el-table-column prop="points" :label="PointsLabelText" />
-        <el-table-column prop="riichi" :label="RiichiLabelText" />
-        <el-table-column prop="agari_summary" :label="AgariSummaryLabelText" />
-        <el-table-column prop="deal_in_summary" :label="DealInSummaryLabelText" />
-        <el-table-column prop="tenpai_on_draw" :label="TenpaiOnDrawSummaryLabelText" />
+        <el-table-column prop="action_summary" :label="ActionSummaryLabelText" />
+        <el-table-column prop="avg_agari_pt_summary" :label="AvgAgariPtSummaryLabelText" />
+        <el-table-column prop="avg_deal_in_pt_summary" :label="AvgDealInPtSummaryLabelText" />
       </el-table>
       <el-divider />
       <el-button v-if="props.game.IsFinished()" type="success" @click="UploadGameStats">

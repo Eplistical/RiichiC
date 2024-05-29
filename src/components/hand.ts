@@ -103,6 +103,9 @@ export class Hand {
     if (this.results.fu) {
       clone_instance.results.fu = this.results.fu
     }
+    if (this.results.points_delta != undefined) {
+      clone_instance.results.points_delta = { ...this.results.points_delta }
+    }
     return clone_instance
   }
 
