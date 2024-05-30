@@ -239,7 +239,6 @@ function RateFormatter(rate) {
       </el-row>
     </el-space>
 
-    <el-text type="danger"> 内测中</el-text>
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
     <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
       <el-table-column fixed prop="name" :label="NameColumnText" />

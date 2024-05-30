@@ -43,7 +43,6 @@ const PlayerPoints = computed(() => {
 })
 
 function FormatPointsDiff(diff) {
-  //return `${(diff / 1000).toFixed(1)}k`
   return diff / 100
 }
 
@@ -99,15 +98,15 @@ function ToggleDisplayMode() {
         <el-row>
           <el-col :span="8">
             {{ LeftPlayerPointsDiff }}
-            <span class="filling_zeros">00</span>
+            <span v-if="LeftPlayerPointsDiff != 0" class="filling_zeros">00</span>
           </el-col>
           <el-col :span="8">
             {{ OppoPlayerPointsDiff }}
-            <span class="filling_zeros">00</span>
+            <span v-if="LeftPlayerPointsDiff != 0" class="filling_zeros">00</span>
           </el-col>
           <el-col :span="8">
             {{ RightPlayerPointsDiff }}
-            <span class="filling_zeros">00</span>
+            <span v-if="LeftPlayerPointsDiff != 0" class="filling_zeros">00</span>
           </el-col>
         </el-row>
       </div>

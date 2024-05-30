@@ -404,18 +404,27 @@
 #  -t anquanda
 
 # 20240524
-python3 record_game.py \
-  -E Kevin,50100,3,6,1 \
-  -S LC,32400,2,3,2 \
-  -W QT,16100,0,1,0 \
-  -N YB,1400,0,1,2 \
-  -d 20240524 \
-  -t anquanda
+#python3 record_game.py \
+#  -E Kevin,50100,3,6,1 \
+#  -S LC,32400,2,3,2 \
+#  -W QT,16100,0,1,0 \
+#  -N YB,1400,0,1,2 \
+#  -d 20240524 \
+#  -t anquanda
+#
+#python3 record_game.py \
+#  -E Kevin,40100,1,3,1 \
+#  -S YB,20700,2,3,2 \
+#  -W LC,20100,1,2,2 \
+#  -N QT,19100,0,1,3 \
+#  -d 20240524 \
+#  -t anquanda
 
 python3 record_game.py \
-  -E Kevin,40100,1,3,1 \
-  -S YB,20700,2,3,2 \
-  -W LC,20100,1,2,2 \
-  -N QT,19100,0,1,3 \
-  -d 20240524 \
-  -t anquanda
+  -E Ep,50000,3,5,1,10000,-2000 \
+  -S Junhan,20000,2,3,2,3999,-5000 \
+  -W Jenny,30000,1,2,2,5234,-1233 \
+  -N Lailai,0,0,1,5,0,-10000 \
+  -d 20240801 \
+  -t xiada
+

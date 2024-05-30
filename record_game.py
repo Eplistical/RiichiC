@@ -5,7 +5,7 @@ from pprint import pprint
 
 def parse_player_stats(arg):
   vals = arg.split(',')
-  if len(vals) == 5:
+  if len(vals) == 7:
     # player,pt,riichi,agari,deal_in
     return {
         "name": vals[0],
@@ -13,6 +13,8 @@ def parse_player_stats(arg):
         "riichi": int(vals[2]),
         "agari": int(vals[3]),
         "deal_in": int(vals[4]),
+        "agari_pt_sum": int(vals[5]),
+        "deal_in_pt_sum": int(vals[6]),
     }
   else:
     print(f"invalid args for player stats: {vals}")
