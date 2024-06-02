@@ -40,7 +40,7 @@ const GamePlayerColumnText = ref('选手')
 const GameRankColumnText = ref('点数顺位')
 const GamePointsColumnText = ref('点数')
 const GamePointsWithUmaColumnText = ref('精算')
-const GameDetailsColumnText = ref('立/和/铳')
+const GameDetailsColumnText = ref('立/和/铳/听')
 const TotalGameCountText = ref('总场次')
 
 onMounted(() => {
@@ -77,6 +77,8 @@ function RefreshData() {
     end_date.getFullYear() * 10000 + (end_date.getMonth() + 1) * 100 + end_date.getDate()
   raw_stats.value = fetchLeaderBoard(start_date_int, end_date_int)
   raw_games.value = fetchGames(start_date_int, end_date_int)
+  //console.log("Getting stats=", raw_stats.value)
+  //console.log("Getting games=", raw_games.value)
 }
 
 function getDefaultDateRange() {
@@ -95,7 +97,7 @@ function getGameRecordTable(game) {
       rank: `${NumberDisplayMap[game[wind].rank]}位`,
       points: game[wind].points,
       points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
-      game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}`
+      game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`
     }
     table.push(row)
   }

@@ -123,6 +123,7 @@ function UploadGameStats() {
       riichi: stats.riichi,
       agari: stats.agari,
       deal_in: stats.deal_in,
+      tenpai_on_draw: stats.tenpai_on_draw,
       agari_pt_sum: stats.agari_pt_sum,
       deal_in_pt_sum: stats.deal_in_pt_sum
     }
