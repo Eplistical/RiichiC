@@ -39,8 +39,8 @@ const TenpaiOnDrawSummaryLabelText = computed(() => {
 })
 
 const ActionSummaryLabelText = ref(`立/和/铳/听`)
-const AvgAgariPtSummaryLabelText = ref(`均和`)
-const AvgDealInPtSummaryLabelText = ref(`均铳`)
+const AvgAgariPtSummaryLabelText = ref(`和牌平均打点`)
+const AvgDealInPtSummaryLabelText = ref(`放铳平均损失`)
 const HandCountLabelText = ref(`局数`)
 
 const UploadGameStatsButtonText = ref('上传结果')
