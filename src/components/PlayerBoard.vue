@@ -81,7 +81,7 @@ function ToggleDisplayMode() {
     }
     display_mode_timeout_id.value = setTimeout(function () {
       show_point_diff.value = false
-    }, 2000)
+    }, 4000)
   }
 }
 </script>

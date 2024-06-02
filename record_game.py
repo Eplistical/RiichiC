@@ -25,6 +25,7 @@ def parse_args():
                       description='record a game.')
   parser.add_argument('-t', '--token', type=str, required=True)
   parser.add_argument('-d', '--date', type=int, required=True)
+  parser.add_argument('-c', '--hand_count', type=int, required=True)
   parser.add_argument('-E', '--east', type=parse_player_stats, required=True)
   parser.add_argument('-S', '--south', type=parse_player_stats, required=True)
   parser.add_argument('-W', '--west', type=parse_player_stats, required=True)
@@ -38,6 +39,7 @@ def run(args):
   }
   game = {
     "game_date": args.date,
+    "game_hand_count": args.hand_count,
     "east": args.east,
     "south": args.south,
     "west": args.west,

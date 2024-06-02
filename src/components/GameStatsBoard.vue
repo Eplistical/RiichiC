@@ -41,6 +41,7 @@ const TenpaiOnDrawSummaryLabelText = computed(() => {
 const ActionSummaryLabelText = ref(`立/和/铳/听`)
 const AvgAgariPtSummaryLabelText = ref(`均和`)
 const AvgDealInPtSummaryLabelText = ref(`均铳`)
+const HandCountLabelText = ref(`局数`)
 
 const UploadGameStatsButtonText = ref('上传结果')
 
@@ -110,7 +111,8 @@ function UploadGameStats() {
     action: 'record_game',
     token: token,
     game: {
-      game_date: game_date
+      game_date: game_date,
+      game_hand_count: GameHandCount()
     }
   }
   for (const player_id of PlayerIdsInOrder) {
@@ -125,7 +127,6 @@ function UploadGameStats() {
       deal_in_pt_sum: stats.deal_in_pt_sum
     }
   }
-  console.log('Game data to post: ', data_to_post)
   const { data, onFetchResponse, onFetchError } = useFetch(RECORD_GAME_API)
     .post(data_to_post)
     .text()
@@ -187,6 +188,7 @@ function ComputeGameStats() {
         stats.agari_pt_sum += hand.results.points_delta[player_id]
         if (player_riichi) {
           stats.agari_after_riichi += 1
+          stats.agari_pt_sum -= props.game.ruleset.riichi_cost
         }
         if (hand.results.han in PointsLadder) {
           stats.agari_over_mangan += 1
@@ -197,6 +199,7 @@ function ComputeGameStats() {
         stats.deal_in_pt_sum += hand.results.points_delta[player_id]
         if (player_riichi) {
           stats.deal_in_after_riichi += 1
+          stats.deal_in_pt_sum -= props.game.ruleset.riichi_cost
         }
         if (hand.results.han in PointsLadder) {
           stats.deal_in_over_mangan += 1
@@ -231,11 +234,15 @@ const GameStatsBoard = computed(() => {
   }
   return table
 })
+
+function GameHandCount() {
+  return props.game.log.length - 1
+}
 </script>
 
 <template>
   <el-collapse>
-    <el-collapse-item :title="StatsTitleText">
+    <el-collapse-item :title="`${StatsTitleText} (${HandCountLabelText}: ${GameHandCount()})`">
       <el-table :data="GameStatsBoard" style="width: 100%" stripe table-layout="auto">
         <el-table-column fixed prop="player_summary" :label="PlayerSummaryLabelText" />
         <el-table-column prop="points" :label="PointsLabelText" />
