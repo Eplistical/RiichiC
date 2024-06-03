@@ -89,13 +89,18 @@ function getDefaultDateRange() {
   ]
 }
 
+function gamePointsDisplay(end_pt, pt_with_uma, start_pt = 25000) {
+  const adjusted_pt_with_uma = (pt_with_uma - start_pt) / 1000
+  return `${end_pt}(${adjusted_pt_with_uma > 0 ? '+' : ''}${adjusted_pt_with_uma.toFixed(1)})`
+}
+
 function getGameRecordTable(game) {
   let table = []
   for (const wind of WindsInOrder) {
     const row = {
       player: `${game[wind].name}[${WindsDisplayTextMap[wind]}起][${NumberDisplayMap[game[wind].rank]}位]`,
       rank: game[wind].rank,
-      points: `${game[wind].points}(${(game[wind].points_with_uma - 25000) / 1000})`,
+      points: gamePointsDisplay(game[wind].points, game[wind].points_with_uma),
       //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
       game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`,
       avg_agari_points:
