@@ -39,8 +39,8 @@ const TenpaiOnDrawSummaryLabelText = computed(() => {
 })
 
 const ActionSummaryLabelText = ref(`立/和/铳/听`)
-const AvgAgariPtSummaryLabelText = ref(`和牌平均打点`)
-const AvgDealInPtSummaryLabelText = ref(`放铳平均损失`)
+const AvgAgariPtSummaryLabelText = ref(`平均和牌打点`)
+const AvgDealInPtSummaryLabelText = ref(`平均放铳损失`)
 const HandCountLabelText = ref(`局数`)
 
 const UploadGameStatsButtonText = ref('上传结果')
@@ -219,6 +219,7 @@ const GameStatsBoard = computed(() => {
     const stats = game_stats.value[player_id]
     const row = {
       player_summary: GetPlayerSummary(player_id, stats.rank),
+      rank: stats.rank,
       points: stats.points,
       //riichi: stats.riichi,
       //agari_summary: GetPlayerAgariSummary(player_id, stats),
@@ -233,6 +234,9 @@ const GameStatsBoard = computed(() => {
     }
     table.push(row)
   }
+  table.sort((a, b) => {
+    return a.rank - b.rank
+  })
   return table
 })
 

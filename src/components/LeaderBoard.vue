@@ -94,7 +94,7 @@ function getGameRecordTable(game) {
   for (const wind of WindsInOrder) {
     const row = {
       player: `${game[wind].name}[${WindsDisplayTextMap[wind]}起][${NumberDisplayMap[game[wind].rank]}位]`,
-      //rank: `${NumberDisplayMap[game[wind].rank]}`,
+      rank: game[wind].rank,
       points: `${game[wind].points}(${(game[wind].points_with_uma - 25000) / 1000})`,
       //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
       game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`,
@@ -105,6 +105,9 @@ function getGameRecordTable(game) {
     }
     table.push(row)
   }
+  table.sort((a, b) => {
+    return a.rank - b.rank
+  })
   return table
 }
 
