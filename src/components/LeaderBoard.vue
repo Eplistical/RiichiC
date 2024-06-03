@@ -37,7 +37,7 @@ const AvgAgariPtColumnText = ref('平均和牌打点')
 const AvgDealInPtColumnText = ref('平均放铳损失')
 
 const GamePlayerColumnText = ref('选手')
-const GameRankColumnText = ref('点数顺位')
+const GameRankColumnText = ref('顺位')
 const GamePointsColumnText = ref('点数')
 const GamePointsWithUmaColumnText = ref('精算')
 const GameDetailsColumnText = ref('立/和/铳/听')
@@ -78,7 +78,7 @@ function RefreshData() {
   raw_stats.value = fetchLeaderBoard(start_date_int, end_date_int)
   raw_games.value = fetchGames(start_date_int, end_date_int)
   //console.log("Getting stats=", raw_stats.value)
-  //console.log("Getting games=", raw_games.value)
+  console.log('Getting games=', raw_games.value)
 }
 
 function getDefaultDateRange() {
@@ -94,10 +94,14 @@ function getGameRecordTable(game) {
   for (const wind of WindsInOrder) {
     const row = {
       player: `[${WindsDisplayTextMap[wind]}]${game[wind].name}`,
-      rank: `${NumberDisplayMap[game[wind].rank]}位`,
-      points: game[wind].points,
-      points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
-      game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`
+      rank: `${NumberDisplayMap[game[wind].rank]}`,
+      points: `${game[wind].points}(${(game[wind].points_with_uma - 25000) / 1000})`,
+      //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
+      game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`,
+      avg_agari_points:
+        game[wind].agari == 0 ? 0 : Math.round(game[wind].agari_pt_sum / game[wind].agari),
+      avg_deal_in_points:
+        game[wind].deal_in == 0 ? 0 : Math.round(-game[wind].deal_in_pt_sum / game[wind].deal_in)
     }
     table.push(row)
   }
@@ -355,8 +359,10 @@ function DealInRateFormatter(row, col) {
               <el-table-column prop="player" :label="GamePlayerColumnText" />
               <el-table-column prop="rank" :label="GameRankColumnText" />
               <el-table-column prop="points" :label="GamePointsColumnText" />
-              <el-table-column prop="points_with_uma" :label="GamePointsWithUmaColumnText" />
+              <!--<el-table-column prop="points_with_uma" :label="GamePointsWithUmaColumnText" />-->
               <el-table-column prop="game_details" :label="GameDetailsColumnText" />
+              <el-table-column prop="avg_agari_points" :label="AvgAgariPtColumnText" />
+              <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" />
             </el-table>
           </div>
         </div>
