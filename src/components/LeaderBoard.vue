@@ -78,7 +78,7 @@ function RefreshData() {
   raw_stats.value = fetchLeaderBoard(start_date_int, end_date_int)
   raw_games.value = fetchGames(start_date_int, end_date_int)
   //console.log("Getting stats=", raw_stats.value)
-  console.log('Getting games=', raw_games.value)
+  //console.log('Getting games=', raw_games.value)
 }
 
 function getDefaultDateRange() {
