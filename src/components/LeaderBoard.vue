@@ -93,8 +93,8 @@ function getGameRecordTable(game) {
   let table = []
   for (const wind of WindsInOrder) {
     const row = {
-      player: `[${WindsDisplayTextMap[wind]}]${game[wind].name}`,
-      rank: `${NumberDisplayMap[game[wind].rank]}`,
+      player: `${game[wind].name}[${WindsDisplayTextMap[wind]}起][${NumberDisplayMap[game[wind].rank]}位]`,
+      //rank: `${NumberDisplayMap[game[wind].rank]}`,
       points: `${game[wind].points}(${(game[wind].points_with_uma - 25000) / 1000})`,
       //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
       game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`,
@@ -357,7 +357,7 @@ function DealInRateFormatter(row, col) {
               table-layout="auto"
             >
               <el-table-column prop="player" :label="GamePlayerColumnText" />
-              <el-table-column prop="rank" :label="GameRankColumnText" />
+              <!--<el-table-column prop="rank" :label="GameRankColumnText" />-->
               <el-table-column prop="points" :label="GamePointsColumnText" />
               <!--<el-table-column prop="points_with_uma" :label="GamePointsWithUmaColumnText" />-->
               <el-table-column prop="game_details" :label="GameDetailsColumnText" />
