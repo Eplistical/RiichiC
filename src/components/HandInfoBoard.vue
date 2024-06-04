@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 const HandSignatureText = computed(() => {
-  return `${WindsDisplayTextMap[props.hand.round_wind]}${props.hand.hand}局${props.hand.honba}本场`
+  return `${WindsDisplayTextMap[props.hand.round_wind]}${props.hand.hand} - ${props.hand.honba}`
 })
 
 const RiichiSticksText = computed(() => {

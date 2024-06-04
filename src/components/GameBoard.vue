@@ -35,8 +35,10 @@ function HandlePlayerRiichi(player_id, riichi) {
     <PlayerBoard
       v-model="riichi_players"
       :player_id="player_id"
+      :current_hand_index="game.GetCurrentHandIndex()"
       :players="game.players"
       :riichi_disabled="!GameIsOnGoing"
+      :last_hand_points_delta="game.GetLastHandPointsDelta()"
       @riichi="HandlePlayerRiichi(player_id, $event)"
     />
   </div>
@@ -48,9 +50,9 @@ function HandlePlayerRiichi(player_id, riichi) {
   text-align: center;
   position: absolute;
   height: 70px;
-  width: 100px;
+  width: 70px;
   top: calc(50% - 35px);
-  left: calc(50% - 50px);
+  left: calc(50% - 35px);
   font-size: 15px;
 }
 

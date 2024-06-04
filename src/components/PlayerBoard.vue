@@ -1,18 +1,35 @@
 <script setup>
 import { Players } from './players'
 import { LastWindMap, NextWindMap, Winds, WindsDisplayTextMap } from './seat_constants'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   player_id: String,
+  current_hand_index: Number,
   players: Players,
-  riichi_disabled: Boolean
+  riichi_disabled: Boolean,
+  last_hand_points_delta: Object
 })
 
 const riichi_players = defineModel()
 const emit = defineEmits(['riichi'])
 const show_point_diff = ref(false)
 const display_mode_timeout_id = ref(undefined)
+const show_last_hand_pt_delta = ref(true)
+const show_last_hand_pt_delta_timeout_id = ref(undefined)
+
+watch(
+  () => props.current_hand_index,
+  () => {
+    show_last_hand_pt_delta.value = true
+    if (show_last_hand_pt_delta_timeout_id.value != undefined) {
+      clearTimeout(show_last_hand_pt_delta_timeout_id.value)
+    }
+    show_last_hand_pt_delta_timeout_id.value = setTimeout(function () {
+      show_last_hand_pt_delta.value = false
+    }, 60000) // 60sec
+  }
+)
 
 function GetCurPlayer() {
   return props.players.GetPlayer(props.player_id)
@@ -72,6 +89,13 @@ const RiichiText = computed(() => {
   return '立直'
 })
 
+const LastHandPointsDelta = computed(() => {
+  const pt_delta = props.last_hand_points_delta
+    ? props.last_hand_points_delta[props.player_id]
+    : undefined
+  return pt_delta == undefined ? 0 : pt_delta
+})
+
 function ToggleDisplayMode() {
   console.log(`ToggleDisplayMode`)
   show_point_diff.value = !show_point_diff.value
@@ -92,7 +116,10 @@ function ToggleDisplayMode() {
       <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
 
       <div v-if="!show_point_diff">
-        {{ PlayerPoints }}
+        <div v-if="show_last_hand_pt_delta && LastHandPointsDelta != 0" class="points_delta">
+          {{ `[${LastHandPointsDelta > 0 ? '+' : ''}${LastHandPointsDelta}]` }}
+        </div>
+        <div>{{ PlayerPoints }}</div>
       </div>
       <div v-else>
         <el-row>
@@ -135,5 +162,12 @@ function ToggleDisplayMode() {
 
 .filling_zeros {
   font-size: 16px;
+}
+
+.points_delta {
+  font-size: 14px;
+  position: absolute;
+  left: calc(50% + 35px);
+  color: #2f261e;
 }
 </style>

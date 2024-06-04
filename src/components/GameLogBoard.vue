@@ -43,7 +43,7 @@ function GetPlayerName(player_id) {
 <template>
   <el-collapse>
     <el-collapse-item :title="LogTitleText">
-      <el-table :data="GameLogTable" style="width: 100%" stripe>
+      <el-table :data="GameLogTable" height="250" style="width: 100%" stripe>
         <el-table-column fixed prop="hand_signature" :label="HandSignatureLabelText" />
         <el-table-column prop="start_game_riichi_sticks" :label="StartGameRiichiSticksLabelText" />
         <el-table-column prop="results_summary" :label="HandResultsSummaryLabelText" />

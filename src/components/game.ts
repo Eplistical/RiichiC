@@ -260,6 +260,19 @@ export class Game {
     return true
   }
 
+  // Get an object containing points delta occurred in the hand that just finished
+  GetLastHandPointsDelta() {
+    if (this.log.length > 0) {
+      return this.log[this.log.length - 1].hand.results.points_delta
+    }
+    return {}
+  }
+
+  // Get the index of the current hand
+  GetCurrentHandIndex() {
+    return this.log.length
+  }
+
   // Generate an object for game log for display/export purpose
   GenerateGameLogTable() {
     let table = []
