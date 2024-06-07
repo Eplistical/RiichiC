@@ -17,7 +17,7 @@ const RiichiSticksText = computed(() => {
 })
 
 const GameFinishedText = computed(() => {
-  return `[游戏已结束]`
+  return `[已结束]`
 })
 </script>
 

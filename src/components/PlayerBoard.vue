@@ -27,7 +27,7 @@ watch(
     }
     show_last_hand_pt_delta_timeout_id.value = setTimeout(function () {
       show_last_hand_pt_delta.value = false
-    }, 60000) // 60sec
+    }, 120000) // 2min
   }
 )
 
@@ -105,7 +105,7 @@ function ToggleDisplayMode() {
     }
     display_mode_timeout_id.value = setTimeout(function () {
       show_point_diff.value = false
-    }, 3000)
+    }, 4000)
   }
 }
 </script>
@@ -129,11 +129,11 @@ function ToggleDisplayMode() {
           </el-col>
           <el-col :span="8">
             {{ OppoPlayerPointsDiff }}
-            <span v-if="LeftPlayerPointsDiff != 0" class="filling_zeros">00</span>
+            <span v-if="OppoPlayerPointsDiff != 0" class="filling_zeros">00</span>
           </el-col>
           <el-col :span="8">
             {{ RightPlayerPointsDiff }}
-            <span v-if="LeftPlayerPointsDiff != 0" class="filling_zeros">00</span>
+            <span v-if="RightPlayerPointsDiff != 0" class="filling_zeros">00</span>
           </el-col>
         </el-row>
       </div>
