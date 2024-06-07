@@ -289,25 +289,10 @@ function DealInRateFormatter(row, col) {
         :formatter="AvgRankFormatter"
         sortable
       />
-      <el-table-column prop="top1_rate" :label="Top1RateColumnText" sortable>
+      <el-table-column prop="avg_points" :label="AvgPointsColumnText" sortable>
         <template #default="scope">
-          <el-text :type="scope.row.max_top1_rate == true ? `success` : ``">
-            {{ RateFormatter(scope.row.top1_rate) }}
-          </el-text>
-        </template>
-      </el-table-column>
-      <el-table-column prop="top2_rate" :label="Top2RateColumnText" sortable>
-        <template #default="scope">
-          <el-text :type="scope.row.max_top2_rate == true ? `success` : ``">
-            {{ RateFormatter(scope.row.top2_rate) }}
-          </el-text>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="top3_rate" :label="Top3RateColumnText" sortable>
-        <template #default="scope">
-          <el-text :type="scope.row.max_top3_rate == true ? `success` : ``">
-            {{ RateFormatter(scope.row.top3_rate) }}
+          <el-text :type="scope.row.max_avg_points == true ? `success` : ``">
+            {{ scope.row.avg_points.toFixed(0) }}
           </el-text>
         </template>
       </el-table-column>
@@ -315,13 +300,6 @@ function DealInRateFormatter(row, col) {
         <template #default="scope">
           <el-text :type="scope.row.max_max_points == true ? `success` : ``">
             {{ scope.row.max_points }}
-          </el-text>
-        </template>
-      </el-table-column>
-      <el-table-column prop="avg_points" :label="AvgPointsColumnText" sortable>
-        <template #default="scope">
-          <el-text :type="scope.row.max_avg_points == true ? `success` : ``">
-            {{ scope.row.avg_points.toFixed(0) }}
           </el-text>
         </template>
       </el-table-column>
@@ -345,6 +323,28 @@ function DealInRateFormatter(row, col) {
       <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" sortable>
         <template #default="scope">
           {{ scope.row.avg_deal_in_points.toFixed(0) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="top1_rate" :label="Top1RateColumnText" sortable>
+        <template #default="scope">
+          <el-text :type="scope.row.max_top1_rate == true ? `success` : ``">
+            {{ RateFormatter(scope.row.top1_rate) }}
+          </el-text>
+        </template>
+      </el-table-column>
+      <el-table-column prop="top2_rate" :label="Top2RateColumnText" sortable>
+        <template #default="scope">
+          <el-text :type="scope.row.max_top2_rate == true ? `success` : ``">
+            {{ RateFormatter(scope.row.top2_rate) }}
+          </el-text>
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="top3_rate" :label="Top3RateColumnText" sortable>
+        <template #default="scope">
+          <el-text :type="scope.row.max_top3_rate == true ? `success` : ``">
+            {{ RateFormatter(scope.row.top3_rate) }}
+          </el-text>
         </template>
       </el-table-column>
     </el-table>
