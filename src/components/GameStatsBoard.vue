@@ -103,10 +103,17 @@ function UploadGameStats() {
     return
   }
   console.log('game date = ', props.game.game_date, typeof props.game.game_date)
+  const date_info = props.game.game_date
+    .toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    })
+    .split('/')
   const game_date =
-    props.game.game_date.getFullYear() * 10000 +
-    (props.game.game_date.getMonth() + 1) * 100 +
-    props.game.game_date.getDate()
+    parseInt(date_info[2]) * 10000 + parseInt(date_info[0]) * 100 + parseInt(date_info[1])
+
   const data_to_post = {
     action: 'record_game',
     token: token,
