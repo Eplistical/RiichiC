@@ -35,6 +35,7 @@ const AgariRateColumnText = ref('和率')
 const DealInRateColumnText = ref('铳率')
 const AvgAgariPtColumnText = ref('平均和牌打点')
 const AvgDealInPtColumnText = ref('平均放铳损失')
+const ExpectedPtColumnText = ref('期望得点')
 
 const GamePlayerColumnText = ref('选手')
 const GameRankColumnText = ref('顺位')
@@ -165,6 +166,9 @@ const ComputedLeaderBoard = computed(() => {
       max_max_points: false,
       max_avg_points: false
     }
+    // expected points
+    row.expected_points =
+      row.agari_rate * row.avg_agari_points - row.deal_in_rate * row.avg_deal_in_points
     // find max top 1 rate
     if (top1_rate > max_top1_rate) {
       max_top1_rate = top1_rate
@@ -236,6 +240,10 @@ function AgariRateFormatter(row, col) {
 
 function DealInRateFormatter(row, col) {
   return `${(row.deal_in_rate * 100).toFixed(2)}%`
+}
+
+function ExpectedPtFormatter(row, col) {
+  return `${Math.round(row.expected_points)}`
 }
 </script>
 
@@ -324,6 +332,13 @@ function DealInRateFormatter(row, col) {
         <template #default="scope">
           {{ scope.row.avg_deal_in_points.toFixed(0) }}
         </template>
+      </el-table-column>
+      <el-table-column
+        prop="expected_points"
+        :label="ExpectedPtColumnText"
+        :formatter="ExpectedPtFormatter"
+        sortable
+      >
       </el-table-column>
       <el-table-column prop="top1_rate" :label="Top1RateColumnText" sortable>
         <template #default="scope">
