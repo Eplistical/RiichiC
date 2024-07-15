@@ -103,7 +103,11 @@ function HasDuplication(arr) {
 }
 
 function ConfirmResetGameLogText(row) {
-  return `回到[${row.hand_signature}结束]并清空此后所有记录？`
+  if (ruleset.value.language == Lang.CN) {
+    return `回到[${row.hand_signature}结束]并清空此后所有记录？`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Backtrack to [end of ${row.hand_signature}] and clean up logs thereafter?`
+  }
 }
 const ConfirmFinishGameText = computed(() => {
   if (ruleset.value.language == Lang.CN) {

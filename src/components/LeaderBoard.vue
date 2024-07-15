@@ -301,7 +301,7 @@ function getGameRecordTable(game) {
 }
 
 function GenerateGameLabel(game) {
-  return `[${game.game_date}] ${game.game_id.substr(0, 8)} ${HandsCountText}: ${game.game_hand_count}`
+  return `[${game.game_date}] ${game.game_id.substr(0, 8)} ${HandsCountText.value}: ${game.game_hand_count}`
 }
 
 const ComputedLeaderBoard = computed(() => {

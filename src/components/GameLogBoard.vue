@@ -50,7 +50,7 @@ const ResetButtonText = computed(() => {
   if (props.language == Lang.CN) {
     return `回溯`
   } else if (props.language == Lang.EN) {
-    return `Backtrace`
+    return `Backtrack`
   }
 })
 
