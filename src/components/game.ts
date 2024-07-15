@@ -4,6 +4,23 @@ import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
 import { Player, PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import { ActionBriefDisplayMap, Actions, PointsLadderBriefDisplayMap } from './game_constants'
 import { Lang } from './app_constants'
+import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
+
+function CannotFindStartingWindMsgText(language) {
+  if (language == Lang.CN) {
+    return `找不到起家`
+  } else if (language == Lang.EN) {
+    return `Cannot find starting wind`
+  }
+}
+
+function InvalidNumPlayersMsgText(language) {
+  if (language == Lang.CN) {
+    return `开局风位数量错误`
+  } else if (language == Lang.EN) {
+    return `Cannot find starting wind`
+  }
+}
 
 export enum GameState {
   NOT_STARTED,
@@ -397,16 +414,20 @@ export class Game {
     player_starting_winds: WindType[],
     ruleset: Ruleset
   ): [boolean, string] {
+    console.log('>>>', ruleset, ruleset.language)
     if (player_starting_winds.length != ruleset.num_players) {
       return [
         false,
-        `开局风位数量错误: ${JSON.stringify(player_starting_winds)}, ${player_starting_winds.length}, ${ruleset.num_players}`
+        `${InvalidNumPlayersMsgText(ruleset.language)}: ${JSON.stringify(player_starting_winds)}, ${player_starting_winds.length}, ${ruleset.num_players}`
       ]
     }
     for (let i = 0; i < ruleset.num_players; ++i) {
       const wind = WindsInOrder[i]
       if (!player_starting_winds.includes(wind)) {
-        return [false, `找不到起家: ${WindsDisplayTextMap[wind]}`]
+        return [
+          false,
+          `${CannotFindStartingWindMsgText(ruleset.language)}: ${WindsDisplayTextMap[wind]}`
+        ]
       }
     }
     return [true, '']
