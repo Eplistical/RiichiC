@@ -47,6 +47,78 @@ export const HandOutcomeEnumDisplayTextMap = Object.freeze({
   }
 })
 
+function InvalidOutcomeMsgText(language) {
+  if (language == Lang.CN) {
+    return '对局结果错误'
+  } else if (language == Lang.EN) {
+    return ' Invalid Hand OutCome'
+  }
+}
+
+function RiichiButNotTenpaiMsgText(language) {
+  if (language == Lang.CN) {
+    return '立直家未听牌'
+  } else if (language == Lang.EN) {
+    return ' Riichi Player Not Tenpai'
+  }
+}
+
+function TsumoPlayerNotFoundMsgText(language) {
+  if (language == Lang.CN) {
+    return '找不到自摸家'
+  } else if (language == Lang.EN) {
+    return 'Tsumo Player Not Found'
+  }
+}
+
+function RonPlayerNotFoundMsgText(language) {
+  if (language == Lang.CN) {
+    return '找不到和牌家'
+  } else if (language == Lang.EN) {
+    return 'Ron Player Not Found'
+  }
+}
+
+function DealInPlayerNotFoundMsgText(language) {
+  if (language == Lang.CN) {
+    return '找不到放铳家'
+  } else if (language == Lang.EN) {
+    return 'Deal-in Player Not Found'
+  }
+}
+
+function SameRonAndDealInPlayer(language) {
+  if (language == Lang.CN) {
+    return '和牌家和放铳家不能重叠'
+  } else if (language == Lang.EN) {
+    return 'Ron and Deal-in Player Cannot Overlap'
+  }
+}
+
+function InvalidHanMsgText(language) {
+  if (language == Lang.CN) {
+    return '番数错误'
+  } else if (language == Lang.EN) {
+    return 'Invalid Han'
+  }
+}
+
+function InvalidFuMsgText(language) {
+  if (language == Lang.CN) {
+    return '符数错误'
+  } else if (language == Lang.EN) {
+    return 'Invalid Fu'
+  }
+}
+
+function InvalidHanFuPairMsgText(language) {
+  if (language == Lang.CN) {
+    return '番符组合错误'
+  } else if (language == Lang.EN) {
+    return 'Invalid (Han, Fu) Pair'
+  }
+}
+
 export type PointsDelta = Record<PlayerId, number>
 
 export type HandResults = {
@@ -335,54 +407,66 @@ export class Hand {
     ruleset: Ruleset
   ): [boolean, string] {
     if (!Object.values(HandOutcomeEnum).includes(results.outcome)) {
-      return [false, `错误对局结果: ${results.outcome}`]
+      return [false, `${InvalidOutcomeMsgText(ruleset.language)}: ${results.outcome}`]
     }
 
     if (results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
       for (const riichi_player of this.riichi) {
         if (!results.tenpai || !results.tenpai.includes(riichi_player)) {
-          return [false, `立直家未听牌: ${players.GetPlayer(riichi_player).name}`]
+          return [
+            false,
+            `${RiichiButNotTenpaiMsgText(ruleset.language)}: ${players.GetPlayer(riichi_player).name}`
+          ]
         }
       }
     } else if (results.outcome == HandOutcomeEnum.TSUMO) {
       if (players.GetPlayer(results.winner) === undefined) {
-        return [false, `找不到自摸家: ${results.winner}`]
+        return [false, `${TsumoPlayerNotFoundMsgText(ruleset.language)}: ${results.winner}`]
       }
       if (!Object.values(AllowedHans).includes(results.han)) {
-        return [false, `番数错误: ${results.han}`]
+        return [false, `${InvalidHanMsgText(ruleset.language)}: ${results.han}`]
       }
       if (
         !Object.values(PointsLadder).includes(results.han) &&
         !Object.values(AllowedFus[results.han]).includes(results.fu)
       ) {
-        return [false, `符数错误: ${results.fu}`]
+        return [false, `${InvalidFuMsgText(ruleset.language)}: ${results.fu}`]
       }
       const key = this.GetPointMapKey(results.han, results.fu, ruleset)
       if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
-        return [false, `番符组合不存在: ${results.outcome}, ${results.han}, ${results.fu}`]
+        return [
+          false,
+          `${InvalidHanFuPairMsgText(ruleset.language)}: ${results.outcome}, ${results.han}, ${results.fu}`
+        ]
       }
     } else if (results.outcome == HandOutcomeEnum.RON) {
       if (players.GetPlayer(results.winner) === undefined) {
-        return [false, `找不到胡牌家: ${results.winner}`]
+        return [false, `${RonPlayerNotFoundMsgText(ruleset.language)}: ${results.winner}`]
       }
       if (players.GetPlayer(results.deal_in) === undefined) {
-        return [false, `找不到点炮家: ${results.deal_in}`]
+        return [false, `${DealInPlayerNotFoundMsgText(ruleset.language)}: ${results.deal_in}`]
       }
       if (results.deal_in == results.winner) {
-        return [false, `点炮家不能和胡家一样: ${results.winner} == ${results.deal_in}`]
+        return [
+          false,
+          `${SameRonAndDealInPlayer(ruleset.language)}: ${results.winner} == ${results.deal_in}`
+        ]
       }
       if (!Object.values(AllowedHans).includes(results.han)) {
-        return [false, `番数错误: ${results.han}`]
+        return [false, `${InvalidHanMsgText(ruleset.language)}: ${results.han}`]
       }
       if (
         !Object.values(PointsLadder).includes(results.han) &&
         !Object.values(AllowedFus[results.han]).includes(results.fu)
       ) {
-        return [false, `符数错误: ${results.fu}`]
+        return [false, `${InvalidFuMsgText(ruleset.language)}: ${results.fu}`]
       }
       const key = this.GetPointMapKey(results.han, results.fu, ruleset)
       if (!RonPointsNonDealer.hasOwnProperty(key)) {
-        return [false, `番符组合不存在: ${results.outcome}, ${results.han}, ${results.fu}`]
+        return [
+          false,
+          `${InvalidHanFuPairMsgText(ruleset.language)}: ${results.outcome}, ${results.han}, ${results.fu}`
+        ]
       }
     }
     return [true, '']

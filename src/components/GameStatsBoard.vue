@@ -84,6 +84,54 @@ const UploadGameStatsButtonText = computed(() => {
   }
 })
 
+const InputTokenMsgText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '请输入上传口令'
+  } else if (language.value == Lang.EN) {
+    return 'Please input token for uploading'
+  }
+})
+
+function UploadCompleteMsgText(game_id) {
+  if (language.value == Lang.CN) {
+    return `数据上传成功! 游戏ID: ${game_id}`
+  } else if (language.value == Lang.EN) {
+    return `Upload Completed! Game ID: ${game_id}`
+  }
+}
+
+const UploadFailedMsgText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '上传失败!'
+  } else if (language.value == Lang.EN) {
+    return 'Upload Failed!'
+  }
+})
+
+const UploadDuplicatedMsgText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '本局游戏已经上传，无需多次上传!'
+  } else if (language.value == Lang.EN) {
+    return 'The game is already uploaded!'
+  }
+})
+
+const UploadDataMissingMsgText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '数据丢失，无法上传!'
+  } else if (language.value == Lang.EN) {
+    return 'Missing data, cannot upload!'
+  }
+})
+
+const UploadRulesetNotSupportedMsgText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '游戏设置规则不支持上传!'
+  } else if (language.value == Lang.EN) {
+    return 'Uploading the current rule set is not supported!'
+  }
+})
+
 const game_stats = ref({})
 
 function GetPlayerSummary(player_id, rank) {
@@ -130,18 +178,18 @@ function UploadGameStats() {
   console.log('UploadGameStats: ', game_stats.value)
   if (!game_stats.value) {
     console.warn('Invalid game stats to upload:', game_stats.value)
-    alert('数据丢失，无法上传')
+    alert(UploadDataMissingMsgText.value)
     return
   }
   if (!RulesetsAreEqual(props.game.ruleset, MLeagueRuleset)) {
-    alert('非默认游戏规则，无法上传')
+    alert(UploadRulesetNotSupportedMsgText.value)
     return
   }
   if (props.game.Uploaded()) {
-    alert('本局游戏已经上传，无需多次上传')
+    alert(UploadDuplicatedMsgText.value)
     return
   }
-  const token = prompt('请输入上传口令')
+  const token = prompt(InputTokenMsgText.value)
   if (token == undefined || token == null) {
     return
   }
@@ -183,11 +231,11 @@ function UploadGameStats() {
     .text()
   onFetchResponse((response) => {
     const game_id = JSON.parse(data.value).game_id
-    alert(`数据上传成功! 游戏ID: ${game_id}`)
+    alert(UploadCompleteMsgText(game_id))
     emit('gameUploaded', game_id)
   })
   onFetchError((error) => {
-    alert(`数据上传失败: ${data.value}`)
+    alert(`${UploadFailedMsgText.value}: ${data.value}`)
   })
 }
 
