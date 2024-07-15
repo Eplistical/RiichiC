@@ -4,34 +4,52 @@ import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand'
 import { Actions, ActionDisplayMap } from './game_constants'
 import { PointsLadderBriefDisplayMap } from './game_constants'
 import { Game } from './game'
+import { Lang } from './app_constants'
 import { AllowedHans, AllowedFus } from './game_constants'
 
 const props = defineProps({
+  language: String,
   game: Game
 })
 
 const results_form = defineModel()
 
 const HandReultsTitleText = computed(() => {
-  return '对局结果'
+  if (props.language == Lang.CN) {
+    return '对局结果'
+  } else if (props.language == Lang.EN) {
+    return 'Hand Result'
+  }
 })
 const TenpaiLabelText = computed(() => {
-  return ActionDisplayMap[Actions.TENPAI]
+  return ActionDisplayMap[Actions.TENPAI][props.language]
 })
 const AgariLabelText = computed(() => {
-  return ActionDisplayMap[Actions.AGARI]
+  return ActionDisplayMap[Actions.AGARI][props.language]
 })
 const DealInLabelText = computed(() => {
-  return ActionDisplayMap[Actions.DEAL_IN]
+  return ActionDisplayMap[Actions.DEAL_IN][props.language]
 })
 const HanLabelText = computed(() => {
-  return `番`
+  if (props.language == Lang.CN) {
+    return `番`
+  } else if (props.language == Lang.EN) {
+    return `Han`
+  }
 })
 const FuLabelText = computed(() => {
-  return `符`
+  if (props.language == Lang.CN) {
+    return `符`
+  } else if (props.language == Lang.EN) {
+    return `Fu`
+  }
 })
 const SubmitButtonText = computed(() => {
-  return `提交`
+  if (props.language == Lang.CN) {
+    return `提交`
+  } else if (props.language == Lang.EN) {
+    return `Submit`
+  }
 })
 
 const TenpaiSelectionColor = ref('#289e20')
@@ -55,7 +73,7 @@ function HandleWinnerSelectionChange(player_id) {
         <el-form-item>
           <el-radio-group v-for="outcome in HandOutcomeEnum" v-model="results_form.outcome">
             <el-radio-button :label="outcome">
-              {{ HandOutcomeEnumDisplayTextMap[outcome] }}
+              {{ HandOutcomeEnumDisplayTextMap[outcome][language] }}
             </el-radio-button>
           </el-radio-group>
         </el-form-item>
@@ -104,7 +122,7 @@ function HandleWinnerSelectionChange(player_id) {
         >
           <el-radio-group v-for="han in AllowedHans" v-model="results_form.han">
             <el-radio-button :label="han">{{
-              han in PointsLadderBriefDisplayMap ? PointsLadderBriefDisplayMap[han] : han
+              han in PointsLadderBriefDisplayMap ? PointsLadderBriefDisplayMap[han][language] : han
             }}</el-radio-button>
           </el-radio-group>
         </el-form-item>

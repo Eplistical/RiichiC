@@ -13,6 +13,7 @@ import {
 import { LeftOverRiichiSticks, Ruleset } from './rulesets.ts'
 import { NextWindMap, WindType, Winds, WindsInOrder } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
+import { Lang } from './app_constants'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -32,9 +33,18 @@ export enum HandState {
 }
 
 export const HandOutcomeEnumDisplayTextMap = Object.freeze({
-  [HandOutcomeEnum.DRAW]: '流局',
-  [HandOutcomeEnum.TSUMO]: '自摸',
-  [HandOutcomeEnum.RON]: '荣和'
+  [HandOutcomeEnum.DRAW]: {
+    [Lang.CN]: '流局',
+    [Lang.EN]: 'Draw'
+  },
+  [HandOutcomeEnum.TSUMO]: {
+    [Lang.CN]: '自摸',
+    [Lang.EN]: 'Tsumo'
+  },
+  [HandOutcomeEnum.RON]: {
+    [Lang.CN]: '荣和',
+    [Lang.EN]: 'Ron'
+  }
 })
 
 export type PointsDelta = Record<PlayerId, number>

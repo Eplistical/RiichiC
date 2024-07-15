@@ -2,8 +2,10 @@
 import { Game } from './game'
 import { computed } from 'vue'
 import { PlayerIdsInOrder } from './players'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   game: Game
 })
 const riichi_players = defineModel()
@@ -24,16 +26,25 @@ function HandlePlayerRiichi(player_id, riichi) {
     props.game.PlayerUnRiichi(player_id)
   }
 }
+
+function GetHandInfoBoardClass() {
+  if (props.language == Lang.EN) {
+    return 'hand_info_board_en'
+  } else {
+    return 'hand_info_board_cn'
+  }
+}
 </script>
 
 <template>
-  <div class="hand_info_board">
-    <HandInfoBoard :hand="game.current_hand" :game_finished="GameIsFinished" />
+  <div :class="GetHandInfoBoardClass()">
+    <HandInfoBoard :language="language" :hand="game.current_hand" :game_finished="GameIsFinished" />
   </div>
 
   <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
     <PlayerBoard
       v-model="riichi_players"
+      :language="language"
       :player_id="player_id"
       :current_hand_index="game.GetCurrentHandIndex()"
       :players="game.players"
@@ -45,7 +56,7 @@ function HandlePlayerRiichi(player_id, riichi) {
 </template>
 
 <style scoped>
-.hand_info_board {
+.hand_info_board_cn {
   border-style: solid;
   text-align: center;
   position: absolute;
@@ -53,6 +64,16 @@ function HandlePlayerRiichi(player_id, riichi) {
   width: 70px;
   top: calc(50% - 35px);
   left: calc(50% - 35px);
+  font-size: 15px;
+}
+.hand_info_board_en {
+  border-style: solid;
+  text-align: center;
+  position: absolute;
+  height: 70px;
+  width: 120px;
+  top: calc(50% - 35px);
+  left: calc(50% - 60px);
   font-size: 15px;
 }
 

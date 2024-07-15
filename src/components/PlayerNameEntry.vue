@@ -1,17 +1,15 @@
 <script setup>
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { computed } from 'vue'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   registered_players: Array
 })
 
 const player_name = defineModel('player_name')
 const player_starting_wind = defineModel('player_starting_wind')
-
-const PlayerNameInputPlaceHolderText = computed(() => {
-  return `玩家名`
-})
 
 function StartigWindText(wind) {
   return `${WindsDisplayTextMap[wind]}`

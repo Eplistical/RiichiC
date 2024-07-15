@@ -1,25 +1,55 @@
 <script setup>
 import { Game } from './game'
 import { computed } from 'vue'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   game: Game
 })
 
 const StartGameButtonText = computed(() => {
-  return '开始对局'
+  if (props.language == Lang.CN) {
+    return '开始对局'
+  } else if (props.language == Lang.EN) {
+    return `Start`
+  }
 })
 const FinishGameButtonText = computed(() => {
-  return '结束对局'
+  if (props.language == Lang.CN) {
+    return '结束对局'
+  } else if (props.language == Lang.EN) {
+    return `End Game`
+  }
 })
 const ExportResultButtonText = computed(() => {
-  return '导出日志'
+  if (props.language == Lang.CN) {
+    return '导出日志'
+  } else if (props.language == Lang.EN) {
+    return `Export Log`
+  }
 })
 const NewGameButtonText = computed(() => {
-  return '新对局'
+  if (props.language == Lang.CN) {
+    return '主界面'
+  } else if (props.language == Lang.EN) {
+    return `Main Panel`
+  }
 })
 const ToLeaderBoardText = computed(() => {
-  return '历史排名'
+  if (props.language == Lang.CN) {
+    return '历史排名'
+  } else if (props.language == Lang.EN) {
+    return `Leaderboard`
+  }
+})
+
+const WorksheetTitleText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '日志'
+  } else if (props.language == Lang.EN) {
+    return `Log`
+  }
 })
 
 const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame', 'toLeaderBoard'])
@@ -58,7 +88,7 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame',
           :fields="game.GenerateGameLogTableFieldsForExport()"
           :data="game.GenerateGameLogTable()"
           :name="`${game.GenerateGameLogFileNameForExport()}.xlsx`"
-          worksheet="日志"
+          :worksheet="WorksheetTitleText"
         >
           <el-button type="primary">{{ ExportResultButtonText }}</el-button>
         </download-excel>

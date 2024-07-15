@@ -3,11 +3,11 @@ import { Game } from './game'
 import { PlayerIdsInOrder } from './players'
 import { ref, computed, toRaw } from 'vue'
 import { WindsDisplayTextMap } from './seat_constants'
-import { NumberDisplayMap } from './game_constants'
+import { PlaceNumberDisplayMap } from './game_constants'
 import { HandOutcomeEnum } from './hand'
 import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
-import { RECORD_GAME_API } from './app_constants'
+import { Lang, RECORD_GAME_API } from './app_constants'
 import { MLeagueRuleset, RulesetsAreEqual } from './rulesets'
 
 const emit = defineEmits(['gameUploaded'])
@@ -16,39 +16,82 @@ const props = defineProps({
   game: Game
 })
 
+const language = computed(() => {
+  return props.game.ruleset.language
+})
+
 const StatsTitleText = computed(() => {
-  return '统计'
+  if (language.value == Lang.CN) {
+    return '统计'
+  } else if (language.value == Lang.EN) {
+    return 'Stats'
+  }
 })
+
 const PlayerSummaryLabelText = computed(() => {
-  return '玩家'
+  if (language.value == Lang.CN) {
+    return '玩家'
+  } else if (language.value == Lang.EN) {
+    return 'Player'
+  }
 })
+
 const PointsLabelText = computed(() => {
-  return '点数'
-})
-const RiichiLabelText = computed(() => {
-  return '立直'
-})
-const AgariSummaryLabelText = computed(() => {
-  return '和/大和/立直和'
-})
-const DealInSummaryLabelText = computed(() => {
-  return '铳/大铳/立直铳'
-})
-const TenpaiOnDrawSummaryLabelText = computed(() => {
-  return '流听'
+  if (language.value == Lang.CN) {
+    return '点数'
+  } else if (language.value == Lang.EN) {
+    return 'Points'
+  }
 })
 
-const ActionSummaryLabelText = ref(`立/和/铳/听`)
-const AvgAgariPtSummaryLabelText = ref(`平均和牌打点`)
-const AvgDealInPtSummaryLabelText = ref(`平均放铳损失`)
-const HandCountLabelText = ref(`局数`)
+const ActionSummaryLabelText = computed(() => {
+  if (language.value == Lang.CN) {
+    return '立/和/铳/听'
+  } else if (language.value == Lang.EN) {
+    return 'R/A/D/T'
+  }
+})
 
-const UploadGameStatsButtonText = ref('上传结果')
+const HandCountLabelText = computed(() => {
+  if (language.value == Lang.CN) {
+    return `局数`
+  } else if (language.value == Lang.EN) {
+    return 'Hands'
+  }
+})
+
+const AvgAgariPtSummaryLabelText = computed(() => {
+  if (language.value == Lang.CN) {
+    return `平均和牌打点`
+  } else if (language.value == Lang.EN) {
+    return 'Avg Agari Income'
+  }
+})
+
+const AvgDealInPtSummaryLabelText = computed(() => {
+  if (language.value == Lang.CN) {
+    return `平均放铳损失`
+  } else if (language.value == Lang.EN) {
+    return 'Avg Deal-in Cost'
+  }
+})
+
+const UploadGameStatsButtonText = computed(() => {
+  if (language.value == Lang.CN) {
+    return `上传结果`
+  } else if (language.value == Lang.EN) {
+    return `Upload Results`
+  }
+})
 
 const game_stats = ref({})
 
 function GetPlayerSummary(player_id, rank) {
-  return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}起][${NumberDisplayMap[rank]}位]`
+  if (language.value == Lang.CN) {
+    return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}起][${PlaceNumberDisplayMap[rank][language.value]}]`
+  } else if (language.value == Lang.EN) {
+    return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}][${PlaceNumberDisplayMap[rank][language.value]}]`
+  }
 }
 
 function GetPlayerAgariSummary(player_id, stats) {

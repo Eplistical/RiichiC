@@ -1,4 +1,5 @@
 import { Winds } from './seat_constants.ts'
+import { Lang } from './app_constants'
 
 export enum LeftOverRiichiSticks {
   // nobody gets left-over riichi sticks
@@ -13,6 +14,7 @@ export enum LeftOverRiichiSticks {
 }
 
 export type Ruleset = {
+  language: string
   num_players: 3 | 4
   starting_points: number
   honba_points: number
@@ -28,6 +30,7 @@ export type Ruleset = {
 }
 
 export const MLeagueRuleset: Ruleset = Object.freeze({
+  language: Lang.CN,
   num_players: 4,
   starting_points: 25000,
   honba_points: 300,
@@ -48,6 +51,9 @@ export function RulesetsAreEqual(rule1, rule2) {
     return false
   }
   for (const key of Object.keys(rule1)) {
+    if (key == 'language') {
+      continue
+    }
     if (!(key in rule2) || rule2[key] != rule1[key]) {
       console.log('!!! ', key, rule1[key], rule2[key])
       return false

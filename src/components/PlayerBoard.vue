@@ -2,8 +2,10 @@
 import { Players } from './players'
 import { LastWindMap, NextWindMap, Winds, WindsDisplayTextMap } from './seat_constants'
 import { ref, computed, watch } from 'vue'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   player_id: String,
   current_hand_index: Number,
   players: Players,
@@ -86,7 +88,11 @@ const IsDealer = computed(() => {
 })
 
 const RiichiText = computed(() => {
-  return '立直'
+  if (props.language == Lang.CN) {
+    return '立直'
+  } else if (props.language == Lang.EN) {
+    return 'Riichi'
+  }
 })
 
 const LastHandPointsDelta = computed(() => {

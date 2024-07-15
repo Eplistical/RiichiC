@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
-import { AppMode } from './app_constants'
+import { AppMode, Lang } from './app_constants'
 import { MLeagueRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
@@ -106,16 +106,32 @@ function ConfirmResetGameLogText(row) {
   return `回到[${row.hand_signature}结束]并清空此后所有记录？`
 }
 const ConfirmFinishGameText = computed(() => {
-  return `确定结束？`
+  if (ruleset.value.language == Lang.CN) {
+    return `确定结束？`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Are you sure to end the game?`
+  }
 })
 const ConfirmSetUpNewGameText = computed(() => {
-  return `确定开始新游戏？数据不会保存!`
+  if (ruleset.value.language == Lang.CN) {
+    return `确定回到主界面？数据不会保存!`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Back to main panel? The game may not be saved!`
+  }
+})
+
+const PlayerDuplicatedMsgText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `玩家重复`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Duplicated player`
+  }
 })
 
 function StartGame() {
   let { duplicated, item } = HasDuplication(player_names.value)
   if (duplicated == true) {
-    alert(`玩家重复: ${item}`)
+    alert(`${PlayerDuplicatedMsgText.value}: ${item}`)
     return
   }
   console.log(
@@ -217,17 +233,22 @@ function HandleResetGameLog(index, row) {
             v-model:player_names="player_names"
             v-model:player_starting_winds="player_starting_winds"
             :num_players="ruleset.num_players"
+            :language="ruleset.language"
           />
         </div>
         <div class="ruleset_configuration_board">
-          <RuleSetConfigurationBoard v-model="ruleset" />
+          <RuleSetConfigurationBoard :language="ruleset.language" v-model="ruleset" />
         </div>
       </div>
 
       <!-- On-going & Finished Game -->
       <div v-else>
         <div class="gameboard">
-          <GameBoard :game="game" v-model="hand_results_form.riichi_players" />
+          <GameBoard
+            :game="game"
+            :language="ruleset.language"
+            v-model="hand_results_form.riichi_players"
+          />
         </div>
 
         <el-divider />
@@ -235,13 +256,14 @@ function HandleResetGameLog(index, row) {
         <div class="hand_results_input_board" v-if="game.IsOnGoing()">
           <HandResultsInputBoard
             v-model="hand_results_form"
+            :language="ruleset.language"
             :game="game"
             @submit="SubmitHandResultsForm"
           />
         </div>
 
         <div class="game_log_board">
-          <GameLogBoard :game="game" @resetLog="HandleResetGameLog" />
+          <GameLogBoard :language="ruleset.language" :game="game" @resetLog="HandleResetGameLog" />
         </div>
         <div class="game_stats_board" v-if="game.IsFinished()">
           <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
@@ -253,6 +275,7 @@ function HandleResetGameLog(index, row) {
       <!-- Game control buttons -->
       <div class="game_control_board">
         <GameControlBoard
+          :language="ruleset.language"
           :game="game"
           @startGame="StartGame"
           @finishGame="FinishGame"
@@ -263,7 +286,7 @@ function HandleResetGameLog(index, row) {
     </div>
     <div v-else-if="app_mode == AppMode.LEADER_BOARD">
       <div class="leader_board">
-        <LeaderBoard class="leader_board" @toGame="EnterGameMode" />
+        <LeaderBoard class="leader_board" :language="ruleset.language" @toGame="EnterGameMode" />
       </div>
     </div>
   </div>

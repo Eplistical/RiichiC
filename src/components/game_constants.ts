@@ -1,3 +1,5 @@
+import { Lang } from './app_constants'
+
 export const PointsLadder = Object.freeze({
   MANGAN: 'MANGAN',
   HANEMAN: 'HANEMAN',
@@ -9,23 +11,65 @@ export const PointsLadder = Object.freeze({
 })
 
 export const PointsLadderDisplayMap = Object.freeze({
-  [PointsLadder.MANGAN]: '满贯',
-  [PointsLadder.HANEMAN]: '跳满',
-  [PointsLadder.BAIMAN]: '倍满',
-  [PointsLadder.SANBAIMAN]: '三倍满',
-  [PointsLadder.YAKUMAN]: '役满',
-  [PointsLadder.DOUBLE_YAKUMAN]: '双倍役满',
-  [PointsLadder.TRIPLE_YAKUMAN]: '三倍役满'
+  [PointsLadder.MANGAN]: {
+    [Lang.CN]: '满贯',
+    [Lang.EN]: 'Mangan'
+  },
+  [PointsLadder.HANEMAN]: {
+    [Lang.CN]: '跳满',
+    [Lang.EN]: 'Haneman'
+  },
+  [PointsLadder.BAIMAN]: {
+    [Lang.CN]: '倍满',
+    [Lang.EN]: 'Baiman'
+  },
+  [PointsLadder.SANBAIMAN]: {
+    [Lang.CN]: '三倍满',
+    [Lang.EN]: 'Sanbaiman'
+  },
+  [PointsLadder.YAKUMAN]: {
+    [Lang.CN]: '役满',
+    [Lang.EN]: 'Yakuman'
+  },
+  [PointsLadder.DOUBLE_YAKUMAN]: {
+    [Lang.CN]: '双倍役满',
+    [Lang.EN]: 'Double Yakuman'
+  },
+  [PointsLadder.TRIPLE_YAKUMAN]: {
+    [Lang.CN]: '三倍役满',
+    [Lang.EN]: 'Triple Yakuman'
+  }
 })
 
 export const PointsLadderBriefDisplayMap = Object.freeze({
-  [PointsLadder.MANGAN]: '满',
-  [PointsLadder.HANEMAN]: '跳',
-  [PointsLadder.BAIMAN]: '倍',
-  [PointsLadder.SANBAIMAN]: '三',
-  [PointsLadder.YAKUMAN]: '役',
-  [PointsLadder.DOUBLE_YAKUMAN]: '双役',
-  [PointsLadder.TRIPLE_YAKUMAN]: '三役'
+  [PointsLadder.MANGAN]: {
+    [Lang.CN]: '满',
+    [Lang.EN]: 'MAN'
+  },
+  [PointsLadder.HANEMAN]: {
+    [Lang.CN]: '跳',
+    [Lang.EN]: 'HANE'
+  },
+  [PointsLadder.BAIMAN]: {
+    [Lang.CN]: '倍',
+    [Lang.EN]: 'BAI'
+  },
+  [PointsLadder.SANBAIMAN]: {
+    [Lang.CN]: '三',
+    [Lang.EN]: 'SAN'
+  },
+  [PointsLadder.YAKUMAN]: {
+    [Lang.CN]: '役',
+    [Lang.EN]: 'YAKU'
+  },
+  [PointsLadder.DOUBLE_YAKUMAN]: {
+    [Lang.CN]: '双役',
+    [Lang.EN]: '2*YAKU'
+  },
+  [PointsLadder.TRIPLE_YAKUMAN]: {
+    [Lang.CN]: '三役',
+    [Lang.EN]: '3*YAKU'
+  }
 })
 
 export enum Actions {
@@ -39,32 +83,84 @@ export enum Actions {
 }
 
 export const ActionDisplayMap = Object.freeze({
-  [Actions.RIICHI]: '立直',
-  [Actions.TENPAI]: '听牌',
-  [Actions.AGARI]: '和牌',
-  [Actions.DEAL_IN]: '放铳',
-  [Actions.TSUMO]: '自摸',
-  [Actions.RON]: '荣和',
-  [Actions.DRAW]: '流局'
+  [Actions.RIICHI]: {
+    [Lang.CN]: '立直',
+    [Lang.EN]: 'Riichi'
+  },
+  [Actions.TENPAI]: {
+    [Lang.CN]: '听牌',
+    [Lang.EN]: 'Tenpai'
+  },
+  [Actions.AGARI]: {
+    [Lang.CN]: '和牌',
+    [Lang.EN]: 'Agari'
+  },
+  [Actions.DEAL_IN]: {
+    [Lang.CN]: '放铳',
+    [Lang.EN]: 'Deal-in'
+  },
+  [Actions.TSUMO]: {
+    [Lang.CN]: '自摸',
+    [Lang.EN]: 'Tsumo'
+  },
+  [Actions.RON]: {
+    [Lang.CN]: '荣和',
+    [Lang.EN]: 'Ron'
+  },
+  [Actions.DRAW]: {
+    [Lang.CN]: '流局',
+    [Lang.EN]: 'Draw'
+  }
 })
 
 export const ActionBriefDisplayMap = Object.freeze({
-  [Actions.RIICHI]: '立',
-  [Actions.TENPAI]: '听',
-  [Actions.AGARI]: '和',
-  [Actions.DEAL_IN]: '铳',
-  [Actions.TSUMO]: '摸',
-  [Actions.RON]: '荣',
-  [Actions.DRAW]: '流'
+  [Actions.RIICHI]: {
+    [Lang.CN]: '立',
+    [Lang.EN]: 'Riichi'
+  },
+  [Actions.TENPAI]: {
+    [Lang.CN]: '听',
+    [Lang.EN]: 'Tenpai'
+  },
+  [Actions.AGARI]: {
+    [Lang.CN]: '和',
+    [Lang.EN]: 'Agari'
+  },
+  [Actions.DEAL_IN]: {
+    [Lang.CN]: '铳',
+    [Lang.EN]: 'Dealin'
+  },
+  [Actions.TSUMO]: {
+    [Lang.CN]: '摸',
+    [Lang.EN]: 'Tsumo'
+  },
+  [Actions.RON]: {
+    [Lang.CN]: '荣',
+    [Lang.EN]: 'Ron'
+  },
+  [Actions.DRAW]: {
+    [Lang.CN]: '流',
+    [Lang.EN]: 'Draw'
+  }
 })
 
-export const NumberDisplayMap = Object.freeze({
-  [-1]: '無',
-  [0]: '零',
-  [1]: '一',
-  [2]: '二',
-  [3]: '三',
-  [4]: '四'
+export const PlaceNumberDisplayMap = Object.freeze({
+  [1]: {
+    [Lang.CN]: '一',
+    [Lang.EN]: '1st'
+  },
+  [2]: {
+    [Lang.CN]: '二',
+    [Lang.EN]: '2nd'
+  },
+  [3]: {
+    [Lang.CN]: '三',
+    [Lang.EN]: '3rd'
+  },
+  [4]: {
+    [Lang.CN]: '四',
+    [Lang.EN]: '4th'
+  }
 })
 
 export type Han = number | string

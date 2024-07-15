@@ -3,6 +3,7 @@ import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_const
 import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
 import { Player, PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import { ActionBriefDisplayMap, Actions, PointsLadderBriefDisplayMap } from './game_constants'
+import { Lang } from './app_constants'
 
 export enum GameState {
   NOT_STARTED,
@@ -274,7 +275,7 @@ export class Game {
   }
 
   // Generate an object for game log for display/export purpose
-  GenerateGameLogTable() {
+  GenerateGameLogTable(language: string = Lang.CN) {
     let table = []
     for (let i = 0; i < this.log.length; ++i) {
       const log = this.log[i]
@@ -291,17 +292,22 @@ export class Game {
       }
 
       if (log.assign_left_over_riichi) {
-        row.hand_signature = `终局`
-        row.results_summary = `供托分配`
+        if (language == Lang.CN) {
+          row.hand_signature = `终局`
+          row.results_summary = `供托分配`
+        } else if (language == Lang.EN) {
+          row.hand_signature = `End Game`
+          row.results_summary = `Left over Riichi Sticks`
+        }
       } else {
         row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
-        row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome]}`
+        row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome][language]}`
         if (
           hand.results.outcome == HandOutcomeEnum.RON ||
           hand.results.outcome == HandOutcomeEnum.TSUMO
         ) {
           if (typeof hand.results.han == 'string') {
-            row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han]}]`
+            row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han][language]}]`
           } else {
             row.results_summary += `[${hand.results.han},${hand.results.fu}]`
           }
@@ -321,23 +327,23 @@ export class Game {
         }
         if (!log.assign_left_over_riichi) {
           if (hand.riichi.includes(player_id)) {
-            row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI]}]`
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI][language]}]`
           }
           if (
             hand.results.outcome == HandOutcomeEnum.DRAW &&
             hand.results.tenpai.includes(player_id)
           ) {
-            row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI]}]`
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.TENPAI][language]}]`
           }
           if (
             (hand.results.outcome == HandOutcomeEnum.TSUMO ||
               hand.results.outcome == HandOutcomeEnum.RON) &&
             hand.results.winner == player_id
           ) {
-            row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI]}]`
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI][language]}]`
           }
           if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
-            row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN]}]`
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN][language]}]`
           }
         }
       }

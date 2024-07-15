@@ -2,8 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useFetch } from '@vueuse/core'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
-import { NumberDisplayMap } from './game_constants'
-import { GET_STATS_API, LIST_GAMES_API } from './app_constants'
+import { PlaceNumberDisplayMap } from './game_constants'
+import { Lang, GET_STATS_API, LIST_GAMES_API } from './app_constants'
+
+const props = defineProps({
+  language: String
+})
 
 const emit = defineEmits(['toGame'])
 
@@ -12,37 +16,216 @@ const raw_stats = ref({})
 const raw_games = ref({})
 const date_range = ref([])
 
-const RefreshDataText = ref('刷新数据')
-const DateRangeTitleText = ref('统计范围')
-const LeaderBoardTitleText = ref('排行榜')
-const GameRecordsTitleText = ref('具体场次')
-const ToGameText = ref('返回游戏')
+const RefreshDataText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '刷新数据'
+  } else if (props.language == Lang.EN) {
+    return 'Refresh'
+  }
+})
 
-const StartDateText = ref('开始日期')
-const EndDateText = ref('结束日期')
+const DateRangeTitleText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '统计范围'
+  } else if (props.language == Lang.EN) {
+    return 'Stats Range'
+  }
+})
 
-const NameColumnText = ref('选手')
-const PointsWithUmaColumnText = ref('积分')
-const PointsColumnText = ref('素点')
-const GamesCountText = ref('试合')
-const AvgRankColumnText = ref('平着')
-const Top1RateColumnText = ref('TOP率')
-const Top2RateColumnText = ref('连对率')
-const Top3RateColumnText = ref('避四率')
-const MaxPointsColumnText = ref('最高得点')
-const AvgPointsColumnText = ref('场均得点')
-const AgariRateColumnText = ref('和率')
-const DealInRateColumnText = ref('铳率')
-const AvgAgariPtColumnText = ref('平均和牌打点')
-const AvgDealInPtColumnText = ref('平均放铳损失')
-const ExpectedPtColumnText = ref('期望得点')
+const LeaderBoardTitleText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '排行榜'
+  } else if (props.language == Lang.EN) {
+    return 'Leaderboard'
+  }
+})
 
-const GamePlayerColumnText = ref('选手')
-const GameRankColumnText = ref('顺位')
-const GamePointsColumnText = ref('点数')
-const GamePointsWithUmaColumnText = ref('精算')
-const GameDetailsColumnText = ref('立/和/铳/听')
-const TotalGameCountText = ref('总场次')
+const ToGameText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '返回游戏'
+  } else if (props.language == Lang.EN) {
+    return 'Main Panel'
+  }
+})
+
+const StartDateText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '开始日期'
+  } else if (props.language == Lang.EN) {
+    return 'Start Date'
+  }
+})
+const EndDateText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '结束日期'
+  } else if (props.language == Lang.EN) {
+    return 'End Date'
+  }
+})
+
+const NameColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '选手'
+  } else if (props.language == Lang.EN) {
+    return 'Player'
+  }
+})
+const PointsWithUmaColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '积分'
+  } else if (props.language == Lang.EN) {
+    return 'Total Pt'
+  }
+})
+const PointsColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '素点'
+  } else if (props.language == Lang.EN) {
+    return 'Base Pt'
+  }
+})
+const GamesCountText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '试合'
+  } else if (props.language == Lang.EN) {
+    return 'Games'
+  }
+})
+const AvgRankColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '平着'
+  } else if (props.language == Lang.EN) {
+    return 'Avg Rank'
+  }
+})
+const Top1RateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return 'TOP率'
+  } else if (props.language == Lang.EN) {
+    return '1st%'
+  }
+})
+const Top2RateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '连对率'
+  } else if (props.language == Lang.EN) {
+    return 'Half%'
+  }
+})
+const Top3RateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '避四率'
+  } else if (props.language == Lang.EN) {
+    return 'Non4th%'
+  }
+})
+const MaxPointsColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '最高得点'
+  } else if (props.language == Lang.EN) {
+    return 'Max Score'
+  }
+})
+const AvgPointsColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '场均得点'
+  } else if (props.language == Lang.EN) {
+    return 'Avg Score'
+  }
+})
+const AgariRateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '和率'
+  } else if (props.language == Lang.EN) {
+    return 'Agari%'
+  }
+})
+const DealInRateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '铳率'
+  } else if (props.language == Lang.EN) {
+    return 'Dealin%'
+  }
+})
+const AvgAgariPtColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '平均和牌打点'
+  } else if (props.language == Lang.EN) {
+    return 'Avg Agari Income'
+  }
+})
+const AvgDealInPtColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '平均放铳损失'
+  } else if (props.language == Lang.EN) {
+    return 'Avg Deal-in Cost'
+  }
+})
+const ExpectedPtColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '期望得点'
+  } else if (props.language == Lang.EN) {
+    return 'Exp. Val.'
+  }
+})
+
+const GamePlayerColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '选手'
+  } else if (props.language == Lang.EN) {
+    return 'Player'
+  }
+})
+const GameRankColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '顺位'
+  } else if (props.language == Lang.EN) {
+    return 'Place'
+  }
+})
+const GamePointsColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '点数'
+  } else if (props.language == Lang.EN) {
+    return 'Points'
+  }
+})
+const GamePointsWithUmaColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '精算'
+  } else if (props.language == Lang.EN) {
+    return 'Pt'
+  }
+})
+const GameDetailsColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '立/和/铳/听'
+  } else if (props.language == Lang.EN) {
+    return 'R/A/D/T'
+  }
+})
+const TotalGameCountText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '总场次'
+  } else if (props.language == Lang.EN) {
+    return 'Games Count'
+  }
+})
+const HandsCountText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '局数'
+  } else if (props.language == Lang.EN) {
+    return 'Hands'
+  }
+})
+
+function GetPlayerSummary(game, starting_wind) {
+  if (props.language == Lang.CN) {
+    return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind]}起][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
+  } else if (props.language == Lang.EN) {
+    return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind]}][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
+  }
+}
 
 onMounted(() => {
   if (init_date.value == false) {
@@ -99,7 +282,7 @@ function getGameRecordTable(game) {
   let table = []
   for (const wind of WindsInOrder) {
     const row = {
-      player: `${game[wind].name}[${WindsDisplayTextMap[wind]}起][${NumberDisplayMap[game[wind].rank]}位]`,
+      player: GetPlayerSummary(game, wind),
       rank: game[wind].rank,
       points: gamePointsDisplay(game[wind].points, game[wind].points_with_uma),
       //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
@@ -118,7 +301,7 @@ function getGameRecordTable(game) {
 }
 
 function GenerateGameLabel(game) {
-  return `[${game.game_date}] ${game.game_id.substr(0, 8)} 局数: ${game.game_hand_count}`
+  return `[${game.game_date}] ${game.game_id.substr(0, 8)} ${HandsCountText}: ${game.game_hand_count}`
 }
 
 const ComputedLeaderBoard = computed(() => {

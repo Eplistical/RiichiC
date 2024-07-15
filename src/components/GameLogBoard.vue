@@ -2,37 +2,60 @@
 import { Game } from './game'
 import { computed } from 'vue'
 import { PlayerIdsInOrder } from './players'
-import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand'
-import { PointsLadderBriefDisplayMap, Actions, ActionBriefDisplayMap } from './game_constants'
-import { WindsDisplayTextMap } from './seat_constants'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   game: Game
 })
 
 const emit = defineEmits(['resetLog'])
 
 const LogTitleText = computed(() => {
-  return `日志`
+  if (props.language == Lang.CN) {
+    return `日志`
+  } else if (props.language == Lang.EN) {
+    return `Log`
+  }
 })
 const HandSignatureLabelText = computed(() => {
-  return `场`
+  if (props.language == Lang.CN) {
+    return `场`
+  } else if (props.language == Lang.EN) {
+    return `Hand`
+  }
 })
 const StartGameRiichiSticksLabelText = computed(() => {
-  return `供托`
+  if (props.language == Lang.CN) {
+    return `供托`
+  } else if (props.language == Lang.EN) {
+    return `Riichi Sticks`
+  }
 })
 const HandResultsSummaryLabelText = computed(() => {
-  return `结局`
+  if (props.language == Lang.CN) {
+    return `结局`
+  } else if (props.language == Lang.EN) {
+    return `Result`
+  }
 })
 const OperationLabelText = computed(() => {
-  return `操作`
+  if (props.language == Lang.CN) {
+    return `操作`
+  } else if (props.language == Lang.EN) {
+    return `Action`
+  }
 })
 const ResetButtonText = computed(() => {
-  return `回溯`
+  if (props.language == Lang.CN) {
+    return `回溯`
+  } else if (props.language == Lang.EN) {
+    return `Backtrace`
+  }
 })
 
 const GameLogTable = computed(() => {
-  return props.game.GenerateGameLogTable()
+  return props.game.GenerateGameLogTable(props.language)
 })
 
 function GetPlayerName(player_id) {

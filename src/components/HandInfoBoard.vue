@@ -2,8 +2,10 @@
 import { Hand } from './hand'
 import { WindsDisplayTextMap } from './seat_constants'
 import { computed } from 'vue'
+import { Lang } from './app_constants'
 
 const props = defineProps({
+  language: String,
   hand: Hand,
   game_finished: Boolean
 })
@@ -13,11 +15,21 @@ const HandSignatureText = computed(() => {
 })
 
 const RiichiSticksText = computed(() => {
-  return `供托: ${props.hand.riichi_sticks}`
+  if (props.language == Lang.CN) {
+    return `供托: ${props.hand.riichi_sticks}`
+  }
+  if (props.language == Lang.EN) {
+    return `Riichi Sticks: ${props.hand.riichi_sticks}`
+  }
 })
 
 const GameFinishedText = computed(() => {
-  return `[已结束]`
+  if (props.language == Lang.CN) {
+    return `[已结束]`
+  }
+  if (props.language == Lang.EN) {
+    return `[Ended]`
+  }
 })
 </script>
 
