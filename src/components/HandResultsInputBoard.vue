@@ -24,6 +24,9 @@ const HandReultsTitleText = computed(() => {
 const TenpaiLabelText = computed(() => {
   return ActionDisplayMap[Actions.TENPAI][props.language]
 })
+const ChomboLabelText = computed(() => {
+  return ActionDisplayMap[Actions.CHOMBO][props.language]
+})
 const AgariLabelText = computed(() => {
   return ActionDisplayMap[Actions.AGARI][props.language]
 })
@@ -55,6 +58,7 @@ const SubmitButtonText = computed(() => {
 const TenpaiSelectionColor = ref('#289e20')
 const WinnerSelectionColor = ref('#289e20')
 const DealInSelectionColor = ref('#e86161')
+const ChomboSelectionColor = ref('#e86161')
 
 const emit = defineEmits(['submit'])
 
@@ -76,6 +80,18 @@ function HandleWinnerSelectionChange(player_id) {
               {{ HandOutcomeEnumDisplayTextMap[outcome][language] }}
             </el-radio-button>
           </el-radio-group>
+        </el-form-item>
+
+        <el-form-item
+          :label="ChomboLabelText"
+          v-if="results_form.outcome == HandOutcomeEnum.CHOMBO"
+        >
+          <PlayersSelection
+            :players="game.players"
+            :fill="ChomboSelectionColor"
+            v-model="results_form.chombo"
+            :multi_selection="true"
+          />
         </el-form-item>
 
         <el-form-item :label="TenpaiLabelText" v-if="results_form.outcome == HandOutcomeEnum.DRAW">

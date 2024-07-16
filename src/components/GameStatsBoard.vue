@@ -45,11 +45,19 @@ const PointsLabelText = computed(() => {
 })
 
 const ActionSummaryLabelText = computed(() => {
+  let text
   if (language.value == Lang.CN) {
-    return '立/和/铳/听'
+    text = '立/和/铳/听'
+    if (has_chombo.value) {
+      text += '/罚'
+    }
   } else if (language.value == Lang.EN) {
-    return 'R/A/D/T'
+    text = 'R/A/D/T'
+    if (has_chombo.value) {
+      text += '/C'
+    }
   }
+  return text
 })
 
 const HandCountLabelText = computed(() => {
@@ -132,6 +140,14 @@ const UploadRulesetNotSupportedMsgText = computed(() => {
   }
 })
 
+const has_chombo = computed(() => {
+  const chombo_logs = props.game.log.reduce(
+    (game_count, log) => (game_count += log.log_type == GameLogType.CHOMBO ? 1 : 0),
+    0
+  )
+  return chombo_logs > 0
+})
+
 const game_stats = ref({})
 
 function GetPlayerSummary(player_id, rank) {
@@ -151,7 +167,11 @@ function GetPlayerDealInSummary(player_id, stats) {
 }
 
 function GetActionSummary(stats) {
-  return `${stats.riichi}/${stats.agari}/${stats.deal_in}/${stats.tenpai_on_draw}`
+  let summary = `${stats.riichi}/${stats.agari}/${stats.deal_in}/${stats.tenpai_on_draw}`
+  if (has_chombo.value) {
+    summary += `/${stats.chombo}`
+  }
+  return summary
 }
 
 function GetAvgAgariPtSummary(stats) {
@@ -221,6 +241,7 @@ function UploadGameStats() {
       riichi: stats.riichi,
       agari: stats.agari,
       deal_in: stats.deal_in,
+      chombo: stats.chombo,
       tenpai_on_draw: stats.tenpai_on_draw,
       agari_pt_sum: stats.agari_pt_sum,
       deal_in_pt_sum: stats.deal_in_pt_sum
@@ -262,45 +283,52 @@ function ComputeGameStats() {
       deal_in_after_riichi: 0,
       deal_in_pt_sum: 0,
 
-      tenpai_on_draw: 0
+      tenpai_on_draw: 0,
+
+      chombo: 0
     }
     props.game.log.forEach((log) => {
       if (log.log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
         return
-      }
-
-      const hand = log.hand
-      const player_riichi = log.hand.riichi && log.hand.riichi.includes(player_id)
-      if (player_riichi) {
-        stats.riichi += 1
-      }
-      if (
-        hand.results.outcome == HandOutcomeEnum.DRAW &&
-        hand.results.tenpai &&
-        hand.results.tenpai.includes(player_id)
-      ) {
-        stats.tenpai_on_draw += 1
-      }
-      if (hand.results.outcome != HandOutcomeEnum.DRAW && hand.results.winner == player_id) {
-        stats.agari += 1
-        stats.agari_pt_sum += hand.results.points_delta[player_id]
+      } else if (log.log_type == GameLogType.CHOMBO) {
+        if (log.hand.results.chombo.includes(player_id)) {
+          stats.chombo += 1
+        }
+        return
+      } else if (log.log_type == GameLogType.REGULAR) {
+        const hand = log.hand
+        const player_riichi = log.hand.riichi && log.hand.riichi.includes(player_id)
         if (player_riichi) {
-          stats.agari_after_riichi += 1
-          stats.agari_pt_sum -= props.game.ruleset.riichi_cost
+          stats.riichi += 1
         }
-        if (hand.results.han in PointsLadder) {
-          stats.agari_over_mangan += 1
+        if (
+          hand.results.outcome == HandOutcomeEnum.DRAW &&
+          hand.results.tenpai &&
+          hand.results.tenpai.includes(player_id)
+        ) {
+          stats.tenpai_on_draw += 1
         }
-      }
-      if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
-        stats.deal_in += 1
-        stats.deal_in_pt_sum += hand.results.points_delta[player_id]
-        if (player_riichi) {
-          stats.deal_in_after_riichi += 1
-          stats.deal_in_pt_sum -= props.game.ruleset.riichi_cost
+        if (hand.results.outcome != HandOutcomeEnum.DRAW && hand.results.winner == player_id) {
+          stats.agari += 1
+          stats.agari_pt_sum += hand.results.points_delta[player_id]
+          if (player_riichi) {
+            stats.agari_after_riichi += 1
+            stats.agari_pt_sum -= props.game.ruleset.riichi_cost
+          }
+          if (hand.results.han in PointsLadder) {
+            stats.agari_over_mangan += 1
+          }
         }
-        if (hand.results.han in PointsLadder) {
-          stats.deal_in_over_mangan += 1
+        if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
+          stats.deal_in += 1
+          stats.deal_in_pt_sum += hand.results.points_delta[player_id]
+          if (player_riichi) {
+            stats.deal_in_after_riichi += 1
+            stats.deal_in_pt_sum -= props.game.ruleset.riichi_cost
+          }
+          if (hand.results.han in PointsLadder) {
+            stats.deal_in_over_mangan += 1
+          }
         }
       }
     })
@@ -338,7 +366,10 @@ const GameStatsBoard = computed(() => {
 })
 
 function GameHandCount() {
-  return props.game.log.length - 1
+  return props.game.log.reduce(
+    (game_count, log) => (game_count += log.log_type == GameLogType.REGULAR ? 1 : 0),
+    0
+  )
 }
 </script>
 

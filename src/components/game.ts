@@ -22,6 +22,14 @@ function InvalidNumPlayersMsgText(language) {
   }
 }
 
+function ResetChomboHandMsgText(language) {
+  if (language == Lang.CN) {
+    return `重置`
+  } else if (language == Lang.EN) {
+    return `Reset`
+  }
+}
+
 export enum GameState {
   NOT_STARTED,
   ON_GOING,
@@ -236,11 +244,14 @@ export class Game {
       return
     }
     this.SanityCheckTotalPoints()
-    const hand_log = {
+    let hand_log = {
       state: this.state,
       hand: this.current_hand.Clone(),
       players: this.players.Clone(this.ruleset),
-      log_type: GameLogType.REGULAR
+      log_type:
+        this.current_hand.results.outcome == HandOutcomeEnum.CHOMBO
+          ? GameLogType.CHOMBO
+          : GameLogType.REGULAR
     }
     console.log('Saving hand to log: ', hand_log)
     this.log.push(hand_log)
@@ -336,6 +347,8 @@ export class Game {
           } else {
             row.results_summary += `[${hand.results.han},${hand.results.fu}]`
           }
+        } else if (hand.results.outcome == HandOutcomeEnum.CHOMBO) {
+          row.hand_signature += `[${ResetChomboHandMsgText(language)}]`
         }
       }
       for (const player_id of PlayerIdsInOrder) {
@@ -369,6 +382,10 @@ export class Game {
           }
           if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
             row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN][language]}]`
+          }
+        } else if (log.log_type == GameLogType.CHOMBO) {
+          if (hand.results.chombo.includes(player_id)) {
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.CHOMBO][language]}]`
           }
         }
       }
@@ -422,7 +439,6 @@ export class Game {
     player_starting_winds: WindType[],
     ruleset: Ruleset
   ): [boolean, string] {
-    console.log('>>>', ruleset, ruleset.language)
     if (player_starting_winds.length != ruleset.num_players) {
       return [
         false,

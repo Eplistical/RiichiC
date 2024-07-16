@@ -91,6 +91,13 @@ const GamesCountText = computed(() => {
     return 'Games'
   }
 })
+const ChomboCountText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '犯规'
+  } else if (props.language == Lang.EN) {
+    return 'Chombo'
+  }
+})
 const AvgRankColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '平着'
@@ -197,13 +204,24 @@ const GamePointsWithUmaColumnText = computed(() => {
     return 'Pt'
   }
 })
-const GameDetailsColumnText = computed(() => {
+
+function GameDetailsColumnText(game) {
+  const has_chombo = HasChombo(game)
+  let text
   if (props.language == Lang.CN) {
-    return '立/和/铳/听'
+    text = '立/和/铳/听'
+    if (has_chombo) {
+      text += '/罚'
+    }
   } else if (props.language == Lang.EN) {
-    return 'R/A/D/T'
+    text = 'R/A/D/T'
+    if (has_chombo) {
+      text += '/C'
+    }
   }
-})
+  return text
+}
+
 const TotalGameCountText = computed(() => {
   if (props.language == Lang.CN) {
     return '总场次'
@@ -261,8 +279,8 @@ function RefreshData() {
     end_date.getFullYear() * 10000 + (end_date.getMonth() + 1) * 100 + end_date.getDate()
   raw_stats.value = fetchLeaderBoard(start_date_int, end_date_int)
   raw_games.value = fetchGames(start_date_int, end_date_int)
-  //console.log("Getting stats=", raw_stats.value)
-  //console.log('Getting games=', raw_games.value)
+  console.log('Getting stats=', raw_stats.value)
+  console.log('Getting games=', raw_games.value)
 }
 
 function getDefaultDateRange() {
@@ -279,6 +297,7 @@ function gamePointsDisplay(end_pt, pt_with_uma, start_pt = 25000) {
 }
 
 function getGameRecordTable(game) {
+  const has_chombo = HasChombo(game)
   let table = []
   for (const wind of WindsInOrder) {
     const row = {
@@ -286,7 +305,9 @@ function getGameRecordTable(game) {
       rank: game[wind].rank,
       points: gamePointsDisplay(game[wind].points, game[wind].points_with_uma),
       //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
-      game_details: `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}`,
+      game_details:
+        `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}` +
+        (has_chombo ? `/${game[wind].chombo}` : ``),
       avg_agari_points:
         game[wind].agari == 0 ? 0 : Math.round(game[wind].agari_pt_sum / game[wind].agari),
       avg_deal_in_points:
@@ -302,6 +323,15 @@ function getGameRecordTable(game) {
 
 function GenerateGameLabel(game) {
   return `[${game.game_date}] ${game.game_id.substr(0, 8)} ${HandsCountText.value}: ${game.game_hand_count}`
+}
+
+function HasChombo(game) {
+  for (const wind of WindsInOrder) {
+    if (game[wind].chombo > 0) {
+      return true
+    }
+  }
+  return false
 }
 
 const ComputedLeaderBoard = computed(() => {
@@ -328,9 +358,11 @@ const ComputedLeaderBoard = computed(() => {
     const avg_points = stats.points_sum / stats.games_count
     const row = {
       name: `[${idx + 1}]${stats.player_name}`,
-      points_with_uma: (stats.points_sum_with_uma - 25000 * stats.games_count) / 1000,
+      points_with_uma:
+        (stats.points_sum_with_uma - 25000 * stats.games_count) / 1000 - 20.0 * stats.chombo_sum,
       points: (stats.points_sum - 25000 * stats.games_count) / 1000,
       games_count: `${stats.games_count}[${stats.place_count_map[1]}|${stats.place_count_map[2]}|${stats.place_count_map[3]}|${stats.place_count_map[4]}]`,
+      chombo_count: stats.chombo_sum,
       avg_rank: stats.rank_sum / stats.games_count,
       top1_rate: top1_rate,
       top2_rate: top2_rate,
@@ -494,6 +526,7 @@ function ExpectedPtFormatter(row, col) {
           </el-text>
         </template>
       </el-table-column>
+      <el-table-column prop="chombo_count" :label="ChomboCountText" />
       <el-table-column
         prop="agari_rate"
         :label="AgariRateColumnText"
@@ -566,7 +599,10 @@ function ExpectedPtFormatter(row, col) {
               <!--<el-table-column prop="rank" :label="GameRankColumnText" />-->
               <el-table-column prop="points" :label="GamePointsColumnText" />
               <!--<el-table-column prop="points_with_uma" :label="GamePointsWithUmaColumnText" />-->
-              <el-table-column prop="game_details" :label="GameDetailsColumnText" />
+              <el-table-column
+                prop="game_details"
+                :label="GameDetailsColumnText(raw_games.value.games[i - 1])"
+              />
               <el-table-column prop="avg_agari_points" :label="AvgAgariPtColumnText" />
               <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" />
             </el-table>

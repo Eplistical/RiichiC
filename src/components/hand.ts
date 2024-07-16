@@ -10,15 +10,16 @@ import {
   Han,
   Fu
 } from './game_constants.ts'
-import { LeftOverRiichiSticks, Ruleset } from './rulesets.ts'
-import { NextWindMap, WindType, Winds, WindsInOrder } from './seat_constants.ts'
+import { Ruleset } from './rulesets.ts'
+import { NextWindMap, WindType } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import { Lang } from './app_constants'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
   RON: 'ron',
-  DRAW: 'draw'
+  DRAW: 'draw',
+  CHOMBO: 'chombo'
 })
 
 // Allowed state transitions:
@@ -44,6 +45,10 @@ export const HandOutcomeEnumDisplayTextMap = Object.freeze({
   [HandOutcomeEnum.RON]: {
     [Lang.CN]: '荣和',
     [Lang.EN]: 'Ron'
+  },
+  [HandOutcomeEnum.CHOMBO]: {
+    [Lang.CN]: '犯规',
+    [Lang.EN]: 'Chombo'
   }
 })
 
@@ -52,6 +57,14 @@ function InvalidOutcomeMsgText(language) {
     return '对局结果错误'
   } else if (language == Lang.EN) {
     return ' Invalid Hand OutCome'
+  }
+}
+
+function ChomboPlayerNotFoundMsgText(language) {
+  if (language == Lang.CN) {
+    return '找不到犯规家'
+  } else if (language == Lang.EN) {
+    return ' Chombo Player Not Found'
   }
 }
 
@@ -129,6 +142,7 @@ export type HandResults = {
   han?: number | string
   fu?: number
   points_delta?: PointsDelta
+  chombo?: PlayerId[]
 }
 
 interface HandInterface {
@@ -188,6 +202,9 @@ export class Hand {
     if (this.results.points_delta != undefined) {
       clone_instance.results.points_delta = { ...this.results.points_delta }
     }
+    if (this.results.chombo) {
+      clone_instance.results.chombo = [...this.results.chombo]
+    }
     return clone_instance
   }
 
@@ -234,11 +251,19 @@ export class Hand {
     }
     // save validated results
     this.results = validated_and_formalized_results
-    // Apply points change and clean up riichi sticks
-    this.results.points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
-    players.ApplyPointsDelta(this.results.points_delta)
-    if (this.results.outcome != HandOutcomeEnum.DRAW) {
-      this.riichi_sticks = 0
+
+    if (this.results.outcome == HandOutcomeEnum.CHOMBO) {
+      // When chombo, we reset to initial state of the hand
+      for (const player_id of PlayerIdsInOrder) {
+        this.PlayerUnRiichi(player_id, players, ruleset)
+      }
+    } else {
+      // Apply points change and clean up riichi sticks
+      this.results.points_delta = this.ResolvePointsDelta(this.results, ruleset, players)
+      players.ApplyPointsDelta(this.results.points_delta)
+      if (this.results.outcome != HandOutcomeEnum.DRAW) {
+        this.riichi_sticks = 0
+      }
     }
     // Mark as finished
     this.state = HandState.FINISHED
@@ -286,6 +311,15 @@ export class Hand {
       console.warn(`cannot set up the next hand as there is no more future hands`)
       return undefined
     }
+    if (this.results.outcome == HandOutcomeEnum.CHOMBO) {
+      return this.CreateNextHand(
+        /*renchan=*/ false,
+        /*honba_increase=*/ false,
+        /*chombo=*/ true,
+        ruleset
+      )
+    }
+
     const [dealer_id, dealer] = players.FindDealer()
     const all_last = this.IsAllLast(ruleset)
     let renchan = false
@@ -309,7 +343,7 @@ export class Hand {
       this.has_next_hand = false
       return undefined
     }
-    return this.CreateNextHand(renchan, honba_increase, players, ruleset)
+    return this.CreateNextHand(renchan, honba_increase, /*chombo=*/ false, ruleset)
   }
 
   PlayerRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
@@ -365,7 +399,11 @@ export class Hand {
     let formalized_results: HandResults = {
       outcome: results.outcome
     }
-    if (results.outcome == HandOutcomeEnum.DRAW) {
+    if (results.outcome == HandOutcomeEnum.CHOMBO) {
+      Object.assign(formalized_results, {
+        chombo: results.chombo
+      })
+    } else if (results.outcome == HandOutcomeEnum.DRAW) {
       Object.assign(formalized_results, {
         tenpai: results.tenpai ? results.tenpai : []
       })
@@ -408,6 +446,12 @@ export class Hand {
   ): [boolean, string] {
     if (!Object.values(HandOutcomeEnum).includes(results.outcome)) {
       return [false, `${InvalidOutcomeMsgText(ruleset.language)}: ${results.outcome}`]
+    }
+
+    if (results.outcome == HandOutcomeEnum.CHOMBO) {
+      if (!results.chombo || results.chombo.length == 0) {
+        return [false, `${ChomboPlayerNotFoundMsgText(ruleset.language)}`]
+      }
     }
 
     if (results.outcome == HandOutcomeEnum.DRAW && this.riichi) {
@@ -519,9 +563,21 @@ export class Hand {
   private CreateNextHand(
     renchan: boolean,
     honba_increase: boolean,
-    players: Players,
+    chombo: boolean,
     ruleset: Ruleset
   ): [Hand, boolean] {
+    if (chombo) {
+      return [
+        new Hand({
+          round_wind: this.round_wind,
+          hand: this.hand,
+          honba: this.honba,
+          riichi_sticks: this.riichi_sticks
+        }),
+        false
+      ]
+    }
+
     const next_honba = honba_increase ? this.honba + 1 : 0
     const players_should_shift_seats = !renchan
     const next_riichi_sticks = this.riichi_sticks

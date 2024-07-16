@@ -79,7 +79,8 @@ export enum Actions {
   DEAL_IN,
   TSUMO,
   RON,
-  DRAW
+  DRAW,
+  CHOMBO
 }
 
 export const ActionDisplayMap = Object.freeze({
@@ -110,6 +111,10 @@ export const ActionDisplayMap = Object.freeze({
   [Actions.DRAW]: {
     [Lang.CN]: '流局',
     [Lang.EN]: 'Draw'
+  },
+  [Actions.CHOMBO]: {
+    [Lang.CN]: '犯规',
+    [Lang.EN]: 'Chombo'
   }
 })
 
@@ -141,6 +146,10 @@ export const ActionBriefDisplayMap = Object.freeze({
   [Actions.DRAW]: {
     [Lang.CN]: '流',
     [Lang.EN]: 'Draw'
+  },
+  [Actions.CHOMBO]: {
+    [Lang.CN]: '罚',
+    [Lang.EN]: 'Chombo'
   }
 })
 

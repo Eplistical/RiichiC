@@ -27,6 +27,7 @@ export type Ruleset = {
   all_last_dealer_win_renchan: boolean
   all_last_dealer_tenpai_renchan: boolean
   left_over_riichi_sticks: LeftOverRiichiSticks
+  chombo_penalty: number
 }
 
 export const MLeagueRuleset: Ruleset = Object.freeze({
@@ -42,7 +43,8 @@ export const MLeagueRuleset: Ruleset = Object.freeze({
   dealer_tenpai_renchan: true,
   all_last_dealer_win_renchan: true,
   all_last_dealer_tenpai_renchan: true,
-  left_over_riichi_sticks: LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS
+  left_over_riichi_sticks: LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS,
+  chombo_penalty: 20.0
 })
 
 export function RulesetsAreEqual(rule1, rule2) {
