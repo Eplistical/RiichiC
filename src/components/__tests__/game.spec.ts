@@ -225,6 +225,27 @@ describe('Game StartCurrentHand', () => {
 })
 
 describe('Game FinishCurrentHand', () => {
+  it('Should handle chombo correctly', () => {
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    game.StartCurrentHand()
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.CHOMBO,
+      chombo: [Winds.WEST, Winds.EAST]
+    })
+    expect(game.current_hand.IsFinished()).toEqual(true)
+    expect(game.current_hand.results).toEqual(
+      expect.objectContaining({
+        outcome: HandOutcomeEnum.CHOMBO,
+        chombo: [Winds.WEST, Winds.EAST]
+      })
+    )
+  })
   it('Should handle draw correctly', () => {
     let game = new Game()
     game.InitGame({
@@ -301,6 +322,35 @@ describe('Game FinishCurrentHand', () => {
 })
 
 describe('Game SetUpNextHandOrFinishGame', () => {
+  it('Should reset the hand on chombo', () => {
+    let game = new Game()
+    game.InitGame({
+      ruleset: ruleset,
+      player_names: player_names,
+      player_starting_winds: player_starting_winds
+    })
+    game.Start()
+    game.StartCurrentHand()
+    game.FinishCurrentHand({
+      outcome: HandOutcomeEnum.CHOMBO,
+      chombo: [Winds.EAST]
+    })
+    game.SetUpNextHandOrFinishGame()
+
+    expect(
+      game.players
+        .GetPlayers([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+        .map((p) => p.current_wind)
+    ).toEqual([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+    expect(game.current_hand).toEqual(
+      expect.objectContaining({
+        state: HandState.NOT_STARTED,
+        round_wind: Winds.EAST,
+        hand: 1,
+        honba: 0
+      })
+    )
+  })
   it('Should move forward on draw dealer noten', () => {
     let game = new Game()
     game.InitGame({

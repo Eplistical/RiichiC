@@ -189,6 +189,30 @@ describe('Hand Set Up Next Hand', () => {
     hand.has_next_hand = false
     expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
   })
+  it('should work for chombo', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.EAST,
+      hand: 3,
+      honba: 2,
+      riichi_sticks: 3,
+      results: {
+        outcome: HandOutcomeEnum.CHOMBO,
+        chombo: [Winds.WEST, Winds.SOUTH]
+      }
+    })
+    const [next_hand, players_should_shift_seats] = hand.SetUpNextHand(players, ruleset)
+    expect(players_should_shift_seats).toEqual(false)
+    expect(next_hand).toEqual(
+      expect.objectContaining({
+        state: HandState.NOT_STARTED,
+        round_wind: Winds.EAST,
+        hand: 3,
+        honba: 2,
+        riichi_sticks: 3
+      })
+    )
+  })
   it('should work for draw dealer tenpai', () => {
     Object.assign(hand, {
       state: HandState.FINISHED,
@@ -572,6 +596,39 @@ describe('Hand Finish', () => {
     })
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should reject undefined chombo player on chombo', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.CHOMBO,
+      chombo: undefined
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should reject empty chombo player on chombo', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.CHOMBO,
+      chombo: []
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should accept valid chombo player on chombo', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.CHOMBO,
+      chombo: [Winds.WEST]
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(true)
+    expect(hand.IsOngoing()).toBe(false)
   })
   it.each([
     { riichi: [Winds.EAST], tenpai: undefined },
