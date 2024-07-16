@@ -1,5 +1,5 @@
 <script setup>
-import { Game } from './game'
+import { Game, GameLogType } from './game'
 import { PlayerIdsInOrder } from './players'
 import { ref, computed, toRaw } from 'vue'
 import { WindsDisplayTextMap } from './seat_constants'
@@ -265,8 +265,7 @@ function ComputeGameStats() {
       tenpai_on_draw: 0
     }
     props.game.log.forEach((log) => {
-      if (log.assign_left_over_riichi) {
-        // do not take the assign_left_over_riichi meta-hand into stats
+      if (log.log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
         return
       }
 

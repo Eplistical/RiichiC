@@ -28,12 +28,20 @@ export enum GameState {
   FINISHED
 }
 
+export enum GameLogType {
+  // the log represents a regular hand
+  REGULAR,
+  // the log represents assigning left-over riichi sticks after the game is finished
+  ASSIGN_LEFT_OVER_RIICHI,
+  // the log represents a chombo record
+  CHOMBO
+}
+
 type GameLog = {
   state: GameState
   hand: Hand
   players: Players
-  // When true, the log represents delta for left-over riichi sticks assignment after a game is finished.
-  assign_left_over_riichi: Boolean
+  log_type: GameLogType
 }
 
 interface GameInterface {
@@ -79,7 +87,7 @@ export class Game {
           state: log.state,
           hand: Hand.ParseFromObject(log.hand),
           players: Players.ParseFromObject(obj.ruleset, log.players),
-          assign_left_over_riichi: log.assign_left_over_riichi
+          log_type: log.log_type
         })
       }
     }
@@ -232,7 +240,7 @@ export class Game {
       state: this.state,
       hand: this.current_hand.Clone(),
       players: this.players.Clone(this.ruleset),
-      assign_left_over_riichi: false
+      log_type: GameLogType.REGULAR
     }
     console.log('Saving hand to log: ', hand_log)
     this.log.push(hand_log)
@@ -248,7 +256,7 @@ export class Game {
       state: this.state,
       hand: this.current_hand.Clone(),
       players: this.players.Clone(this.ruleset),
-      assign_left_over_riichi: true
+      log_type: GameLogType.ASSIGN_LEFT_OVER_RIICHI
     }
     console.log('Saving hand to log for leftover riihci sticks: ', hand_log)
     this.log.push(hand_log)
@@ -308,7 +316,7 @@ export class Game {
         results_summary: null
       }
 
-      if (log.assign_left_over_riichi) {
+      if (log.log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
         if (language == Lang.CN) {
           row.hand_signature = `终局`
           row.results_summary = `供托分配`
@@ -342,7 +350,7 @@ export class Game {
         } else if (pt_delta < 0) {
           row[player_id] += `(${pt_delta})`
         }
-        if (!log.assign_left_over_riichi) {
+        if (log.log_type == GameLogType.REGULAR) {
           if (hand.riichi.includes(player_id)) {
             row[player_id] += `[${ActionBriefDisplayMap[Actions.RIICHI][language]}]`
           }

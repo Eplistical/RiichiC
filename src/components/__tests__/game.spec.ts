@@ -3,7 +3,7 @@ import { beforeEach, describe, it, expect } from 'vitest'
 import { WindType, Winds, WindsInOrder } from '../seat_constants.ts'
 import { LeftOverRiichiSticks, Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
-import { Game, GameState } from '../game.ts'
+import { Game, GameLogType, GameState } from '../game.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from '../players.ts'
 import { PointsLadder } from '../game_constants.ts'
 
@@ -602,7 +602,7 @@ describe('Game Finish', () => {
     })
     game.Finish()
     expect(game.state).toEqual(GameState.FINISHED)
-    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
     expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
   it('Should ignore an finished game', () => {
@@ -645,7 +645,7 @@ describe('Game Finish', () => {
       24000, 28000, 24000, 24000
     ])
     expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([2, 1, 2, 2])
-    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
     expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
 
@@ -671,7 +671,7 @@ describe('Game Finish', () => {
       23500, 26500, 23500, 26500
     ])
     expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([3, 1, 3, 1])
-    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
     expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
 
@@ -698,7 +698,7 @@ describe('Game Finish', () => {
       22000, 26000, 26000, 26000
     ])
     expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([4, 1, 1, 1])
-    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
     expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
 
@@ -747,7 +747,7 @@ describe('Game Finish', () => {
       25800, 23000, 25600, 25600
     ])
     expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([1, 4, 1, 1])
-    expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+    expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
     expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
   })
 })
@@ -776,7 +776,7 @@ it('Should assign left-over riichi sticks correctly with 4 top players', () => {
     25000, 25000, 25000, 25000
   ])
   expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([1, 1, 1, 1])
-  expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+  expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
   expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(0)
 })
 
@@ -802,7 +802,7 @@ it('Should abandon left-over riichi sticks when ruleset enforce it', () => {
     23500, 25500, 23500, 25500
   ])
   expect(PlayerIdsInOrder.map((p) => game.players.player_rank[p])).toEqual([3, 1, 3, 1])
-  expect(game.log[game.log.length - 1].assign_left_over_riichi).toBe(true)
+  expect(game.log[game.log.length - 1].log_type).toBe(GameLogType.ASSIGN_LEFT_OVER_RIICHI)
   expect(game.log[game.log.length - 1].hand.riichi_sticks).toEqual(2)
 })
 
@@ -876,6 +876,7 @@ describe('Game SaveHandLog', () => {
       game.SetUpNextHandOrFinishGame()
     }
     expect(game.log).toHaveLength(6)
+    expect(game.log[5].log_type).toEqual(GameLogType.REGULAR)
     expect(game.log[5].state).toEqual(GameState.ON_GOING)
     expect(game.log[5].hand).toEqual(
       expect.objectContaining({
