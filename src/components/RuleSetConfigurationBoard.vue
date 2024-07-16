@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { Lang } from './app_constants'
+import { LeftOverRiichiSticks } from './rulesets'
 
 const props = defineProps({
   language: String
@@ -98,6 +99,27 @@ const LastRoundWindInactiveText = computed(() => {
     return `Tonpuusen`
   }
 })
+const LeftOverRiichiSticksTitleText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `终局供托`
+  } else if (props.language == Lang.EN) {
+    return `End game left-over riichi sticks`
+  }
+})
+const LeftOverRiichiSticksActiveText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `首位获得`
+  } else if (props.language == Lang.EN) {
+    return `To top`
+  }
+})
+const LeftOverRiichiSticksInactiveText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `丢弃`
+  } else if (props.language == Lang.EN) {
+    return `Abandon`
+  }
+})
 </script>
 
 <template>
@@ -140,5 +162,13 @@ const LastRoundWindInactiveText = computed(() => {
     :inactive_text="RoundUpManganInactiveText"
     :active_value="true"
     :inactive_value="false"
+  />
+  <ConfigurationToggleEntry
+    v-model="ruleset.left_over_riichi_sticks"
+    :title="LeftOverRiichiSticksTitleText"
+    :active_text="LeftOverRiichiSticksActiveText"
+    :inactive_text="LeftOverRiichiSticksInactiveText"
+    :active_value="LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS"
+    :inactive_value="LeftOverRiichiSticks.ABANDONED"
   />
 </template>
