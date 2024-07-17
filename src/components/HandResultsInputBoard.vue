@@ -62,7 +62,8 @@ const ChomboSelectionColor = ref('#e86161')
 
 const emit = defineEmits(['submit'])
 
-function HandleWinnerSelectionChange(player_id) {
+function HandleWinnerSelectionChange(player_id, selected) {
+  console.log('>>>', player_id, selected)
   // when winner selection changes, make sure the same player is un-selected from deal-in
   if (results_form.value.deal_in && results_form.value.deal_in == player_id) {
     delete results_form.value.deal_in
@@ -73,6 +74,7 @@ function HandleWinnerSelectionChange(player_id) {
 <template>
   <el-collapse>
     <el-collapse-item :title="HandReultsTitleText">
+      {{ results_form }}
       <el-form>
         <el-form-item>
           <el-radio-group v-for="outcome in HandOutcomeEnum" v-model="results_form.outcome">
@@ -114,7 +116,7 @@ function HandleWinnerSelectionChange(player_id) {
             :players="game.players"
             :fill="WinnerSelectionColor"
             v-model="results_form.winner"
-            :multi_selection="false"
+            :multi_selection="!game.ruleset.head_bump"
             @change="HandleWinnerSelectionChange"
           />
         </el-form-item>
@@ -125,38 +127,54 @@ function HandleWinnerSelectionChange(player_id) {
             :fill="DealInSelectionColor"
             v-model="results_form.deal_in"
             :multi_selection="false"
-            :disabled_options="[results_form.winner]"
+            :disabled_options="game.ruleset.head_bump ? [results_form.winner] : results_form.winner"
           />
         </el-form-item>
 
-        <el-form-item
-          :label="HanLabelText"
-          v-if="
-            results_form.outcome == HandOutcomeEnum.TSUMO ||
-            results_form.outcome == HandOutcomeEnum.RON
-          "
-        >
-          <el-radio-group v-for="han in AllowedHans" v-model="results_form.han">
-            <el-radio-button :label="han">{{
-              han in PointsLadderBriefDisplayMap ? PointsLadderBriefDisplayMap[han][language] : han
-            }}</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item
-          :label="FuLabelText"
-          v-if="
-            results_form.outcome == HandOutcomeEnum.TSUMO ||
-            results_form.outcome == HandOutcomeEnum.RON
-          "
-        >
-          <el-radio-group
-            v-for="fu in AllowedFus[results_form.han]"
-            v-model="results_form.fu"
-            :disabled="results_form.han in PointsLadderBriefDisplayMap"
-          >
-            <el-radio-button :label="fu" />
-          </el-radio-group>
-        </el-form-item>
+        <div v-if="results_form.outcome == HandOutcomeEnum.TSUMO">
+          <el-form-item :label="HanLabelText">
+            <el-radio-group v-for="han in AllowedHans" v-model="results_form.han">
+              <el-radio-button :label="han">{{
+                han in PointsLadderBriefDisplayMap
+                  ? PointsLadderBriefDisplayMap[han][language]
+                  : han
+              }}</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item :label="FuLabelText">
+            <el-radio-group
+              v-for="fu in AllowedFus[results_form.han]"
+              v-model="results_form.fu"
+              :disabled="results_form.han in PointsLadderBriefDisplayMap"
+            >
+              <el-radio-button :label="fu" />
+            </el-radio-group>
+          </el-form-item>
+        </div>
+        <div v-else-if="results_form.outcome == HandOutcomeEnum.RON">
+          <div v-for="winner in results_form.winner">
+            <el-divider> {{ game.players.GetPlayer(winner).name }} </el-divider>
+            <el-form-item :label="HanLabelText">
+              <el-radio-group v-for="han in AllowedHans" v-model="results_form[`${winner}_han`]">
+                <el-radio-button :label="han">{{
+                  han in PointsLadderBriefDisplayMap
+                    ? PointsLadderBriefDisplayMap[han][language]
+                    : han
+                }}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item :label="FuLabelText">
+              <el-radio-group
+                v-for="fu in AllowedFus[results_form[`${winner}_han`]]"
+                v-model="results_form[`${winner}_fu`]"
+                :disabled="results_form.han in PointsLadderBriefDisplayMap"
+              >
+                <el-radio-button :label="fu" />
+              </el-radio-group>
+            </el-form-item>
+          </div>
+        </div>
+
         <el-form-item>
           <el-button type="primary" @click="$emit('submit')">{{ SubmitButtonText }}</el-button>
         </el-form-item>

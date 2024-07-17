@@ -76,11 +76,11 @@ function RiichiButNotTenpaiMsgText(language) {
   }
 }
 
-function TsumoPlayerNotFoundMsgText(language) {
+function TsumoMustHaveOneWinnerMsgText(language) {
   if (language == Lang.CN) {
-    return '找不到自摸家'
+    return '自摸家有且只有一个'
   } else if (language == Lang.EN) {
-    return 'Tsumo Player Not Found'
+    return 'There Must be Only One Tsumo Winner'
   }
 }
 
@@ -108,11 +108,35 @@ function SameRonAndDealInPlayer(language) {
   }
 }
 
+function HeadBumpProhibitsMultipleRonWinner(language) {
+  if (language == Lang.CN) {
+    return '头跳规则不支持多人荣和'
+  } else if (language == Lang.EN) {
+    return 'Head Bump Rule Prohibits Multiple Ron Players'
+  }
+}
+
+function InvalidHanSizeMsgText(language) {
+  if (language == Lang.CN) {
+    return '番数数量必需等于荣和家数量'
+  } else if (language == Lang.EN) {
+    return 'Han Size Must Equal Ron Players Size'
+  }
+}
+
 function InvalidHanMsgText(language) {
   if (language == Lang.CN) {
     return '番数错误'
   } else if (language == Lang.EN) {
     return 'Invalid Han'
+  }
+}
+
+function InvalidFuSizeMsgText(language) {
+  if (language == Lang.CN) {
+    return '符数量必需等于荣和家数量'
+  } else if (language == Lang.EN) {
+    return 'Fu Size Must Equal Ron Players Size'
   }
 }
 
@@ -137,10 +161,10 @@ export type PointsDelta = Record<PlayerId, number>
 export type HandResults = {
   outcome: string | null
   tenpai?: PlayerId[]
-  winner?: PlayerId
+  winner?: PlayerId[]
   deal_in?: PlayerId
-  han?: number | string
-  fu?: number
+  han?: (number | string)[]
+  fu?: (number | null)[]
   points_delta?: PointsDelta
   chombo?: PlayerId[]
 }
@@ -188,16 +212,16 @@ export class Hand {
       clone_instance.results.tenpai = [...this.results.tenpai]
     }
     if (this.results.winner) {
-      clone_instance.results.winner = this.results.winner
+      clone_instance.results.winner = [...this.results.winner]
     }
     if (this.results.deal_in) {
       clone_instance.results.deal_in = this.results.deal_in
     }
     if (this.results.han) {
-      clone_instance.results.han = this.results.han
+      clone_instance.results.han = [...this.results.han]
     }
     if (this.results.fu) {
-      clone_instance.results.fu = this.results.fu
+      clone_instance.results.fu = [...this.results.fu]
     }
     if (this.results.points_delta != undefined) {
       clone_instance.results.points_delta = { ...this.results.points_delta }
@@ -266,6 +290,7 @@ export class Hand {
       }
     }
     // Mark as finished
+    console.log('Finishing the current hand with results=', this.results)
     this.state = HandState.FINISHED
     return true
   }
@@ -427,13 +452,17 @@ export class Hand {
 
   // Applies round-up mangan if enabled, updates the results directly
   private MaybeApplyRoundUpMangan(results: HandResults, ruleset: Ruleset) {
-    if (
-      ruleset.round_up_mangan &&
-      results.outcome != HandOutcomeEnum.DRAW &&
-      ((results.han == 4 && results.fu == 30) || (results.han == 3 && results.fu == 60))
-    ) {
-      results.han = PointsLadder.MANGAN
-      delete results.fu
+    if (ruleset.round_up_mangan) {
+      const winner_count = results.winner ? results.winner.length : 0
+      for (let i = 0; i < winner_count; ++i) {
+        if (
+          (results.han[i] == 4 && results.fu[i] == 30) ||
+          (results.han[i] == 3 && results.fu[i] == 60)
+        ) {
+          results.han[i] = PointsLadder.MANGAN
+          results.fu[i] = null
+        }
+      }
     }
   }
 
@@ -464,19 +493,29 @@ export class Hand {
         }
       }
     } else if (results.outcome == HandOutcomeEnum.TSUMO) {
-      if (players.GetPlayer(results.winner) === undefined) {
-        return [false, `${TsumoPlayerNotFoundMsgText(ruleset.language)}: ${results.winner}`]
+      if (
+        !results.winner ||
+        results.winner.length != 1 ||
+        players.GetPlayer(results.winner[0]) === undefined
+      ) {
+        return [false, `${TsumoMustHaveOneWinnerMsgText(ruleset.language)}: ${results.winner}`]
       }
-      if (!Object.values(AllowedHans).includes(results.han)) {
+      if (
+        !results.han ||
+        results.han.length == 0 ||
+        !Object.values(AllowedHans).includes(results.han[0])
+      ) {
         return [false, `${InvalidHanMsgText(ruleset.language)}: ${results.han}`]
       }
       if (
-        !Object.values(PointsLadder).includes(results.han) &&
-        !Object.values(AllowedFus[results.han]).includes(results.fu)
+        !results.fu ||
+        results.fu.length == 0 ||
+        (!Object.values(PointsLadder).includes(results.han[0]) &&
+          !Object.values(AllowedFus[results.han[0]]).includes(results.fu[0]))
       ) {
         return [false, `${InvalidFuMsgText(ruleset.language)}: ${results.fu}`]
       }
-      const key = this.GetPointMapKey(results.han, results.fu, ruleset)
+      const key = this.GetPointMapKey(results.han[0], results.fu[0], ruleset)
       if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
         return [
           false,
@@ -484,33 +523,52 @@ export class Hand {
         ]
       }
     } else if (results.outcome == HandOutcomeEnum.RON) {
-      if (players.GetPlayer(results.winner) === undefined) {
+      if (
+        !results.winner ||
+        results.winner.length == 0 ||
+        results.winner.some((p) => players.GetPlayer(p) === undefined)
+      ) {
         return [false, `${RonPlayerNotFoundMsgText(ruleset.language)}: ${results.winner}`]
+      }
+      const winner_count = results.winner.length
+      if (ruleset.head_bump && winner_count > 1) {
+        return [false, `${HeadBumpProhibitsMultipleRonWinner(ruleset.language)}`]
       }
       if (players.GetPlayer(results.deal_in) === undefined) {
         return [false, `${DealInPlayerNotFoundMsgText(ruleset.language)}: ${results.deal_in}`]
       }
-      if (results.deal_in == results.winner) {
+      if (results.winner.includes(results.deal_in)) {
         return [
           false,
           `${SameRonAndDealInPlayer(ruleset.language)}: ${results.winner} == ${results.deal_in}`
         ]
       }
-      if (!Object.values(AllowedHans).includes(results.han)) {
-        return [false, `${InvalidHanMsgText(ruleset.language)}: ${results.han}`]
+      if (!results.han || results.han.length != winner_count) {
+        return [false, `${InvalidHanSizeMsgText(ruleset.language)}: ${results.han}`]
       }
-      if (
-        !Object.values(PointsLadder).includes(results.han) &&
-        !Object.values(AllowedFus[results.han]).includes(results.fu)
-      ) {
-        return [false, `${InvalidFuMsgText(ruleset.language)}: ${results.fu}`]
+      if (!results.fu || results.fu.length != winner_count) {
+        return [false, `${InvalidFuSizeMsgText(ruleset.language)}: ${results.han}`]
       }
-      const key = this.GetPointMapKey(results.han, results.fu, ruleset)
-      if (!RonPointsNonDealer.hasOwnProperty(key)) {
-        return [
-          false,
-          `${InvalidHanFuPairMsgText(ruleset.language)}: ${results.outcome}, ${results.han}, ${results.fu}`
-        ]
+
+      for (let i = 0; i < winner_count; ++i) {
+        const han_i = results.han[i]
+        const fu_i = results.fu[i]
+        if (!Object.values(AllowedHans).includes(han_i)) {
+          return [false, `${InvalidHanMsgText(ruleset.language)}: ${han_i}`]
+        }
+        if (
+          !Object.values(PointsLadder).includes(han_i) &&
+          !Object.values(AllowedFus[han_i]).includes(fu_i)
+        ) {
+          return [false, `${InvalidFuMsgText(ruleset.language)}: ${fu_i}`]
+        }
+        const key = this.GetPointMapKey(han_i, fu_i, ruleset)
+        if (!RonPointsNonDealer.hasOwnProperty(key)) {
+          return [
+            false,
+            `${InvalidHanFuPairMsgText(ruleset.language)}: ${results.outcome}, ${han_i}, ${fu_i}`
+          ]
+        }
       }
     }
     return [true, '']
@@ -608,9 +666,9 @@ export class Hand {
     ruleset: Ruleset,
     players: Players
   ): PointsDelta {
-    const winner_id: PlayerId = hand_results.winner
-    const han: Han = hand_results.han
-    const fu: Fu = hand_results.fu
+    const winner_id: PlayerId = hand_results.winner[0]
+    const han: Han = hand_results.han[0]
+    const fu: Fu = hand_results.fu[0]
     const num_players: number = players.NumPlayers()
     const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
 
@@ -654,10 +712,10 @@ export class Hand {
     ruleset: Ruleset,
     players: Players
   ): PointsDelta {
-    const winner_id: PlayerId = hand_results.winner
+    const winner_id: PlayerId = hand_results.winner[0]
     const deal_in_id: PlayerId = hand_results.deal_in
-    const han: Han = hand_results.han
-    const fu: Fu = hand_results.fu
+    const han: Han = hand_results.han[0]
+    const fu: Fu = hand_results.fu[0]
     const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
     const num_players: number = players.NumPlayers()
 

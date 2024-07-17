@@ -278,19 +278,19 @@ describe('Game FinishCurrentHand', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.RON,
-      winner: Winds.NORTH,
+      winner: [Winds.NORTH],
       deal_in: Winds.EAST,
-      han: 3,
-      fu: 30
+      han: [3],
+      fu: [30]
     })
     expect(game.current_hand.IsFinished()).toEqual(true)
     expect(game.current_hand.results).toEqual(
       expect.objectContaining({
         outcome: HandOutcomeEnum.RON,
-        winner: Winds.NORTH,
+        winner: [Winds.NORTH],
         deal_in: Winds.EAST,
-        han: 3,
-        fu: 30
+        han: [3],
+        fu: [30]
       })
     )
   })
@@ -305,17 +305,17 @@ describe('Game FinishCurrentHand', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.NORTH,
-      han: 2,
-      fu: 20
+      winner: [Winds.NORTH],
+      han: [2],
+      fu: [20]
     })
     expect(game.current_hand.IsFinished()).toEqual(true)
     expect(game.current_hand.results).toEqual(
       expect.objectContaining({
         outcome: HandOutcomeEnum.TSUMO,
-        winner: Winds.NORTH,
-        han: 2,
-        fu: 20
+        winner: [Winds.NORTH],
+        han: [2],
+        fu: [20]
       })
     )
   })
@@ -422,9 +422,10 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.RON,
-      winner: Winds.NORTH,
+      winner: [Winds.NORTH],
       deal_in: Winds.EAST,
-      han: PointsLadder.MANGAN
+      han: [PointsLadder.MANGAN],
+      fu: [null]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -453,9 +454,9 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.NORTH,
-      han: 3,
-      fu: 30
+      winner: [Winds.NORTH],
+      han: [3],
+      fu: [30]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -485,9 +486,10 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.RON,
-      winner: Winds.EAST,
+      winner: [Winds.EAST],
       deal_in: Winds.NORTH,
-      han: PointsLadder.MANGAN
+      han: [PointsLadder.MANGAN],
+      fu: [null]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -516,9 +518,9 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.EAST,
-      han: 3,
-      fu: 40
+      winner: [Winds.EAST],
+      han: [3],
+      fu: [40]
     })
     game.SetUpNextHandOrFinishGame()
 
@@ -559,9 +561,9 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.SOUTH,
-      han: 2,
-      fu: 30
+      winner: [Winds.SOUTH],
+      han: [2],
+      fu: [30]
     })
     game.SetUpNextHandOrFinishGame()
     expect(game.current_hand).toEqual(
@@ -596,9 +598,9 @@ describe('Game SetUpNextHandOrFinishGame', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.NORTH, // all last the dealer should be the beginning north player (P4)
-      han: 2,
-      fu: 30
+      winner: [Winds.NORTH], // all last the dealer should be the beginning north player (P4)
+      han: [2],
+      fu: [30]
     })
     game.SetUpNextHandOrFinishGame()
     expect(game.current_hand).toEqual(
@@ -765,9 +767,9 @@ describe('Game Finish', () => {
     game.StartCurrentHand()
     game.FinishCurrentHand({
       outcome: HandOutcomeEnum.TSUMO,
-      winner: Winds.SOUTH,
-      han: 3,
-      fu: 30
+      winner: [Winds.SOUTH],
+      han: [3],
+      fu: [30]
     })
     game.SaveHandLog()
     game.SetUpNextHandOrFinishGame()

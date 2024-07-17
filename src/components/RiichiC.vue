@@ -195,9 +195,29 @@ function EnterGameMode() {
   SaveToStorage()
 }
 
+// pre-process hand results form
+function ResolveHandResultsFromHandResultsForm(hand_results_form) {
+  let hand_results = { ...hand_results_form }
+  if (hand_results.winner && !Array.isArray(hand_results.winner)) {
+    hand_results.winner = [hand_results.winner]
+  }
+  if (hand_results.han && !Array.isArray(hand_results.han)) {
+    hand_results.han = [hand_results.han]
+    if (hand_results.fu === undefined) {
+      hand_results.fu = [null]
+    } else {
+      hand_results.fu = [hand_results.fu]
+    }
+  }
+  console.log('resolved hand results = ', hand_results)
+  return hand_results
+}
+
 function SubmitHandResultsForm() {
   console.log('SubmitHandResultsForm')
-  const hand_finished = game.value.FinishCurrentHand(hand_results_form.value)
+  const hand_finished = game.value.FinishCurrentHand(
+    ResolveHandResultsFromHandResultsForm(hand_results_form.value)
+  )
   console.log('hand_finished = ', hand_finished)
   if (hand_finished) {
     game.value.SaveHandLog()

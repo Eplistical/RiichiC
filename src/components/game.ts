@@ -376,7 +376,7 @@ export class Game {
           if (
             (hand.results.outcome == HandOutcomeEnum.TSUMO ||
               hand.results.outcome == HandOutcomeEnum.RON) &&
-            hand.results.winner == player_id
+            hand.results.winner.includes(player_id)
           ) {
             row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI][language]}]`
           }

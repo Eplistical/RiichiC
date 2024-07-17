@@ -63,14 +63,14 @@ const RoundUpManganTitleText = computed(() => {
     return `Round-up Mangan`
   }
 })
-const RoundUpManganActiveText = computed(() => {
+const OnText = computed(() => {
   if (props.language == Lang.CN) {
     return `开`
   } else if (props.language == Lang.EN) {
     return `On`
   }
 })
-const RoundUpManganInactiveText = computed(() => {
+const OffText = computed(() => {
   if (props.language == Lang.CN) {
     return `关`
   } else if (props.language == Lang.EN) {
@@ -120,6 +120,13 @@ const LeftOverRiichiSticksInactiveText = computed(() => {
     return `Abandon`
   }
 })
+const HeadBumpTitleText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `头跳`
+  } else if (props.language == Lang.EN) {
+    return `Head Bump`
+  }
+})
 </script>
 
 <template>
@@ -156,10 +163,18 @@ const LeftOverRiichiSticksInactiveText = computed(() => {
     :step="DrawTenpaiPointsStep"
   />
   <ConfigurationToggleEntry
+    v-model="ruleset.head_bump"
+    :title="HeadBumpTitleText"
+    :active_text="OnText"
+    :inactive_text="OffText"
+    :active_value="true"
+    :inactive_value="false"
+  />
+  <ConfigurationToggleEntry
     v-model="ruleset.round_up_mangan"
     :title="RoundUpManganTitleText"
-    :active_text="RoundUpManganActiveText"
-    :inactive_text="RoundUpManganInactiveText"
+    :active_text="OnText"
+    :inactive_text="OffText"
     :active_value="true"
     :inactive_value="false"
   />
