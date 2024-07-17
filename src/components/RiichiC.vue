@@ -7,6 +7,8 @@ import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
 import HandResultsInputBoard from './HandResultsInputBoard.vue'
+import { Hand, HandOutcomeEnum } from './hand'
+import { PointsLadder } from './game_constants'
 
 function preventRefresh(event) {
   event.preventDefault()
@@ -198,9 +200,30 @@ function EnterGameMode() {
 // pre-process hand results form
 function ResolveHandResultsFromHandResultsForm(hand_results_form) {
   let hand_results = { ...hand_results_form }
-  if (hand_results.winner && !Array.isArray(hand_results.winner)) {
-    hand_results.winner = [hand_results.winner]
+  if (
+    hand_results.outcome == HandOutcomeEnum.TSUMO ||
+    hand_results.outcome == HandOutcomeEnum.RON
+  ) {
+    if (!hand_results.winner) {
+      hand_results.winner = []
+    } else if (!Array.isArray(hand_results.winner)) {
+      hand_results.winner = [hand_results.winner]
+    }
+
+    hand_results.han = []
+    hand_results.fu = []
+    for (let winner of hand_results.winner) {
+      hand_results.han.push(hand_results[`${winner}_han`])
+      if (hand_results[`${winner}_han`] in PointsLadder || !hand_results[`${winner}_fu`]) {
+        hand_results.fu.push(null)
+      } else {
+        hand_results.fu.push(hand_results[`${winner}_fu`])
+      }
+      delete hand_results[`${winner}_han`]
+      delete hand_results[`${winner}_fu`]
+    }
   }
+
   if (hand_results.han && !Array.isArray(hand_results.han)) {
     hand_results.han = [hand_results.han]
     if (hand_results.fu === undefined) {

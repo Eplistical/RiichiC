@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand'
-import { Actions, ActionDisplayMap } from './game_constants'
+import { Actions, ActionDisplayMap, PointsLadder } from './game_constants'
 import { PointsLadderBriefDisplayMap } from './game_constants'
 import { Game } from './game'
 import { Lang } from './app_constants'
 import { AllowedHans, AllowedFus } from './game_constants'
+import HanFuSelection from './HanFuSelection.vue'
+import { PlayerIdsInOrder } from './players'
 
 const props = defineProps({
   language: String,
@@ -68,6 +70,45 @@ function HandleWinnerSelectionChange(player_id, selected) {
   if (results_form.value.deal_in && results_form.value.deal_in == player_id) {
     delete results_form.value.deal_in
   }
+  // sort winners by order
+  if (Array.isArray(results_form.value.winner)) {
+    results_form.value.winner.sort(
+      (p1, p2) => PlayerIdsInOrder.indexOf(p1) - PlayerIdsInOrder.indexOf(p2)
+    )
+  }
+  if (!selected) {
+    delete results_form.value[`${player_id}_han`]
+    delete results_form.value[`${player_id}_fu`]
+  }
+}
+
+function HandleHanFuSelectionChange(winner, han, fu) {
+  if (han in PointsLadder) {
+    fu = null
+  }
+  console.log('>>>', winner, han, fu)
+  if (results_form.value.hanfu === undefined) {
+    results_form.value.hanfu = {}
+  }
+  results_form.value.hanfu[winner] = {
+    han: han,
+    fu: fu
+  }
+}
+
+function SortWinnersInOrder(winners) {
+  console.log('>>>> Sort: ', winners)
+  if (!winners) {
+    return []
+  } else if (Array.isArray(winners)) {
+    return [winners]
+  } else {
+    let rst = [...winners]
+    console.log('>>>', rst)
+    rst.sort((p1, p2) => PlayerIdsInOrder.indexOf(p1) - PlayerIdsInOrder.indexOf(p2))
+    console.log('>>>', rst)
+    return rst
+  }
 }
 </script>
 
@@ -105,73 +146,78 @@ function HandleWinnerSelectionChange(player_id, selected) {
           />
         </el-form-item>
 
-        <el-form-item
-          :label="AgariLabelText"
-          v-if="
-            results_form.outcome == HandOutcomeEnum.TSUMO ||
-            results_form.outcome == HandOutcomeEnum.RON
-          "
-        >
-          <PlayersSelection
-            :players="game.players"
-            :fill="WinnerSelectionColor"
-            v-model="results_form.winner"
-            :multi_selection="!game.ruleset.head_bump"
-            @change="HandleWinnerSelectionChange"
-          />
-        </el-form-item>
-
-        <el-form-item :label="DealInLabelText" v-if="results_form.outcome == HandOutcomeEnum.RON">
-          <PlayersSelection
-            :players="game.players"
-            :fill="DealInSelectionColor"
-            v-model="results_form.deal_in"
-            :multi_selection="false"
-            :disabled_options="game.ruleset.head_bump ? [results_form.winner] : results_form.winner"
-          />
-        </el-form-item>
-
-        <div v-if="results_form.outcome == HandOutcomeEnum.TSUMO">
-          <el-form-item :label="HanLabelText">
-            <el-radio-group v-for="han in AllowedHans" v-model="results_form.han">
-              <el-radio-button :label="han">{{
-                han in PointsLadderBriefDisplayMap
-                  ? PointsLadderBriefDisplayMap[han][language]
-                  : han
-              }}</el-radio-button>
-            </el-radio-group>
+        <div v-if="game.ruleset.head_bump">
+          <!-- Head bump ON case -->
+          <el-form-item
+            :label="AgariLabelText"
+            v-if="
+              results_form.outcome == HandOutcomeEnum.TSUMO ||
+              results_form.outcome == HandOutcomeEnum.RON
+            "
+          >
+            <PlayersSelection
+              :players="game.players"
+              :fill="WinnerSelectionColor"
+              v-model="results_form.winner"
+              :multi_selection="false"
+              @change="HandleWinnerSelectionChange"
+            />
           </el-form-item>
-          <el-form-item :label="FuLabelText">
-            <el-radio-group
-              v-for="fu in AllowedFus[results_form.han]"
-              v-model="results_form.fu"
-              :disabled="results_form.han in PointsLadderBriefDisplayMap"
-            >
-              <el-radio-button :label="fu" />
-            </el-radio-group>
+
+          <el-form-item :label="DealInLabelText" v-if="results_form.outcome == HandOutcomeEnum.RON">
+            <PlayersSelection
+              :players="game.players"
+              :fill="DealInSelectionColor"
+              v-model="results_form.deal_in"
+              :multi_selection="false"
+              :disabled_options="[results_form.winner]"
+            />
           </el-form-item>
+
+          <HanFuSelection
+            :language="language"
+            :winner="results_form.winner"
+            v-model:selected_han="results_form[`${results_form.winner}_han`]"
+            v-model:selected_fu="results_form[`${results_form.winner}_fu`]"
+          />
         </div>
-        <div v-else-if="results_form.outcome == HandOutcomeEnum.RON">
+        <div v-else>
+          <!-- Head bump OFF case -->
+          <!--@change="HandleHanFuSelectionChange"-->
+          <el-form-item
+            :label="AgariLabelText"
+            v-if="
+              results_form.outcome == HandOutcomeEnum.TSUMO ||
+              results_form.outcome == HandOutcomeEnum.RON
+            "
+          >
+            <PlayersSelection
+              :players="game.players"
+              :fill="WinnerSelectionColor"
+              v-model="results_form.winner"
+              :multi_selection="true"
+              @change="HandleWinnerSelectionChange"
+            />
+          </el-form-item>
+
+          <el-form-item :label="DealInLabelText" v-if="results_form.outcome == HandOutcomeEnum.RON">
+            <PlayersSelection
+              :players="game.players"
+              :fill="DealInSelectionColor"
+              v-model="results_form.deal_in"
+              :multi_selection="false"
+              :disabled_options="results_form.winner"
+            />
+          </el-form-item>
+
           <div v-for="winner in results_form.winner">
             <el-divider> {{ game.players.GetPlayer(winner).name }} </el-divider>
-            <el-form-item :label="HanLabelText">
-              <el-radio-group v-for="han in AllowedHans" v-model="results_form[`${winner}_han`]">
-                <el-radio-button :label="han">{{
-                  han in PointsLadderBriefDisplayMap
-                    ? PointsLadderBriefDisplayMap[han][language]
-                    : han
-                }}</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item :label="FuLabelText">
-              <el-radio-group
-                v-for="fu in AllowedFus[results_form[`${winner}_han`]]"
-                v-model="results_form[`${winner}_fu`]"
-                :disabled="results_form.han in PointsLadderBriefDisplayMap"
-              >
-                <el-radio-button :label="fu" />
-              </el-radio-group>
-            </el-form-item>
+            <HanFuSelection
+              :language="language"
+              :winner="winner"
+              v-model:selected_han="results_form[`${winner}_han`]"
+              v-model:selected_fu="results_form[`${winner}_fu`]"
+            />
           </div>
         </div>
 

@@ -14,6 +14,7 @@ import { Ruleset } from './rulesets.ts'
 import { NextWindMap, WindType } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import { Lang } from './app_constants'
+import { readFile } from '../../node_modules/xlsx/types/index'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',
@@ -357,7 +358,10 @@ export class Hand {
           (all_last && ruleset.all_last_dealer_tenpai_renchan)
       }
     } else {
-      if (this.results.winner == dealer_id) {
+      if (
+        (Array.isArray(this.results.winner) && this.results.winner.includes(dealer_id)) ||
+        this.results.winner == dealer_id
+      ) {
         honba_increase = true
         renchan = !all_last || ruleset.all_last_dealer_win_renchan
       }
