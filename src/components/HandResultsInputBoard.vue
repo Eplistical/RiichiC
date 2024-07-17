@@ -175,6 +175,10 @@ function SortWinnersInOrder(winners) {
           </el-form-item>
 
           <HanFuSelection
+            v-if="
+              results_form.outcome == HandOutcomeEnum.TSUMO ||
+              results_form.outcome == HandOutcomeEnum.RON
+            "
             :language="language"
             :winner="results_form.winner"
             v-model:selected_han="results_form[`${results_form.winner}_han`]"
@@ -210,14 +214,21 @@ function SortWinnersInOrder(winners) {
             />
           </el-form-item>
 
-          <div v-for="winner in results_form.winner">
-            <el-divider> {{ game.players.GetPlayer(winner).name }} </el-divider>
-            <HanFuSelection
-              :language="language"
-              :winner="winner"
-              v-model:selected_han="results_form[`${winner}_han`]"
-              v-model:selected_fu="results_form[`${winner}_fu`]"
-            />
+          <div
+            v-if="
+              results_form.outcome == HandOutcomeEnum.TSUMO ||
+              results_form.outcome == HandOutcomeEnum.RON
+            "
+          >
+            <div v-for="winner in results_form.winner">
+              <el-divider> {{ game.players.GetPlayer(winner).name }} </el-divider>
+              <HanFuSelection
+                :language="language"
+                :winner="winner"
+                v-model:selected_han="results_form[`${winner}_han`]"
+                v-model:selected_fu="results_form[`${winner}_fu`]"
+              />
+            </div>
           </div>
         </div>
 

@@ -670,6 +670,7 @@ export class Hand {
     ruleset: Ruleset,
     players: Players
   ): PointsDelta {
+    // tsumo should have exactly one winner, thus we just access [0]
     const winner_id: PlayerId = hand_results.winner[0]
     const han: Han = hand_results.han[0]
     const fu: Fu = hand_results.fu[0]
@@ -716,20 +717,32 @@ export class Hand {
     ruleset: Ruleset,
     players: Players
   ): PointsDelta {
-    const winner_id: PlayerId = hand_results.winner[0]
     const deal_in_id: PlayerId = hand_results.deal_in
-    const han: Han = hand_results.han[0]
-    const fu: Fu = hand_results.fu[0]
-    const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
-    const num_players: number = players.NumPlayers()
 
-    let points_delta: PointsDelta = {}
-    const points_map = players.GetPlayer(winner_id).IsDealer()
-      ? RonPointsDealer
-      : RonPointsNonDealer
-    const delta = points_map[key] + this.honba * ruleset.honba_points
-    points_delta[winner_id] = delta + this.riichi_sticks * ruleset.riichi_cost
-    points_delta[deal_in_id] = -delta
+    const winner_count = hand_results.winner.length
+    let points_delta: PointsDelta = {
+      [deal_in_id]: 0
+    }
+    for (let i = 0; i < winner_count; ++i) {
+      const winner_id: PlayerId = hand_results.winner[i]
+      const han: Han = hand_results.han[i]
+      const fu: Fu = hand_results.fu[i]
+      const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
+      const points_map = players.GetPlayer(winner_id).IsDealer()
+        ? RonPointsDealer
+        : RonPointsNonDealer
+      const delta = points_map[key]
+      points_delta[winner_id] = delta
+      points_delta[deal_in_id] -= delta
+    }
+    // riichi sticks and honba goes to the closest winner from the deal_in player
+    let closest_winner_id = deal_in_id
+    while (!hand_results.winner.includes(closest_winner_id)) {
+      closest_winner_id = NextWindMap[closest_winner_id]
+    }
+    points_delta[closest_winner_id] +=
+      this.riichi_sticks * ruleset.riichi_cost + this.honba * ruleset.honba_points
+    points_delta[deal_in_id] -= this.honba * ruleset.honba_points
     return points_delta
   }
 
