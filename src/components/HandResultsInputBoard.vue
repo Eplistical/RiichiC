@@ -2,10 +2,8 @@
 import { ref, computed } from 'vue'
 import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand'
 import { Actions, ActionDisplayMap, PointsLadder } from './game_constants'
-import { PointsLadderBriefDisplayMap } from './game_constants'
 import { Game } from './game'
 import { Lang } from './app_constants'
-import { AllowedHans, AllowedFus } from './game_constants'
 import HanFuSelection from './HanFuSelection.vue'
 import { PlayerIdsInOrder } from './players'
 
@@ -95,27 +93,11 @@ function HandleHanFuSelectionChange(winner, han, fu) {
     fu: fu
   }
 }
-
-function SortWinnersInOrder(winners) {
-  console.log('>>>> Sort: ', winners)
-  if (!winners) {
-    return []
-  } else if (Array.isArray(winners)) {
-    return [winners]
-  } else {
-    let rst = [...winners]
-    console.log('>>>', rst)
-    rst.sort((p1, p2) => PlayerIdsInOrder.indexOf(p1) - PlayerIdsInOrder.indexOf(p2))
-    console.log('>>>', rst)
-    return rst
-  }
-}
 </script>
 
 <template>
   <el-collapse>
     <el-collapse-item :title="HandReultsTitleText">
-      {{ results_form }}
       <el-form>
         <el-form-item>
           <el-radio-group v-for="outcome in HandOutcomeEnum" v-model="results_form.outcome">

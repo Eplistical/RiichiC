@@ -2,7 +2,12 @@ import { Hand, HandResults, HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } fro
 import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
 import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
 import { Player, PlayerId, PlayerIdsInOrder, Players } from './players.ts'
-import { ActionBriefDisplayMap, Actions, PointsLadderBriefDisplayMap } from './game_constants'
+import {
+  ActionBriefDisplayMap,
+  Actions,
+  PointsLadder,
+  PointsLadderBriefDisplayMap
+} from './game_constants'
 import { Lang } from './app_constants'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 
@@ -342,10 +347,14 @@ export class Game {
           hand.results.outcome == HandOutcomeEnum.RON ||
           hand.results.outcome == HandOutcomeEnum.TSUMO
         ) {
-          if (typeof hand.results.han == 'string') {
-            row.results_summary += `[${PointsLadderBriefDisplayMap[hand.results.han][language]}]`
-          } else {
-            row.results_summary += `[${hand.results.han},${hand.results.fu}]`
+          for (let i = 0; i < hand.results.han.length; ++i) {
+            const han = hand.results.han[i]
+            const fu = hand.results.fu[i]
+            if (han in PointsLadder) {
+              row.results_summary += `[${PointsLadderBriefDisplayMap[han][language]}]`
+            } else {
+              row.results_summary += `[${han}, ${fu}]`
+            }
           }
         } else if (hand.results.outcome == HandOutcomeEnum.CHOMBO) {
           row.hand_signature += `[${ResetChomboHandMsgText(language)}]`

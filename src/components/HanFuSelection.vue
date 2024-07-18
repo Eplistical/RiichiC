@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onDeactivated, onBeforeUnmount, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { PointsLadderBriefDisplayMap } from './game_constants'
 import { Lang } from './app_constants'
 import { AllowedHans, AllowedFus } from './game_constants'
@@ -11,29 +11,6 @@ const props = defineProps({
 
 const selected_han = defineModel('selected_han')
 const selected_fu = defineModel('selected_fu')
-
-//const selected_han = ref(undefined)
-//const selected_fu = ref(undefined)
-/*
-
-onDeactivated(() => {
-  console.log(">>> onDeactivated")
-  selected_han.value = undefined
-  selected_fu.value = undefined
-})
-
-onUnmounted(() => {
-  console.log(">>> onUnmounted")
-  selected_han.value = undefined
-  selected_fu.value = undefined
-})
-
-onBeforeUnmount(() => {
-  console.log(">>> onBeforeUnmount")
-  selected_han.value = undefined
-  selected_fu.value = undefined
-})
-*/
 
 const HanLabelText = computed(() => {
   if (props.language == Lang.CN) {
