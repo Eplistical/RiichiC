@@ -14,7 +14,6 @@ import { Ruleset } from './rulesets.ts'
 import { NextWindMap, WindType } from './seat_constants.ts'
 import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import { Lang } from './app_constants'
-import { readFile } from '../../node_modules/xlsx/types/index'
 
 export const HandOutcomeEnum = Object.freeze({
   TSUMO: 'tsumo',

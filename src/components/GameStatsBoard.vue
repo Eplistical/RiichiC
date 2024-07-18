@@ -158,14 +158,6 @@ function GetPlayerSummary(player_id, rank) {
   }
 }
 
-function GetPlayerAgariSummary(player_id, stats) {
-  return `${stats.agari}/${stats.agari_over_mangan}/${stats.agari_after_riichi}`
-}
-
-function GetPlayerDealInSummary(player_id, stats) {
-  return `${stats.deal_in}/${stats.deal_in_over_mangan}/${stats.deal_in_after_riichi}`
-}
-
 function GetActionSummary(stats) {
   let summary = `${stats.riichi}/${stats.agari}/${stats.deal_in}/${stats.tenpai_on_draw}`
   if (has_chombo.value) {
@@ -308,7 +300,10 @@ function ComputeGameStats() {
         ) {
           stats.tenpai_on_draw += 1
         }
-        if (hand.results.outcome != HandOutcomeEnum.DRAW && hand.results.winner == player_id) {
+        if (
+          hand.results.outcome != HandOutcomeEnum.DRAW &&
+          hand.results.winner.includes(player_id)
+        ) {
           stats.agari += 1
           stats.agari_pt_sum += hand.results.points_delta[player_id]
           if (player_riichi) {
@@ -346,13 +341,7 @@ const GameStatsBoard = computed(() => {
       player_summary: GetPlayerSummary(player_id, stats.rank),
       rank: stats.rank,
       points: stats.points,
-      //riichi: stats.riichi,
-      //agari_summary: GetPlayerAgariSummary(player_id, stats),
-      //deal_in_summary: GetPlayerDealInSummary(player_id, stats),
       action_summary: GetActionSummary(stats),
-      //avg_agari_pt: (stats.agari > 0) ? (Math.abs(stats.agari_pt_sum / stats.agari)) : 0,
-      //avg_deal_in_pt: (stats.deal_in > 0) ? (Math.abs(stats.deal_in_pt_sum / stats.deal_in)) : 0,
-      //avg_pt_summary: GetAvgPtSummary(stats),
       avg_agari_pt_summary: GetAvgAgariPtSummary(stats),
       avg_deal_in_pt_summary: GetAvgDealInPtSummary(stats),
       tenpai_on_draw: stats.tenpai_on_draw

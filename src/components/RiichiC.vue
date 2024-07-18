@@ -7,7 +7,7 @@ import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
 import HandResultsInputBoard from './HandResultsInputBoard.vue'
-import { Hand, HandOutcomeEnum } from './hand'
+import { HandOutcomeEnum } from './hand'
 import { PointsLadder } from './game_constants'
 
 function preventRefresh(event) {

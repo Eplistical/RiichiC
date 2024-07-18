@@ -1,7 +1,5 @@
 <script setup>
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
-import { computed } from 'vue'
-import { Lang } from './app_constants'
 
 const props = defineProps({
   language: String,
