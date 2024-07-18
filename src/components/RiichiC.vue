@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { AppMode, Lang } from './app_constants'
-import { MLeagueRuleset } from './rulesets.ts'
+import { MLeagueRuleset, PreDefinedRuleSetMap, AssignRuleSet } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
@@ -25,11 +25,13 @@ onDeactivated(() => {
 })
 
 function SaveToStorage() {
+  console.log('Save to storage')
   const to_save = {
     app_mode: app_mode.value,
     player_starting_winds: player_starting_winds.value,
     player_names: player_names.value,
     ruleset: ruleset.value,
+    ruleset_to_load: ruleset_to_load.value,
     game: game.value,
     timestamp: new Date()
   }
@@ -68,6 +70,10 @@ function LoadFromStorage() {
       player_names.value = data.player_names
       console.log('Loaded player_names=', player_names.value)
     }
+    if ('ruleset_to_load' in data) {
+      ruleset_to_load.value = data.ruleset_to_load
+      console.log('Loaded ruleset_to_load=', ruleset_to_load.value)
+    }
     if ('ruleset' in data) {
       ruleset.value = data.ruleset
       console.log('Loaded ruleset=', ruleset.value)
@@ -82,6 +88,7 @@ function LoadFromStorage() {
 
 const player_names = ref([undefined, undefined, undefined, undefined])
 const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
+const ruleset_to_load = ref('M_LEAGUE')
 const ruleset = ref({ ...MLeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
@@ -268,6 +275,12 @@ function HandleResetGameLog(index, row) {
     SaveToStorage()
   }
 }
+
+function HandleLoadRuleset() {
+  console.log('loading ruleset: ', PreDefinedRuleSetMap[ruleset_to_load.value])
+  AssignRuleSet(ruleset.value, PreDefinedRuleSetMap[ruleset_to_load.value])
+  SaveToStorage()
+}
 </script>
 
 <template>
@@ -284,7 +297,12 @@ function HandleResetGameLog(index, row) {
           />
         </div>
         <div class="ruleset_configuration_board">
-          <RuleSetConfigurationBoard :language="ruleset.language" v-model="ruleset" />
+          <RuleSetConfigurationBoard
+            :language="ruleset.language"
+            v-model:ruleset="ruleset"
+            v-model:ruleset_to_load="ruleset_to_load"
+            @loadRuleset="HandleLoadRuleset"
+          />
         </div>
       </div>
 

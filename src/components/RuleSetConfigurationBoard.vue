@@ -13,8 +13,10 @@ const props = defineProps({
   language: String
 })
 
-const ruleset = defineModel()
-const ruleset_to_load = ref(undefined)
+const ruleset = defineModel('ruleset')
+const ruleset_to_load = defineModel('ruleset_to_load')
+
+const emit = defineEmits(['loadRuleset'])
 
 const LANG_CN_TEXT = ref('中文')
 const LANG_EN_TEXT = ref('English')
@@ -140,13 +142,6 @@ const LoadRulsetButtonText = computed(() => {
     return `Load Ruleset`
   }
 })
-
-function LoadRuleSet() {
-  if (ruleset_to_load.value in PreDefinedRuleSetMap) {
-    console.log('loading ruleset: ', PreDefinedRuleSetMap[ruleset_to_load.value])
-    AssignRuleSet(ruleset.value, PreDefinedRuleSetMap[ruleset_to_load.value])
-  }
-}
 </script>
 
 <template>
@@ -165,8 +160,7 @@ function LoadRuleSet() {
     </el-col>
     <el-col :span="4"> </el-col>
     <el-col :span="8">
-      <!--<el-button type="primary" @click="$emit('LoadRuleSet')> {{ LoadRulsetButtonText }} </el-button>-->
-      <el-button type="primary" @click="LoadRuleSet()">{{ LoadRulsetButtonText }}</el-button>
+      <el-button type="primary" @click="$emit('loadRuleset')">{{ LoadRulsetButtonText }}</el-button>
     </el-col>
   </el-row>
 
