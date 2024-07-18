@@ -5,6 +5,7 @@ import { Ruleset } from '../rulesets.ts'
 import { HandOutcomeEnum, HandResults, Hand, HandState } from '../hand.ts'
 import { PlayerIdsInOrder, Players } from '../players.ts'
 import { PointsLadder } from '../game_constants.ts'
+import { Lang } from '../app_constants.ts'
 
 let ruleset: Ruleset
 let players: Players
@@ -13,6 +14,7 @@ let hand_results: HandResults
 
 beforeEach(() => {
   ruleset = {
+    language: Lang.CN,
     num_players: 4,
     starting_points: 25000,
     honba_points: 300,
@@ -23,7 +25,8 @@ beforeEach(() => {
     last_round_wind: Winds.SOUTH,
     dealer_tenpai_renchan: true,
     all_last_dealer_win_renchan: true,
-    all_last_dealer_tenpai_renchan: true
+    all_last_dealer_tenpai_renchan: true,
+    chombo_penalty: 20.0
   }
 
   players = new Players(ruleset, ['P1', 'P2', 'P3', 'P4'])
@@ -575,6 +578,61 @@ describe('Hand Set Up Next Hand', () => {
     expect(hand.SetUpNextHand(players, ruleset)).toBe(undefined)
     expect(hand.has_next_hand).toEqual(false)
   })
+
+  it('should work for multi-ron including dealer', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 1,
+      honba: 1,
+      riichi_sticks: 0,
+      results: {
+        outcome: HandOutcomeEnum.RON,
+        winner: [Winds.EAST, Winds.WEST],
+        deal_in: Winds.SOUTH,
+        han: [3, 2],
+        fu: [30, 25]
+      }
+    })
+    const [next_hand, players_should_shift_seats] = hand.SetUpNextHand(players, ruleset)
+    expect(players_should_shift_seats).toEqual(false)
+    expect(next_hand).toEqual(
+      expect.objectContaining({
+        state: HandState.NOT_STARTED,
+        round_wind: Winds.SOUTH,
+        hand: 1,
+        honba: 2,
+        riichi_sticks: 0
+      })
+    )
+  })
+  it('should work for multi-ron excluding dealer', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 1,
+      honba: 1,
+      riichi_sticks: 0,
+      results: {
+        outcome: HandOutcomeEnum.RON,
+        winner: [Winds.NORTH, Winds.WEST],
+        deal_in: Winds.SOUTH,
+        han: [3, 2],
+        fu: [30, 25]
+      }
+    })
+    const [next_hand, players_should_shift_seats] = hand.SetUpNextHand(players, ruleset)
+    expect(players_should_shift_seats).toEqual(true)
+    expect(next_hand).toEqual(
+      expect.objectContaining({
+        state: HandState.NOT_STARTED,
+        round_wind: Winds.SOUTH,
+        hand: 2,
+        honba: 0,
+        riichi_sticks: 0
+      })
+    )
+  })
 })
 
 describe('Hand Finish', () => {
@@ -705,6 +763,36 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
+  it('should reject multiple winner on ron with head bump on', () => {
+    ruleset.head_bump = true
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: [Winds.WEST, Winds.SOUTH],
+      deal_in: Winds.EAST,
+      han: [3, 3],
+      fu: [30, 25]
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should accept multiple winner on ron with head bump off', () => {
+    ruleset.head_bump = false
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: [Winds.WEST, Winds.SOUTH],
+      deal_in: Winds.EAST,
+      han: [3, 3],
+      fu: [30, 25]
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(true)
+    expect(hand.IsOngoing()).toBe(false)
+  })
   it('should reject undefined deal in on ron', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING
@@ -777,20 +865,6 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject undefined fu on ron', () => {
-    Object.assign(hand, {
-      state: HandState.ON_GOING
-    })
-    hand_results = {
-      outcome: HandOutcomeEnum.RON,
-      winner: [Winds.SOUTH],
-      deal_in: Winds.NORTH,
-      han: [2],
-      fu: undefined
-    }
-    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
-    expect(hand.IsOngoing()).toBe(true)
-  })
   it('should reject invalid han on ron', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING
@@ -805,7 +879,7 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject invalid fu value on ron', () => {
+  it('should reject undefined fu on ron', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING
     })
@@ -814,7 +888,36 @@ describe('Hand Finish', () => {
       winner: [Winds.SOUTH],
       deal_in: Winds.NORTH,
       han: [2],
-      fu: [35]
+      fu: undefined
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should reject empty fu on ron', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: [Winds.SOUTH],
+      deal_in: Winds.NORTH,
+      han: [2],
+      fu: []
+    }
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should reject invalid fu size on ron', () => {
+    ruleset.head_bump = false
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.RON,
+      winner: [Winds.SOUTH, Winds.EAST],
+      deal_in: Winds.NORTH,
+      han: [2, 3],
+      fu: [30]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
@@ -855,13 +958,13 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject undefined winner on tsumo', () => {
+  it('should reject empty or undefined winner on tsumo', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING
     })
     hand_results = {
       outcome: HandOutcomeEnum.TSUMO,
-      winner: undefined,
+      winner: [],
       han: [3],
       fu: [30]
     }
@@ -872,14 +975,32 @@ describe('Hand Finish', () => {
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
     expect(hand.IsOngoing()).toBe(true)
   })
-  it('should reject undefined han on tsumo', () => {
+  it('should reject multiple winner on tsumo', () => {
+    Object.assign(hand, {
+      state: HandState.ON_GOING
+    })
+    hand_results = {
+      outcome: HandOutcomeEnum.TSUMO,
+      winner: [Winds.EAST, Winds.NORTH],
+      han: [3],
+      fu: [30]
+    }
+    ruleset.head_bump = true
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+
+    ruleset.head_bump = false
+    expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
+    expect(hand.IsOngoing()).toBe(true)
+  })
+  it('should reject empty or undefined han on tsumo', () => {
     Object.assign(hand, {
       state: HandState.ON_GOING
     })
     hand_results = {
       outcome: HandOutcomeEnum.TSUMO,
       winner: [Winds.WEST],
-      han: undefined,
+      han: [],
       fu: [30]
     }
     expect(hand.Finish(hand_results, players, ruleset)).toEqual(false)
@@ -1635,7 +1756,7 @@ describe.each([
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
     for (const player_id of PlayerIdsInOrder) {
-      if (player_id == winner) {
+      if (player_id == winner[0]) {
         hand_results.points_delta[player_id] = expected_delta
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1668,7 +1789,7 @@ describe.each([
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
     for (const player_id of PlayerIdsInOrder) {
-      if (player_id == winner) {
+      if (player_id == winner[0]) {
         hand_results.points_delta[player_id] = expected_delta
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1711,7 +1832,7 @@ describe.each([
     expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
     expect(hand.IsFinished()).toBe(true)
     for (const player_id of PlayerIdsInOrder) {
-      if (player_id == winner) {
+      if (player_id == winner[0]) {
         hand_results.points_delta[player_id] = expected_delta
         expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_delta)
       } else if (player_id == deal_in) {
@@ -1778,7 +1899,7 @@ describe.each([
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
       for (const player_id of PlayerIdsInOrder) {
-        if (player_id == winner) {
+        if (player_id == winner[0]) {
           hand_results.points_delta[player_id] = expected_winner_delta
           expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_winner_delta)
         } else if (player_id == deal_in) {
@@ -1872,7 +1993,7 @@ describe.each([{ winner: [Winds.SOUTH] }, { winner: [Winds.WEST] }, { winner: [W
       expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
       expect(hand.IsFinished()).toBe(true)
       for (const player_id of PlayerIdsInOrder) {
-        if (player_id == winner) {
+        if (player_id == winner[0]) {
           hand_results.points_delta[player_id] =
             expected_dealer_delta + expected_non_dealer_delta * 2
           expect(players.GetPlayer(player_id).points).toEqual(
@@ -1914,7 +2035,7 @@ describe.each([{ winner: [Winds.SOUTH] }, { winner: [Winds.WEST] }, { winner: [W
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
         for (const player_id of PlayerIdsInOrder) {
-          if (player_id == winner) {
+          if (player_id == winner[0]) {
             hand_results.points_delta[player_id] =
               expected_non_dealer_delta * 2 + expected_dealer_delta
             expect(players.GetPlayer(player_id).points).toEqual(
@@ -1990,7 +2111,7 @@ describe.each([{ winner: [Winds.SOUTH] }, { winner: [Winds.WEST] }, { winner: [W
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
         for (const player_id of PlayerIdsInOrder) {
-          if (player_id == winner) {
+          if (player_id == winner[0]) {
             expect(players.GetPlayer(player_id).points).toEqual(
               25000 + expected_non_dealer_delta * 2 + expected_dealer_delta
             )
@@ -2073,7 +2194,7 @@ describe.each([{ winner: [Winds.SOUTH] }, { winner: [Winds.WEST] }, { winner: [W
         expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
         expect(hand.IsFinished()).toBe(true)
         for (const player_id of PlayerIdsInOrder) {
-          if (player_id == winner) {
+          if (player_id == winner[0]) {
             hand_results.points_delta[player_id] = expected_winner_delta
             expect(players.GetPlayer(player_id).points).toEqual(25000 + expected_winner_delta)
           } else if (player_id == Winds.EAST) {
@@ -2089,6 +2210,81 @@ describe.each([{ winner: [Winds.SOUTH] }, { winner: [Winds.WEST] }, { winner: [W
         expect(hand.riichi_sticks).toEqual(0)
       }
     )
+  }
+)
+
+describe.each([
+  {
+    winner: [Winds.EAST, Winds.SOUTH],
+    deal_in: Winds.WEST,
+    han: [3, PointsLadder.MANGAN],
+    fu: [25, null],
+    riichi_sticks: 2,
+    honba: 1,
+    expected_points_delta: {
+      [Winds.EAST]: 7100,
+      [Winds.SOUTH]: 8000,
+      [Winds.WEST]: -13100
+    }
+  },
+  {
+    winner: [Winds.EAST, Winds.WEST, Winds.NORTH],
+    deal_in: Winds.SOUTH,
+    han: [1, PointsLadder.MANGAN, 2],
+    fu: [40, null, 30],
+    riichi_sticks: 1,
+    honba: 3,
+    expected_points_delta: {
+      [Winds.EAST]: 2000,
+      [Winds.SOUTH]: -12900,
+      [Winds.WEST]: 9900,
+      [Winds.NORTH]: 2000
+    }
+  },
+  {
+    winner: [Winds.NORTH, Winds.SOUTH],
+    deal_in: Winds.EAST,
+    han: [PointsLadder.MANGAN, 4],
+    fu: [null, 25],
+    riichi_sticks: 5,
+    honba: 0,
+    expected_points_delta: {
+      [Winds.EAST]: -14400,
+      [Winds.SOUTH]: 11400,
+      [Winds.NORTH]: 8000
+    }
+  }
+])(
+  'Hand Finish Applies Points Delta When Multiple Ron on $winner $han $fu',
+  ({ winner, deal_in, han, fu, riichi_sticks, honba, expected_points_delta }) => {
+    it('points delta are correct', () => {
+      ruleset.round_up_mangan = false
+      ruleset.head_bump = false
+      Object.assign(hand, {
+        state: HandState.ON_GOING,
+        riichi_sticks: riichi_sticks,
+        honba: honba
+      })
+      hand_results = {
+        outcome: HandOutcomeEnum.RON,
+        winner: winner,
+        deal_in: deal_in,
+        han: han,
+        fu: fu,
+        points_delta: expected_points_delta
+      }
+      expect(hand.Finish(hand_results, players, ruleset)).toBe(true)
+      expect(hand.IsFinished()).toBe(true)
+      for (const player_id of PlayerIdsInOrder) {
+        if (player_id in Object.keys(expected_points_delta)) {
+          expect(players.GetPlayer(player_id).points).toEqual(
+            25000 + expected_points_delta[player_id]
+          )
+        }
+      }
+      expect(hand.results).toEqual(hand_results)
+      expect(hand.results).not.toBe(hand_results)
+    })
   }
 )
 
@@ -2127,6 +2323,40 @@ describe('Hand Clone', () => {
     expect(clone.results.fu).toEqual(hand.results.fu)
     expect(clone.results.tenpai).toEqual(hand.results.tenpai)
   })
+  it('should copy all fields correctly for multiple winners', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 3,
+      honba: 2,
+      riichi: [Winds.NORTH, Winds.WEST],
+      riichi_sticks: 1,
+      has_next_hand: true,
+      results: {
+        outcome: HandOutcomeEnum.RON,
+        winner: [Winds.EAST, Winds.SOUTH],
+        deal_in: Winds.WEST,
+        han: [3, PointsLadder.MANGAN],
+        fu: [20, null],
+        tenpai: [Winds.SOUTH, Winds.EAST]
+      }
+    })
+    const clone = hand.Clone()
+    expect(clone).not.toBe(hand)
+    expect(clone.state).toEqual(hand.state)
+    expect(clone.round_wind).toEqual(hand.round_wind)
+    expect(clone.hand).toEqual(hand.hand)
+    expect(clone.honba).toEqual(hand.honba)
+    expect(clone.riichi).toEqual(hand.riichi)
+    expect(clone.riichi_sticks).toEqual(hand.riichi_sticks)
+    expect(clone.has_next_hand).toEqual(hand.has_next_hand)
+    expect(clone.results.outcome).toEqual(hand.results.outcome)
+    expect(clone.results.winner).toEqual(hand.results.winner)
+    expect(clone.results.deal_in).toEqual(hand.results.deal_in)
+    expect(clone.results.han).toEqual(hand.results.han)
+    expect(clone.results.fu).toEqual(hand.results.fu)
+    expect(clone.results.tenpai).toEqual(hand.results.tenpai)
+  })
 })
 
 describe('Hand Parse From Object', () => {
@@ -2145,6 +2375,29 @@ describe('Hand Parse From Object', () => {
         deal_in: Winds.WEST,
         han: [3],
         fu: [20],
+        tenpai: [Winds.SOUTH, Winds.EAST]
+      }
+    })
+    const obj = JSON.parse(JSON.stringify(hand))
+    const parsed = Hand.ParseFromObject(hand)
+    expect(parsed).toEqual(hand)
+    expect(parsed).not.toBe(hand)
+  })
+  it('should copy all fields correctly for multiple winner', () => {
+    Object.assign(hand, {
+      state: HandState.FINISHED,
+      round_wind: Winds.SOUTH,
+      hand: 3,
+      honba: 2,
+      riichi: [Winds.NORTH, Winds.WEST],
+      riichi_sticks: 1,
+      has_next_hand: true,
+      results: {
+        outcome: HandOutcomeEnum.RON,
+        winner: [Winds.EAST, Winds.SOUTH],
+        deal_in: Winds.WEST,
+        han: [3, PointsLadder.MANGAN],
+        fu: [20, null],
         tenpai: [Winds.SOUTH, Winds.EAST]
       }
     })
