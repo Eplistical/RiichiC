@@ -2,20 +2,26 @@
 import { ref, computed } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { Lang } from './app_constants'
-import { LeftOverRiichiSticks } from './rulesets'
+import {
+  PreDefinedRuleSetMap,
+  PreDefinedRuleSetDisplayText,
+  LeftOverRiichiSticks,
+  AssignRuleSet
+} from './rulesets'
 
 const props = defineProps({
   language: String
 })
 
 const ruleset = defineModel()
+const ruleset_to_load = ref(undefined)
 
 const LANG_CN_TEXT = ref('中文')
 const LANG_EN_TEXT = ref('English')
 
 const LanguageTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `语言`
+    return `显示语言`
   } else if (props.language == Lang.EN) {
     return `Language`
   }
@@ -80,9 +86,9 @@ const OffText = computed(() => {
 
 const LastRoundWindTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `半庄战`
+    return `游戏类型`
   } else if (props.language == Lang.EN) {
-    return `Hanchan`
+    return `Game Type`
   }
 })
 const LastRoundWindActiveText = computed(() => {
@@ -103,14 +109,14 @@ const LeftOverRiichiSticksTitleText = computed(() => {
   if (props.language == Lang.CN) {
     return `终局供托`
   } else if (props.language == Lang.EN) {
-    return `End game left-over riichi sticks`
+    return `End Game Riichi Sticks`
   }
 })
 const LeftOverRiichiSticksActiveText = computed(() => {
   if (props.language == Lang.CN) {
     return `首位获得`
   } else if (props.language == Lang.EN) {
-    return `To top`
+    return `To Top`
   }
 })
 const LeftOverRiichiSticksInactiveText = computed(() => {
@@ -120,17 +126,52 @@ const LeftOverRiichiSticksInactiveText = computed(() => {
     return `Abandon`
   }
 })
-const HeadBumpTitleText = computed(() => {
+const MultipleRonTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `头跳`
+    return `一炮多响`
   } else if (props.language == Lang.EN) {
-    return `Head Bump`
+    return `Multiple Ron`
   }
 })
+const LoadRulsetButtonText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `载入规则`
+  } else if (props.language == Lang.EN) {
+    return `Load Ruleset`
+  }
+})
+
+function LoadRuleSet() {
+  if (ruleset_to_load.value in PreDefinedRuleSetMap) {
+    console.log('loading ruleset: ', PreDefinedRuleSetMap[ruleset_to_load.value])
+    AssignRuleSet(ruleset.value, PreDefinedRuleSetMap[ruleset_to_load.value])
+  }
+}
 </script>
 
 <template>
   <el-divider> {{ RuleTitleText }}</el-divider>
+
+  <el-row>
+    <el-col :span="12">
+      <el-select v-model="ruleset_to_load" filterable>
+        <el-option
+          v-for="item in Object.keys(PreDefinedRuleSetMap)"
+          :key="item"
+          :label="PreDefinedRuleSetDisplayText[item]"
+          :value="item"
+        />
+      </el-select>
+    </el-col>
+    <el-col :span="4"> </el-col>
+    <el-col :span="8">
+      <!--<el-button type="primary" @click="$emit('LoadRuleSet')> {{ LoadRulsetButtonText }} </el-button>-->
+      <el-button type="primary" @click="LoadRuleSet()">{{ LoadRulsetButtonText }}</el-button>
+    </el-col>
+  </el-row>
+
+  <el-divider />
+
   <ConfigurationToggleEntry
     v-model="ruleset.language"
     :title="LanguageTitleText"
@@ -164,11 +205,11 @@ const HeadBumpTitleText = computed(() => {
   />
   <ConfigurationToggleEntry
     v-model="ruleset.head_bump"
-    :title="HeadBumpTitleText"
+    :title="MultipleRonTitleText"
     :active_text="OnText"
     :inactive_text="OffText"
-    :active_value="true"
-    :inactive_value="false"
+    :active_value="false"
+    :inactive_value="true"
   />
   <ConfigurationToggleEntry
     v-model="ruleset.round_up_mangan"

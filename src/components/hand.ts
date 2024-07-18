@@ -110,9 +110,9 @@ function SameRonAndDealInPlayer(language) {
 
 function HeadBumpProhibitsMultipleRonWinner(language) {
   if (language == Lang.CN) {
-    return '头跳规则不支持多人荣和'
+    return '规则不支持多人荣和'
   } else if (language == Lang.EN) {
-    return 'Head Bump Rule Prohibits Multiple Ron Players'
+    return 'The Ruleset Prohibits Multiple Ron Players'
   }
 }
 
@@ -357,10 +357,7 @@ export class Hand {
           (all_last && ruleset.all_last_dealer_tenpai_renchan)
       }
     } else {
-      if (
-        (Array.isArray(this.results.winner) && this.results.winner.includes(dealer_id)) ||
-        this.results.winner == dealer_id
-      ) {
+      if (Array.isArray(this.results.winner) && this.results.winner.includes(dealer_id)) {
         honba_increase = true
         renchan = !all_last || ruleset.all_last_dealer_win_renchan
       }

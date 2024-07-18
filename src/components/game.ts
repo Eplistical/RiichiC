@@ -35,6 +35,30 @@ function ResetChomboHandMsgText(language) {
   }
 }
 
+function HandSignatureTitleText(language) {
+  if (language == Lang.CN) {
+    return `场`
+  } else if (language == Lang.EN) {
+    return `Hand`
+  }
+}
+
+function StartRiichiStickTitleText(language) {
+  if (language == Lang.CN) {
+    return `供托`
+  } else if (language == Lang.EN) {
+    return `Starting Riichi Sticks`
+  }
+}
+
+function ResultSummaryTitleText(language) {
+  if (language == Lang.CN) {
+    return `结局`
+  } else if (language == Lang.EN) {
+    return `Results Summary`
+  }
+}
+
 export enum GameState {
   NOT_STARTED,
   ON_GOING,
@@ -404,11 +428,11 @@ export class Game {
   }
 
   // Generate JSON fields for game log headers for export purpose
-  GenerateGameLogTableFieldsForExport() {
+  GenerateGameLogTableFieldsForExport(language: string = Lang.CN) {
     let fields = {
-      [`场`]: 'hand_signature',
-      [`供托`]: 'start_game_riichi_sticks',
-      [`结局`]: 'results_summary'
+      [`${HandSignatureTitleText(language)}`]: 'hand_signature',
+      [`${StartRiichiStickTitleText(language)}`]: 'start_game_riichi_sticks',
+      [`${ResultSummaryTitleText(language)}`]: 'results_summary'
     }
     for (let player_id of PlayerIdsInOrder) {
       fields[this.GetPlayerName(player_id)] = player_id

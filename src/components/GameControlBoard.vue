@@ -85,8 +85,8 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame',
       <el-col :span="6">
         <download-excel
           type="xlsx"
-          :fields="game.GenerateGameLogTableFieldsForExport()"
-          :data="game.GenerateGameLogTable()"
+          :fields="game.GenerateGameLogTableFieldsForExport(props.language)"
+          :data="game.GenerateGameLogTable(props.language)"
           :name="`${game.GenerateGameLogFileNameForExport()}.xlsx`"
           :worksheet="WorksheetTitleText"
         >

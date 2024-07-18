@@ -47,9 +47,40 @@ export const MLeagueRuleset: Ruleset = Object.freeze({
   chombo_penalty: 20.0
 })
 
+export const PhiLeagueRuleset: Ruleset = Object.freeze({
+  language: Lang.EN,
+  num_players: 4,
+  starting_points: 30000,
+  honba_points: 300,
+  round_up_mangan: true,
+  head_bump: false,
+  draw_tenpai_points: 3000,
+  riichi_cost: 1000,
+  last_round_wind: Winds.SOUTH,
+  dealer_tenpai_renchan: true,
+  all_last_dealer_win_renchan: true,
+  all_last_dealer_tenpai_renchan: true,
+  left_over_riichi_sticks: LeftOverRiichiSticks.ABANDONED,
+  chombo_penalty: 20.0
+})
+
+export const PreDefinedRuleSetMap: Record<string, Ruleset> = Object.freeze({
+  M_LEAGUE: MLeagueRuleset,
+  PHI_LEAGUE: PhiLeagueRuleset
+})
+
+export const PreDefinedRuleSetDisplayText: Record<string, string> = Object.freeze({
+  M_LEAGUE: 'M-League',
+  PHI_LEAGUE: 'PhiLeague'
+})
+
 export function RulesetsAreEqual(rule1, rule2) {
   if (Object.keys(rule1).length != Object.keys(rule2).length) {
-    console.log('!!! ', Object.keys(rule1).length, Object.keys(rule2).length)
+    console.log(
+      'RulesetsAreEqual sees different lengths: ',
+      Object.keys(rule1).length,
+      Object.keys(rule2).length
+    )
     return false
   }
   for (const key of Object.keys(rule1)) {
@@ -57,9 +88,19 @@ export function RulesetsAreEqual(rule1, rule2) {
       continue
     }
     if (!(key in rule2) || rule2[key] != rule1[key]) {
-      console.log('!!! ', key, rule1[key], rule2[key])
+      console.log('Ruleset Difference Found: ', key, rule1[key], rule2[key])
       return false
     }
+  }
+  return true
+}
+
+export function AssignRuleSet(target: Ruleset, ruleset: Ruleset) {
+  for (const key of Object.keys(ruleset)) {
+    if (key == 'language') {
+      continue
+    }
+    target[key] = ruleset[key]
   }
   return true
 }
