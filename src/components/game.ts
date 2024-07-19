@@ -58,6 +58,14 @@ function ResultSummaryTitleText(language) {
   }
 }
 
+function ResetForGameAlreadyUploadedMsgText(language) {
+  if (language == Lang.CN) {
+    return `对局已上传至数据库。请联系管理员删除无效对局!`
+  } else if (language == Lang.EN) {
+    return `The Game Has Already Been Uploaded. Please Contact Administrator to Remove Corrupted Game.`
+  }
+}
+
 export enum GameState {
   NOT_STARTED,
   ON_GOING,
@@ -171,6 +179,10 @@ export class Game {
 
   Uploaded() {
     return !(this.game_id == undefined)
+  }
+
+  ClearGameId() {
+    this.game_id = undefined
   }
 
   SetGameId(game_id) {
@@ -312,6 +324,12 @@ export class Game {
     if (log_index == this.log.length - 1) {
       console.log('do nothing when resetting to the current game, log index = ', log_index)
       return false
+    }
+    if (this.Uploaded()) {
+      if (!confirm(ResetForGameAlreadyUploadedMsgText(this.ruleset.language))) {
+        return false
+      }
+      this.ClearGameId()
     }
     const log_to_reset = this.log[log_index]
     console.log('Resetting to', log_to_reset)

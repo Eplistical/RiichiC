@@ -1,5 +1,5 @@
 <script setup>
-import { Game } from './game'
+import { Game, GameLogType } from './game'
 import { computed } from 'vue'
 import { PlayerIdsInOrder } from './players'
 import { Lang } from './app_constants'

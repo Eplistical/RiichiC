@@ -514,14 +514,14 @@ function ExpectedPtFormatter(row, col) {
       <el-table-column prop="points_with_uma" :label="PointsWithUmaColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.points_with_uma >= 0 ? `success` : `danger`">
-            {{ scope.row.points_with_uma }}
+            {{ scope.row.points_with_uma.toFixed(1) }}
           </el-text>
         </template>
       </el-table-column>
       <el-table-column prop="points" :label="PointsColumnText" sortable>
         <template #default="scope">
           <el-text :type="scope.row.points >= 0 ? `success` : `danger`">
-            {{ scope.row.points }}
+            {{ scope.row.points.toFixed(1) }}
           </el-text>
         </template>
       </el-table-column>
