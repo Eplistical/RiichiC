@@ -9,7 +9,6 @@ import {
   PointsLadderBriefDisplayMap
 } from './game_constants'
 import { Lang } from './app_constants'
-import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 
 function CannotFindStartingWindMsgText(language) {
   if (language == Lang.CN) {
