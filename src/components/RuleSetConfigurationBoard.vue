@@ -148,7 +148,7 @@ const LoadRulsetButtonText = computed(() => {
         <el-option
           v-for="ruleset_id in Object.keys(RulesetName)"
           :key="ruleset_id"
-          :label="RulesetName[ruleset_id]"
+          :label="RulesetName[ruleset_id][language]"
           :value="ruleset_id"
         />
       </el-select>

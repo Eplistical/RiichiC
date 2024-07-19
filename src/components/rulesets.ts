@@ -13,10 +13,19 @@ export enum LeftOverRiichiSticks {
   SPLIT_AMONG_TOP_PLAYERS
 }
 
-export const RulesetName: Record<string, string> = Object.freeze({
-  M_LEAGUE: 'M-League',
-  PHI_LEAGUE: 'PhiLeague',
-  CUSTOM: 'Custom'
+export const RulesetName: Record<string, Record<string, string>> = Object.freeze({
+  M_LEAGUE: {
+    [Lang.CN]: 'M-League',
+    [Lang.EN]: 'M-League'
+  },
+  PHI_LEAGUE: {
+    [Lang.CN]: 'PhiLeague',
+    [Lang.EN]: 'PhiLeague'
+  },
+  CUSTOM: {
+    [Lang.CN]: '自定义',
+    [Lang.EN]: 'Custom'
+  }
 })
 
 export type Ruleset = {

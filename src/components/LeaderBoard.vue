@@ -36,9 +36,9 @@ const DateRangeTitleText = computed(() => {
 
 const LeaderBoardTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `排行榜 (${RulesetName[props.ruleset_id]})`
+    return `排行榜 (${RulesetName[props.ruleset_id][props.language]})`
   } else if (props.language == Lang.EN) {
-    return `Leaderboard (${RulesetName[props.ruleset_id]})`
+    return `Leaderboard (${RulesetName[props.ruleset_id][props.language]})`
   }
 })
 
@@ -288,7 +288,7 @@ function fetchGames(start_date, end_date, player_name) {
 function RefreshData() {
   console.log('RefreshData')
   if (!Object.keys(FixedRulesetMap).includes(props.ruleset_id)) {
-    alert(`${NoDatabaseForRulesetIdText.value}: ${props.ruleset_id}`)
+    alert(`${NoDatabaseForRulesetIdText.value}: ${RulesetName[props.ruleset_id][props.language]}`)
     return
   }
   const start_date = date_range.value[0]
