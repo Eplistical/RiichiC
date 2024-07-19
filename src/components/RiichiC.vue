@@ -4,7 +4,7 @@ import { Winds } from './seat_constants.ts'
 import { AppMode, Lang } from './app_constants'
 import { MLeagueRuleset, AssignRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
-import RulesetConfigurationBoard from './RulesetConfigurationBoard.vue'
+import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
 import HandResultsInputBoard from './HandResultsInputBoard.vue'
 import { HandOutcomeEnum } from './hand'
@@ -297,7 +297,7 @@ function HandleLoadRuleset() {
           />
         </div>
         <div class="ruleset_configuration_board">
-          <RulesetConfigurationBoard
+          <RuleSetConfigurationBoard
             :language="ruleset.language"
             v-model:ruleset="ruleset"
             v-model:ruleset_to_load="ruleset_to_load"
