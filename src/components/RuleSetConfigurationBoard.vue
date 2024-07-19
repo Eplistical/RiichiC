@@ -2,12 +2,7 @@
 import { ref, computed } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { Lang } from './app_constants'
-import {
-  PreDefinedRuleSetMap,
-  PreDefinedRuleSetDisplayText,
-  LeftOverRiichiSticks,
-  AssignRuleSet
-} from './rulesets'
+import { IsCustomizable, LeftOverRiichiSticks, RulesetName } from './rulesets'
 
 const props = defineProps({
   language: String
@@ -151,10 +146,10 @@ const LoadRulsetButtonText = computed(() => {
     <el-col :span="12">
       <el-select v-model="ruleset_to_load" filterable>
         <el-option
-          v-for="item in Object.keys(PreDefinedRuleSetMap)"
-          :key="item"
-          :label="PreDefinedRuleSetDisplayText[item]"
-          :value="item"
+          v-for="ruleset_id in Object.keys(RulesetName)"
+          :key="ruleset_id"
+          :label="RulesetName[ruleset_id]"
+          :value="ruleset_id"
         />
       </el-select>
     </el-col>
@@ -181,21 +176,25 @@ const LoadRulsetButtonText = computed(() => {
     :inactive_text="LastRoundWindInactiveText"
     :active_value="Winds.SOUTH"
     :inactive_value="Winds.EAST"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <RuleNumberEntry
     v-model="ruleset.starting_points"
     :title="StartingPointsTitleText"
     :step="StartingPointsStep"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <RuleNumberEntry
     v-model="ruleset.honba_points"
     :title="HonbaPointsTitleText"
     :step="HonbaPointsStep"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <RuleNumberEntry
     v-model="ruleset.draw_tenpai_points"
     :title="DrawTenpaiPointsTitleText"
     :step="DrawTenpaiPointsStep"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <ConfigurationToggleEntry
     v-model="ruleset.head_bump"
@@ -204,6 +203,7 @@ const LoadRulsetButtonText = computed(() => {
     :inactive_text="OffText"
     :active_value="false"
     :inactive_value="true"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <ConfigurationToggleEntry
     v-model="ruleset.round_up_mangan"
@@ -212,6 +212,7 @@ const LoadRulsetButtonText = computed(() => {
     :inactive_text="OffText"
     :active_value="true"
     :inactive_value="false"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
   <ConfigurationToggleEntry
     v-model="ruleset.left_over_riichi_sticks"
@@ -220,5 +221,6 @@ const LoadRulsetButtonText = computed(() => {
     :inactive_text="LeftOverRiichiSticksInactiveText"
     :active_value="LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS"
     :inactive_value="LeftOverRiichiSticks.ABANDONED"
+    :disabled="!IsCustomizable(ruleset.id)"
   />
 </template>

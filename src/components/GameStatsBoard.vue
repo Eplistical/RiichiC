@@ -8,7 +8,7 @@ import { HandOutcomeEnum } from './hand'
 import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
 import { Lang, RECORD_GAME_API } from './app_constants'
-import { MLeagueRuleset, RulesetsAreEqual } from './rulesets'
+import { FixedRulesetMap } from './rulesets'
 
 const emit = defineEmits(['gameUploaded'])
 
@@ -193,7 +193,7 @@ function UploadGameStats() {
     alert(UploadDataMissingMsgText.value)
     return
   }
-  if (!RulesetsAreEqual(props.game.ruleset, MLeagueRuleset)) {
+  if (!Object.keys(FixedRulesetMap).includes(props.game.ruleset.id)) {
     alert(UploadRulesetNotSupportedMsgText.value)
     return
   }
@@ -220,6 +220,7 @@ function UploadGameStats() {
   const data_to_post = {
     action: 'record_game',
     token: token,
+    ruleset_id: props.game.ruleset.id,
     game: {
       game_date: game_date,
       game_hand_count: GameHandCount()

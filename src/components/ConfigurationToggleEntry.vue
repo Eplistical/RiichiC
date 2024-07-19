@@ -4,7 +4,8 @@ const props = defineProps({
   active_text: String,
   inactive_text: String,
   active_value: String | Number | Boolean,
-  inactive_value: String | Number | Boolean
+  inactive_value: String | Number | Boolean,
+  disabled: Boolean
 })
 
 const result = defineModel()
@@ -20,6 +21,7 @@ const result = defineModel()
         :active-value="active_value"
         :inactive-text="inactive_text"
         :inactive-value="inactive_value"
+        :disabled="disabled"
       />
     </el-col>
   </el-row>

@@ -4,9 +4,11 @@ import { useFetch } from '@vueuse/core'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { PlaceNumberDisplayMap } from './game_constants'
 import { Lang, GET_STATS_API, LIST_GAMES_API } from './app_constants'
+import { RulesetName, FixedRulesetMap } from './rulesets'
 
 const props = defineProps({
-  language: String
+  language: String,
+  ruleset_id: String
 })
 
 const emit = defineEmits(['toGame'])
@@ -34,9 +36,9 @@ const DateRangeTitleText = computed(() => {
 
 const LeaderBoardTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return '排行榜'
+    return `排行榜 (${RulesetName[props.ruleset_id]})`
   } else if (props.language == Lang.EN) {
-    return 'Leaderboard'
+    return `Leaderboard (${RulesetName[props.ruleset_id]})`
   }
 })
 
@@ -237,6 +239,14 @@ const HandsCountText = computed(() => {
   }
 })
 
+const NoDatabaseForRulesetIdText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '此规则没有配置后台数据库'
+  } else if (props.language == Lang.EN) {
+    return 'The Selected Ruleset Does Not Have Database'
+  }
+})
+
 function GetPlayerSummary(game, starting_wind) {
   if (props.language == Lang.CN) {
     return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind]}起][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
@@ -254,16 +264,22 @@ onMounted(() => {
 })
 
 function fetchLeaderBoard(start_date, end_date, player_name) {
-  console.log(`FetchLeaderBoard range: ${start_date} to ${end_date} player: ${player_name}`)
-  return useFetch(`${GET_STATS_API}?action=get_stats&start_date=${start_date}&end_date=${end_date}`)
+  console.log(
+    `FetchLeaderBoard range: ${start_date} to ${end_date} player: ${player_name} ruleset_id: ${props.ruleset_id}`
+  )
+  return useFetch(
+    `${GET_STATS_API}?action=get_stats&start_date=${start_date}&end_date=${end_date}&ruleset_id=${props.ruleset_id}`
+  )
     .get()
     .json().data
 }
 
 function fetchGames(start_date, end_date, player_name) {
-  console.log(`fetchGames range: ${start_date} to ${end_date} player: ${player_name}`)
+  console.log(
+    `fetchGames range: ${start_date} to ${end_date} player: ${player_name} ruleset_id: ${props.ruleset_id}`
+  )
   return useFetch(
-    `${LIST_GAMES_API}?action=list_games&start_date=${start_date}&end_date=${end_date}`
+    `${LIST_GAMES_API}?action=list_games&start_date=${start_date}&end_date=${end_date}&ruleset_id=${props.ruleset_id}`
   )
     .get()
     .json().data
@@ -271,6 +287,10 @@ function fetchGames(start_date, end_date, player_name) {
 
 function RefreshData() {
   console.log('RefreshData')
+  if (!Object.keys(FixedRulesetMap).includes(props.ruleset_id)) {
+    alert(`${NoDatabaseForRulesetIdText.value}: ${props.ruleset_id}`)
+    return
+  }
   const start_date = date_range.value[0]
   const end_date = date_range.value[1]
   const start_date_int =

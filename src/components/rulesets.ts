@@ -13,7 +13,14 @@ export enum LeftOverRiichiSticks {
   SPLIT_AMONG_TOP_PLAYERS
 }
 
+export const RulesetName: Record<string, string> = Object.freeze({
+  M_LEAGUE: 'M-League',
+  PHI_LEAGUE: 'PhiLeague',
+  CUSTOM: 'Custom'
+})
+
 export type Ruleset = {
+  id: string
   language: string
   num_players: 3 | 4
   starting_points: number
@@ -31,6 +38,7 @@ export type Ruleset = {
 }
 
 export const MLeagueRuleset: Ruleset = Object.freeze({
+  id: 'M_LEAGUE',
   language: Lang.CN,
   num_players: 4,
   starting_points: 25000,
@@ -48,6 +56,7 @@ export const MLeagueRuleset: Ruleset = Object.freeze({
 })
 
 export const PhiLeagueRuleset: Ruleset = Object.freeze({
+  id: 'PHI_LEAGUE',
   language: Lang.EN,
   num_players: 4,
   starting_points: 30000,
@@ -64,15 +73,14 @@ export const PhiLeagueRuleset: Ruleset = Object.freeze({
   chombo_penalty: 20.0
 })
 
-export const PreDefinedRuleSetMap: Record<string, Ruleset> = Object.freeze({
+export const FixedRulesetMap: Record<string, Ruleset> = Object.freeze({
   M_LEAGUE: MLeagueRuleset,
   PHI_LEAGUE: PhiLeagueRuleset
 })
 
-export const PreDefinedRuleSetDisplayText: Record<string, string> = Object.freeze({
-  M_LEAGUE: 'M-League',
-  PHI_LEAGUE: 'PhiLeague'
-})
+export function IsCustomizable(ruleset_id: string) {
+  return !Object.keys(FixedRulesetMap).includes(ruleset_id)
+}
 
 export function RulesetsAreEqual(rule1, rule2) {
   if (Object.keys(rule1).length != Object.keys(rule2).length) {
@@ -95,7 +103,12 @@ export function RulesetsAreEqual(rule1, rule2) {
   return true
 }
 
-export function AssignRuleSet(target: Ruleset, ruleset: Ruleset) {
+export function AssignRuleset(target: Ruleset, id: string) {
+  if (!Object.keys(FixedRulesetMap).includes(id)) {
+    target.id = id
+    return
+  }
+  const ruleset = FixedRulesetMap[id]
   for (const key of Object.keys(ruleset)) {
     if (key == 'language') {
       continue

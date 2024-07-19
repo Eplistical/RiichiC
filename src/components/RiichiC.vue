@@ -2,9 +2,9 @@
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { AppMode, Lang } from './app_constants'
-import { MLeagueRuleset, PreDefinedRuleSetMap, AssignRuleSet } from './rulesets.ts'
+import { MLeagueRuleset, AssignRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
-import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
+import RulesetConfigurationBoard from './RulesetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
 import HandResultsInputBoard from './HandResultsInputBoard.vue'
 import { HandOutcomeEnum } from './hand'
@@ -277,8 +277,8 @@ function HandleResetGameLog(index, row) {
 }
 
 function HandleLoadRuleset() {
-  console.log('loading ruleset: ', PreDefinedRuleSetMap[ruleset_to_load.value])
-  AssignRuleSet(ruleset.value, PreDefinedRuleSetMap[ruleset_to_load.value])
+  console.log('loading ruleset: ', ruleset_to_load.value)
+  AssignRuleset(ruleset.value, ruleset_to_load.value)
   SaveToStorage()
 }
 </script>
@@ -297,7 +297,7 @@ function HandleLoadRuleset() {
           />
         </div>
         <div class="ruleset_configuration_board">
-          <RuleSetConfigurationBoard
+          <RulesetConfigurationBoard
             :language="ruleset.language"
             v-model:ruleset="ruleset"
             v-model:ruleset_to_load="ruleset_to_load"
@@ -351,7 +351,12 @@ function HandleLoadRuleset() {
     </div>
     <div v-else-if="app_mode == AppMode.LEADER_BOARD">
       <div class="leader_board">
-        <LeaderBoard class="leader_board" :language="ruleset.language" @toGame="EnterGameMode" />
+        <LeaderBoard
+          class="leader_board"
+          :language="ruleset.language"
+          :ruleset_id="ruleset.id"
+          @toGame="EnterGameMode"
+        />
       </div>
     </div>
   </div>
