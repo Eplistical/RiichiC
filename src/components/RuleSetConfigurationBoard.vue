@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { Lang } from './app_constants'
 import { IsCustomizable, LeftOverRiichiSticks, RulesetName } from './rulesets'
+import RuleNumberEntry from './RuleNumberEntry.vue'
 
 const props = defineProps({
   language: String
@@ -143,20 +144,15 @@ const LoadRulsetButtonText = computed(() => {
   <el-divider> {{ RuleTitleText }}</el-divider>
 
   <el-row>
-    <el-col :span="12">
-      <el-select v-model="ruleset_to_load" filterable>
-        <el-option
-          v-for="ruleset_id in Object.keys(RulesetName)"
-          :key="ruleset_id"
-          :label="RulesetName[ruleset_id][language]"
-          :value="ruleset_id"
-        />
-      </el-select>
-    </el-col>
-    <el-col :span="4"> </el-col>
-    <el-col :span="8">
-      <el-button type="primary" @click="$emit('loadRuleset')">{{ LoadRulsetButtonText }}</el-button>
-    </el-col>
+    <el-radio-group
+      v-for="ruleset_id in Object.keys(RulesetName)"
+      v-model="ruleset_to_load"
+      @change="$emit('loadRuleset')"
+    >
+      <el-radio-button :label="ruleset_id">
+        {{ RulesetName[ruleset_id][language] }}
+      </el-radio-button>
+    </el-radio-group>
   </el-row>
 
   <el-divider />

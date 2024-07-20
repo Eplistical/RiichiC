@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { AppMode, Lang } from './app_constants'
-import { MLeagueRuleset, AssignRuleset } from './rulesets.ts'
+import { RulesetName, MLeagueRuleset, AssignRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
@@ -138,6 +138,14 @@ const PlayerDuplicatedMsgText = computed(() => {
     return `玩家重复`
   } else if (ruleset.value.language == Lang.EN) {
     return `Duplicated player`
+  }
+})
+
+const RulesetText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `规则`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Ruleset`
   }
 })
 
@@ -315,8 +323,7 @@ function HandleLoadRuleset() {
             v-model="hand_results_form.riichi_players"
           />
         </div>
-
-        <el-divider />
+        <el-divider> {{ RulesetName[ruleset.id][ruleset.language] }} {{ RulesetText }} </el-divider>
 
         <div class="hand_results_input_board" v-if="game.IsOnGoing()">
           <HandResultsInputBoard
