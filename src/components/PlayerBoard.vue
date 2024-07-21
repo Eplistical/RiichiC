@@ -54,7 +54,7 @@ const PlayerName = computed(() => {
 })
 
 const PlayerCurrentWind = computed(() => {
-  return WindsDisplayTextMap[GetCurPlayer().current_wind]
+  return WindsDisplayTextMap[GetCurPlayer().current_wind][props.language]
 })
 
 const PlayerPoints = computed(() => {

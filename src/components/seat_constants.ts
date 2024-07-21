@@ -1,3 +1,5 @@
+import { Lang } from './app_constants'
+
 export type WindType = string
 
 export const Winds = Object.freeze({
@@ -24,8 +26,20 @@ export const LastWindMap: Record<WindType, WindType> = Object.freeze({
 })
 
 export const WindsDisplayTextMap: Record<WindType, string> = Object.freeze({
-  [Winds.EAST]: '東',
-  [Winds.SOUTH]: '南',
-  [Winds.WEST]: '西',
-  [Winds.NORTH]: '北'
+  [Winds.EAST]: {
+    [Lang.CN]: '東',
+    [Lang.EN]: '東/E'
+  },
+  [Winds.SOUTH]: {
+    [Lang.CN]: '南',
+    [Lang.EN]: '南/S'
+  },
+  [Winds.WEST]: {
+    [Lang.CN]: '西',
+    [Lang.EN]: '西/W'
+  },
+  [Winds.NORTH]: {
+    [Lang.CN]: '北',
+    [Lang.EN]: '北/N'
+  }
 })

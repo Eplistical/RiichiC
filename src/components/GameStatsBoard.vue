@@ -1,7 +1,7 @@
 <script setup>
 import { Game, GameLogType } from './game'
 import { PlayerIdsInOrder } from './players'
-import { ref, computed, toRaw } from 'vue'
+import { ref, computed } from 'vue'
 import { WindsDisplayTextMap } from './seat_constants'
 import { PlaceNumberDisplayMap } from './game_constants'
 import { HandOutcomeEnum } from './hand'
@@ -151,11 +151,7 @@ const has_chombo = computed(() => {
 const game_stats = ref({})
 
 function GetPlayerSummary(player_id, rank) {
-  if (language.value == Lang.CN) {
-    return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}起][${PlaceNumberDisplayMap[rank][language.value]}]`
-  } else if (language.value == Lang.EN) {
-    return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id]}][${PlaceNumberDisplayMap[rank][language.value]}]`
-  }
+  return `${GetPlayerName(player_id)}[${WindsDisplayTextMap[player_id][language.value]}][${PlaceNumberDisplayMap[rank][language.value]}]`
 }
 
 function GetActionSummary(stats) {

@@ -248,11 +248,7 @@ const NoDatabaseForRulesetIdText = computed(() => {
 })
 
 function GetPlayerSummary(game, starting_wind) {
-  if (props.language == Lang.CN) {
-    return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind]}起][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
-  } else if (props.language == Lang.EN) {
-    return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind]}][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
-  }
+  return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind][props.language]}][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
 }
 
 onMounted(() => {

@@ -11,7 +11,7 @@ const props = defineProps({
 })
 
 const HandSignatureText = computed(() => {
-  return `${WindsDisplayTextMap[props.hand.round_wind]}${props.hand.hand} - ${props.hand.honba}`
+  return `${WindsDisplayTextMap[props.hand.round_wind][props.language]}${props.hand.hand} - ${props.hand.honba}`
 })
 
 const RiichiSticksText = computed(() => {

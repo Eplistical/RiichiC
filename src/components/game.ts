@@ -1,7 +1,7 @@
 import { Hand, HandResults, HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand.ts'
 import { WindType, Winds, WindsDisplayTextMap, WindsInOrder } from './seat_constants.ts'
 import { Ruleset, LeftOverRiichiSticks } from './rulesets.ts'
-import { Player, PlayerId, PlayerIdsInOrder, Players } from './players.ts'
+import { PlayerId, PlayerIdsInOrder, Players } from './players.ts'
 import {
   ActionBriefDisplayMap,
   Actions,
@@ -382,7 +382,7 @@ export class Game {
           row.results_summary = `Left over Riichi Sticks`
         }
       } else {
-        row.hand_signature = `${WindsDisplayTextMap[hand.round_wind]}${hand.hand}-${hand.honba}`
+        row.hand_signature = `${WindsDisplayTextMap[hand.round_wind][language]}${hand.hand}-${hand.honba}`
         row.results_summary = `${HandOutcomeEnumDisplayTextMap[hand.results.outcome][language]}`
         if (
           hand.results.outcome == HandOutcomeEnum.RON ||
@@ -500,7 +500,7 @@ export class Game {
       if (!player_starting_winds.includes(wind)) {
         return [
           false,
-          `${CannotFindStartingWindMsgText(ruleset.language)}: ${WindsDisplayTextMap[wind]}`
+          `${CannotFindStartingWindMsgText(ruleset.language)}: ${WindsDisplayTextMap[wind][ruleset.language]}`
         ]
       }
     }

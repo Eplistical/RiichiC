@@ -1,4 +1,5 @@
 <script setup>
+import { Lang } from './app_constants'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 
 const props = defineProps({
@@ -10,7 +11,7 @@ const player_name = defineModel('player_name')
 const player_starting_wind = defineModel('player_starting_wind')
 
 function StartigWindText(wind) {
-  return `${WindsDisplayTextMap[wind]}`
+  return `${WindsDisplayTextMap[wind][props.language]}`
 }
 </script>
 
