@@ -8,7 +8,7 @@ import { HandOutcomeEnum } from './hand'
 import { useFetch } from '@vueuse/core'
 import { PointsLadder } from './game_constants'
 import { Lang, RECORD_GAME_API } from './app_constants'
-import { FixedRulesetMap } from './rulesets'
+import { UploadableRulesets } from './rulesets'
 
 const emit = defineEmits(['gameUploaded'])
 
@@ -193,7 +193,7 @@ function UploadGameStats() {
     alert(UploadDataMissingMsgText.value)
     return
   }
-  if (!Object.keys(FixedRulesetMap).includes(props.game.ruleset.id)) {
+  if (!UploadableRulesets.has(props.game.ruleset.id)) {
     alert(UploadRulesetNotSupportedMsgText.value)
     return
   }

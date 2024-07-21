@@ -4,7 +4,7 @@ import { useFetch } from '@vueuse/core'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { PlaceNumberDisplayMap } from './game_constants'
 import { Lang, GET_STATS_API, LIST_GAMES_API } from './app_constants'
-import { RulesetName, FixedRulesetMap } from './rulesets'
+import { RulesetName, UploadableRulesets, FixedRulesetMap } from './rulesets'
 
 const props = defineProps({
   language: String,
@@ -44,7 +44,7 @@ const LeaderBoardTitleText = computed(() => {
 
 const ToGameText = computed(() => {
   if (props.language == Lang.CN) {
-    return '返回游戏'
+    return '主界面'
   } else if (props.language == Lang.EN) {
     return 'Main Panel'
   }
@@ -287,7 +287,7 @@ function fetchGames(start_date, end_date, player_name) {
 
 function RefreshData() {
   console.log('RefreshData')
-  if (!Object.keys(FixedRulesetMap).includes(props.ruleset_id)) {
+  if (!UploadableRulesets.has(props.ruleset_id)) {
     alert(`${NoDatabaseForRulesetIdText.value}: ${RulesetName[props.ruleset_id][props.language]}`)
     return
   }
@@ -311,20 +311,23 @@ function getDefaultDateRange() {
   ]
 }
 
-function gamePointsDisplay(end_pt, pt_with_uma, start_pt = 25000) {
-  const adjusted_pt_with_uma = (pt_with_uma - start_pt) / 1000
+function gamePointsDisplay(end_pt, pt_with_uma, starting_points) {
+  const adjusted_pt_with_uma = (pt_with_uma - starting_points) / 1000
   return `${end_pt}(${adjusted_pt_with_uma > 0 ? '+' : ''}${adjusted_pt_with_uma.toFixed(1)})`
 }
 
 function getGameRecordTable(game) {
   const has_chombo = HasChombo(game)
   let table = []
+  if (!(props.ruleset_id in FixedRulesetMap)) {
+    return table
+  }
+  const starting_points = FixedRulesetMap[props.ruleset_id].starting_points
   for (const wind of WindsInOrder) {
     const row = {
       player: GetPlayerSummary(game, wind),
       rank: game[wind].rank,
-      points: gamePointsDisplay(game[wind].points, game[wind].points_with_uma),
-      //points_with_uma: (game[wind].points_with_uma - 25000) / 1000,
+      points: gamePointsDisplay(game[wind].points, game[wind].points_with_uma, starting_points),
       game_details:
         `${game[wind].riichi}/${game[wind].agari}/${game[wind].deal_in}/${game[wind].tenpai_on_draw}` +
         (has_chombo ? `/${game[wind].chombo}` : ``),
@@ -360,6 +363,10 @@ const ComputedLeaderBoard = computed(() => {
   if (!raw_stats.value || !raw_stats.value.value) {
     return table
   }
+  if (!(props.ruleset_id in FixedRulesetMap)) {
+    return table
+  }
+  const starting_points = FixedRulesetMap[props.ruleset_id].starting_points
   let idx = 0
   let max_top1_rate = 0.0
   let max_top1_rate_idx = []
@@ -379,8 +386,9 @@ const ComputedLeaderBoard = computed(() => {
     const row = {
       name: `[${idx + 1}]${stats.player_name}`,
       points_with_uma:
-        (stats.points_sum_with_uma - 25000 * stats.games_count) / 1000 - 20.0 * stats.chombo_sum,
-      points: (stats.points_sum - 25000 * stats.games_count) / 1000,
+        (stats.points_sum_with_uma - starting_points * stats.games_count) / 1000 -
+        20.0 * stats.chombo_sum,
+      points: (stats.points_sum - starting_points * stats.games_count) / 1000,
       games_count: `${stats.games_count}[${stats.place_count_map[1]}|${stats.place_count_map[2]}|${stats.place_count_map[3]}|${stats.place_count_map[4]}]`,
       chombo_count: stats.chombo_sum,
       avg_rank: stats.rank_sum / stats.games_count,
@@ -616,9 +624,7 @@ function ExpectedPtFormatter(row, col) {
               table-layout="auto"
             >
               <el-table-column prop="player" :label="GamePlayerColumnText" />
-              <!--<el-table-column prop="rank" :label="GameRankColumnText" />-->
               <el-table-column prop="points" :label="GamePointsColumnText" />
-              <!--<el-table-column prop="points_with_uma" :label="GamePointsWithUmaColumnText" />-->
               <el-table-column
                 prop="game_details"
                 :label="GameDetailsColumnText(raw_games.value.games[i - 1])"

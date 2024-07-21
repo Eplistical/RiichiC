@@ -87,6 +87,8 @@ export const FixedRulesetMap: Record<string, Ruleset> = Object.freeze({
   PHI_LEAGUE: PhiLeagueRuleset
 })
 
+export const UploadableRulesets = new Set<string>(['M_LEAGUE', 'PHI_LEAGUE'])
+
 export function IsCustomizable(ruleset_id: string) {
   return !Object.keys(FixedRulesetMap).includes(ruleset_id)
 }
