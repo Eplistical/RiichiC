@@ -86,6 +86,7 @@ function LoadFromStorage() {
   console.log('Load from storage Done')
 }
 
+const registered_players = ref([])
 const player_names = ref([undefined, undefined, undefined, undefined])
 const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
 const ruleset_to_load = ref('M_LEAGUE')
@@ -141,6 +142,14 @@ const PlayerDuplicatedMsgText = computed(() => {
   }
 })
 
+const UnregisteredPlayersMsgText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `存在未注册玩家，本游戏可能无法上传，确定继续？`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `There are unregistered players and the game may not be uploadable, proceed?`
+  }
+})
+
 const RulesetText = computed(() => {
   if (ruleset.value.language == Lang.CN) {
     return `规则`
@@ -150,6 +159,7 @@ const RulesetText = computed(() => {
 })
 
 function StartGame() {
+  // check duplicated players
   let { duplicated, item } = HasDuplication(player_names.value)
   if (duplicated == true) {
     alert(`${PlayerDuplicatedMsgText.value}: ${item}`)
@@ -163,6 +173,20 @@ function StartGame() {
     ' and ruleset: ',
     ruleset.value
   )
+  // alert about unregistered players
+  let unregistered_players = []
+  if (registered_players.value) {
+    for (let player_name of player_names.value) {
+      if (!registered_players.value.includes(player_name)) {
+        unregistered_players.push(player_name)
+      }
+    }
+  }
+  if (unregistered_players.length > 0) {
+    if (!confirm(`${UnregisteredPlayersMsgText.value} ${unregistered_players}`)) {
+      return
+    }
+  }
   const [success, msg] = game.value.InitGame({
     ruleset: ruleset.value,
     player_names: player_names.value,
@@ -300,8 +324,10 @@ function HandleLoadRuleset() {
           <PlayerNameConfigurationBoard
             v-model:player_names="player_names"
             v-model:player_starting_winds="player_starting_winds"
+            v-model:registered_players="registered_players"
             :num_players="ruleset.num_players"
             :language="ruleset.language"
+            :ruleset_id="ruleset_to_load"
           />
         </div>
         <div class="ruleset_configuration_board">

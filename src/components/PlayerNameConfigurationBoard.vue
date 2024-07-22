@@ -5,10 +5,12 @@ import { LIST_PLAYERS_API } from './app_constants'
 import { Lang } from './app_constants'
 const props = defineProps({
   language: String,
-  num_players: Number
+  num_players: Number,
+  ruleset_id: String
 })
 const player_names = defineModel('player_names')
 const player_starting_winds = defineModel('player_starting_winds')
+const registered_players = defineModel('registered_players')
 
 const PlayerNameDividerText = computed(() => {
   if (props.language == Lang.CN) {
@@ -26,21 +28,30 @@ const CannotFindPlayerMsgText = computed(() => {
   }
 })
 
-const registered_players = ref([])
+const players = ref({})
 
-onMounted(() => {
-  GetRegisteredPlayers()
+const registered_players_for_ruleset_id = computed(() => {
+  if (props.ruleset_id in players.value) {
+    registered_players.value = players.value[props.ruleset_id]
+  } else {
+    registered_players.value = players.value['CUSTOM']
+  }
+  return registered_players.value
 })
 
-function GetRegisteredPlayers() {
-  console.log('GetRegisteredPlayers')
+onMounted(() => {
+  GetPlayers()
+})
+
+function GetPlayers() {
+  console.log('GetPlayers')
   const { data, onFetchResponse, onFetchError } = useFetch(
     `${LIST_PLAYERS_API}?action=list_players`
   )
     .get()
     .text()
   onFetchResponse((response) => {
-    registered_players.value = JSON.parse(data.value).players
+    players.value = JSON.parse(data.value).players
   })
   onFetchError((error) => {
     alert(`${CannotFindPlayerMsgText}: ${data.value}`)
@@ -55,7 +66,7 @@ function GetRegisteredPlayers() {
       v-model:player_name="player_names[i - 1]"
       v-model:player_starting_wind="player_starting_winds[i - 1]"
       :language="language"
-      :registered_players="registered_players"
+      :registered_players="registered_players_for_ruleset_id"
     />
   </el-row>
 </template>
