@@ -14,7 +14,7 @@ export enum LeftOverRiichiSticks {
 }
 
 export const RulesetName: Record<string, Record<string, string>> = Object.freeze({
-  M_LEAGUE: {
+  THE_3Q1_LEAGUE: {
     [Lang.CN]: 'M-League',
     [Lang.EN]: 'M-League'
   },
@@ -46,8 +46,8 @@ export type Ruleset = {
   chombo_penalty: number
 }
 
-export const MLeagueRuleset: Ruleset = Object.freeze({
-  id: 'M_LEAGUE',
+export const The3Q1LeagueRuleset: Ruleset = Object.freeze({
+  id: 'THE_3Q1_LEAGUE',
   language: Lang.CN,
   num_players: 4,
   starting_points: 25000,
@@ -83,11 +83,11 @@ export const PhiLeagueRuleset: Ruleset = Object.freeze({
 })
 
 export const FixedRulesetMap: Record<string, Ruleset> = Object.freeze({
-  M_LEAGUE: MLeagueRuleset,
+  THE_3Q1_LEAGUE: The3Q1LeagueRuleset,
   PHI_LEAGUE: PhiLeagueRuleset
 })
 
-export const UploadableRulesets = new Set<string>(['M_LEAGUE', 'PHI_LEAGUE'])
+export const UploadableRulesets = new Set<string>(['THE_3Q1_LEAGUE', 'PHI_LEAGUE'])
 
 export function IsCustomizable(ruleset_id: string) {
   return !Object.keys(FixedRulesetMap).includes(ruleset_id)

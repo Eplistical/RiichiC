@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onDeactivated } from 'vue'
 import { Winds } from './seat_constants.ts'
 import { AppMode, Lang } from './app_constants'
-import { RulesetName, MLeagueRuleset, AssignRuleset } from './rulesets.ts'
+import { RulesetName, The3Q1LeagueRuleset, AssignRuleset } from './rulesets.ts'
 import { Game } from './game.ts'
 import RuleSetConfigurationBoard from './RuleSetConfigurationBoard.vue'
 import GameBoard from './GameBoard.vue'
@@ -89,8 +89,8 @@ function LoadFromStorage() {
 const registered_players = ref([])
 const player_names = ref([undefined, undefined, undefined, undefined])
 const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
-const ruleset_to_load = ref('M_LEAGUE')
-const ruleset = ref({ ...MLeagueRuleset })
+const ruleset_to_load = ref('THE_3Q1_LEAGUE')
+const ruleset = ref({ ...The3Q1LeagueRuleset })
 const game = ref(new Game())
 const hand_results_form = ref({})
 const app_mode = ref(AppMode.GAME)
