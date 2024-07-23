@@ -9,6 +9,7 @@ import GameBoard from './GameBoard.vue'
 import HandResultsInputBoard from './HandResultsInputBoard.vue'
 import { HandOutcomeEnum } from './hand'
 import { PointsLadder } from './game_constants'
+import { TickTimer } from './tick_timer'
 
 function preventRefresh(event) {
   event.preventDefault()
@@ -32,6 +33,7 @@ function SaveToStorage() {
     player_names: player_names.value,
     ruleset: ruleset.value,
     ruleset_to_load: ruleset_to_load.value,
+    tick_timer: tick_timer.value,
     game: game.value,
     timestamp: new Date()
   }
@@ -78,6 +80,10 @@ function LoadFromStorage() {
       ruleset.value = data.ruleset
       console.log('Loaded ruleset=', ruleset.value)
     }
+    if ('tick_timer' in data) {
+      tick_timer.value = TickTimer.ParseFromObject(data.tick_timer)
+      console.log('Loaded tick_timer=', tick_timer.value)
+    }
     if ('game' in data) {
       game.value = Game.ParseFromObject(data.game)
       console.log('Loaded game=', game.value)
@@ -92,6 +98,7 @@ const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NO
 const ruleset_to_load = ref('THE_3Q1_LEAGUE')
 const ruleset = ref({ ...The3Q1LeagueRuleset })
 const game = ref(new Game())
+const tick_timer = ref(undefined)
 const hand_results_form = ref({})
 const app_mode = ref(AppMode.GAME)
 
@@ -311,6 +318,12 @@ function HandleResetGameLog(index, row) {
 function HandleLoadRuleset() {
   console.log('loading ruleset: ', ruleset_to_load.value)
   AssignRuleset(ruleset.value, ruleset_to_load.value)
+  // set up timer
+  if (ruleset.value.total_minutes != undefined) {
+    tick_timer.value = new TickTimer(ruleset.value.total_minutes)
+  } else {
+    tick_timer.value = undefined
+  }
   SaveToStorage()
 }
 </script>
@@ -346,7 +359,9 @@ function HandleLoadRuleset() {
           <GameBoard
             :game="game"
             :language="ruleset.language"
+            :tick_timer="tick_timer"
             v-model="hand_results_form.riichi_players"
+            @saveState="SaveToStorage"
           />
         </div>
         <el-divider> {{ RulesetName[ruleset.id][ruleset.language] }} {{ RulesetText }} </el-divider>

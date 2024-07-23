@@ -3,12 +3,16 @@ import { Game } from './game'
 import { computed } from 'vue'
 import { PlayerIdsInOrder } from './players'
 import { Lang } from './app_constants'
+import { TickTimer } from './tick_timer'
 
 const props = defineProps({
   language: String,
-  game: Game
+  game: Game,
+  tick_timer: TickTimer
 })
 const riichi_players = defineModel()
+
+const emit = defineEmits(['saveState'])
 
 const GameIsOnGoing = computed(() => {
   return props.game.IsOnGoing()
@@ -38,7 +42,13 @@ function GetHandInfoBoardClass() {
 
 <template>
   <div :class="GetHandInfoBoardClass()">
-    <HandInfoBoard :language="language" :hand="game.current_hand" :game_finished="GameIsFinished" />
+    <HandInfoBoard
+      :language="language"
+      :hand="game.current_hand"
+      :game_finished="GameIsFinished"
+      :tick_timer="tick_timer"
+      @saveState="$emit('saveState')"
+    />
   </div>
 
   <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
