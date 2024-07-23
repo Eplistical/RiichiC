@@ -2,9 +2,11 @@
 import { Game } from './game'
 import { computed } from 'vue'
 import { Lang } from './app_constants'
+import { UploadableRulesets } from './rulesets'
 
 const props = defineProps({
   language: String,
+  ruleset_id: String,
   game: Game
 })
 
@@ -64,9 +66,12 @@ const emit = defineEmits(['startGame', 'finishGame', 'exportResults', 'newGame',
         }}</el-button>
       </el-col>
       <el-col :span="6">
-        <el-button type="primary" @click="$emit('toLeaderBoard', $event)">{{
-          ToLeaderBoardText
-        }}</el-button>
+        <el-button
+          v-if="UploadableRulesets.has(ruleset_id)"
+          type="primary"
+          @click="$emit('toLeaderBoard', $event)"
+          >{{ ToLeaderBoardText }}</el-button
+        >
       </el-col>
     </el-row>
   </div>

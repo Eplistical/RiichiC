@@ -374,6 +374,7 @@ function HandleLoadRuleset() {
       <div class="game_control_board">
         <GameControlBoard
           :language="ruleset.language"
+          :ruleset_id="ruleset.id"
           :game="game"
           @startGame="StartGame"
           @finishGame="FinishGame"
