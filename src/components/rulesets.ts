@@ -15,8 +15,8 @@ export enum LeftOverRiichiSticks {
 
 export const RulesetName: Record<string, Record<string, string>> = Object.freeze({
   THE_3Q1_LEAGUE: {
-    [Lang.CN]: 'M-League',
-    [Lang.EN]: 'M-League'
+    [Lang.CN]: '3q1-League',
+    [Lang.EN]: '3q1-League'
   },
   PHI_LEAGUE: {
     [Lang.CN]: 'PhiLeague',
