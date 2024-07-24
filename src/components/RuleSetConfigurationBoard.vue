@@ -164,7 +164,7 @@ const TotalMinutesSuffixText = computed(() => {
   </el-row>
 
   <el-divider />
-
+  <!--
   <ConfigurationToggleEntry
     v-model="ruleset.language"
     :title="LanguageTitleText"
@@ -173,6 +173,7 @@ const TotalMinutesSuffixText = computed(() => {
     :active_value="Lang.CN"
     :inactive_value="Lang.EN"
   />
+  -->
   <ConfigurationToggleEntry
     v-model="ruleset.last_round_wind"
     :title="LastRoundWindTitleText"

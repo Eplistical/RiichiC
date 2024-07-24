@@ -388,9 +388,9 @@ function HandleLoadRuleset() {
       <!-- Game control buttons -->
       <div class="game_control_board">
         <GameControlBoard
-          :language="ruleset.language"
           :ruleset_id="ruleset.id"
           :game="game"
+          v-model="ruleset.language"
           @startGame="StartGame"
           @finishGame="FinishGame"
           @newGame="SetUpNewGame"

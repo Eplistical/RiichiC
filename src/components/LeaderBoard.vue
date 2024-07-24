@@ -36,9 +36,9 @@ const DateRangeTitleText = computed(() => {
 
 const LeaderBoardTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `排行榜 (${RulesetName[props.ruleset_id][props.language]})`
+    return `${RulesetName[props.ruleset_id][props.language]}`
   } else if (props.language == Lang.EN) {
-    return `Leaderboard (${RulesetName[props.ruleset_id][props.language]})`
+    return `${RulesetName[props.ruleset_id][props.language]}`
   }
 })
 
