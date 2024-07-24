@@ -227,10 +227,12 @@ const TotalMinutesSuffixText = computed(() => {
     :inactive_value="LeftOverRiichiSticks.ABANDONED"
     :disabled="!IsCustomizable(ruleset.id)"
   />
+  <!--
   <RuleNumberEntry
     v-model="ruleset.total_minutes"
     :title="TotalMinutesTitleText"
     :step="TotalMinutesStep"
     :disabled="!IsCustomizable(ruleset.id)"
   />
+  -->
 </template>

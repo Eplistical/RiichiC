@@ -47,9 +47,11 @@ const GameFinishedText = computed(() => {
   <div v-if="game_finished" class="game_finished_div">
     {{ GameFinishedText }}
   </div>
+  <!--
   <div v-else-if="tick_timer != undefined" class="timer_widget_div">
     <TimerWidget :language="language" :tick_timer="tick_timer" @saveState="$emit('saveState')" />
   </div>
+  -->
 </template>
 
 <style scoped>
