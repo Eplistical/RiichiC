@@ -12,25 +12,30 @@ const emit = defineEmits(['saveState'])
 
 const interval_handle = ref(0)
 
+onMounted(() => {
+  interval_handle.value = setInterval(UpdateTimer, 1000)
+})
+
 function UpdateTimer() {
-  console.log('UpdateTimer')
   props.tick_timer.Tick()
 }
 
 function ToggleTimer() {
   console.log('ToggleTimer')
   props.tick_timer.Toggle()
-  if (props.tick_timer.started) {
-    interval_handle.value = setInterval(UpdateTimer, 10000)
-  } else {
-    clearInterval(interval_handle.value)
-    interval_handle.value = 0
-  }
   emit('saveState')
 }
 
-const minutes_left = computed(() => {
-  return Math.ceil(props.tick_timer.TimeLeftMs() / 1000 / 60)
+const time_left = computed(() => {
+  const time_left_min = props.tick_timer.TimeLeftMin()
+  if (time_left_min > 5) {
+    // if time left > 5min, update every 5min
+    const total_min = props.tick_timer.TotalMin()
+    return `${Math.min(Math.ceil(time_left_min / 5) * 5, Math.ceil(total_min))} min`
+  } else {
+    // if time left < 5min, update every 1 min
+    return `${Math.ceil(time_left_min)} ${MinuteText}`
+  }
 })
 
 const TimeIsUpMsgText = computed(() => {
@@ -38,6 +43,14 @@ const TimeIsUpMsgText = computed(() => {
     return `时间到`
   } else if (props.language == Lang.EN) {
     return `TIME UP`
+  }
+})
+
+const MinuteText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `分钟`
+  } else if (props.language == Lang.EN) {
+    return `min`
   }
 })
 </script>
@@ -48,11 +61,15 @@ const TimeIsUpMsgText = computed(() => {
   </div>
   <div v-else-if="!tick_timer.started" v-on:click="ToggleTimer()" class="timer_paused_div">
     <el-icon><VideoPause /></el-icon>
-    {{ minutes_left }} min
+    {{ time_left }}
   </div>
-  <div v-else v-on:click="ToggleTimer()">
+  <div
+    v-else
+    v-on:click="ToggleTimer()"
+    :class="tick_timer.TimeLeftMin() > 5 ? `timer_running_div` : `timer_warning_div`"
+  >
     <el-icon><Timer /></el-icon>
-    {{ minutes_left }} min
+    {{ time_left }}
   </div>
 </template>
 
@@ -62,5 +79,8 @@ const TimeIsUpMsgText = computed(() => {
 }
 .timer_paused_div {
   color: red;
+}
+.timer_warning_div {
+  color: orange;
 }
 </style>

@@ -131,11 +131,19 @@ const MultipleRonTitleText = computed(() => {
     return `Multiple Ron`
   }
 })
-const LoadRulsetButtonText = computed(() => {
+const TotalMinutesStep = 15
+const TotalMinutesTitleText = computed(() => {
   if (props.language == Lang.CN) {
-    return `载入规则`
+    return `游戏限时(分钟, 0为不限)`
   } else if (props.language == Lang.EN) {
-    return `Load Ruleset`
+    return `Time Limit(Min, 0 Is Unlimited)`
+  }
+})
+const TotalMinutesSuffixText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `分钟`
+  } else if (props.language == Lang.EN) {
+    return `min`
   }
 })
 </script>
@@ -217,6 +225,12 @@ const LoadRulsetButtonText = computed(() => {
     :inactive_text="LeftOverRiichiSticksInactiveText"
     :active_value="LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS"
     :inactive_value="LeftOverRiichiSticks.ABANDONED"
+    :disabled="!IsCustomizable(ruleset.id)"
+  />
+  <RuleNumberEntry
+    v-model="ruleset.total_minutes"
+    :title="TotalMinutesTitleText"
+    :step="TotalMinutesStep"
     :disabled="!IsCustomizable(ruleset.id)"
   />
 </template>

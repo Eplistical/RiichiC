@@ -44,7 +44,7 @@ export type Ruleset = {
   all_last_dealer_tenpai_renchan: boolean
   left_over_riichi_sticks: LeftOverRiichiSticks
   chombo_penalty: number
-  total_minutes: number | undefined
+  total_minutes: number
 }
 
 export const The3Q1LeagueRuleset: Ruleset = Object.freeze({
@@ -63,7 +63,7 @@ export const The3Q1LeagueRuleset: Ruleset = Object.freeze({
   all_last_dealer_tenpai_renchan: true,
   left_over_riichi_sticks: LeftOverRiichiSticks.SPLIT_AMONG_TOP_PLAYERS,
   chombo_penalty: 20.0,
-  total_minutes: undefined
+  total_minutes: 0
 })
 
 export const PhiLeagueRuleset: Ruleset = Object.freeze({

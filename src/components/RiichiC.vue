@@ -203,6 +203,12 @@ function StartGame() {
     alert(msg)
     return
   }
+  // set up timer
+  if (ruleset.value.total_minutes > 0) {
+    tick_timer.value = new TickTimer(ruleset.value.total_minutes)
+  } else {
+    tick_timer.value = null
+  }
   game.value.Start()
   game.value.StartCurrentHand()
   SaveToStorage()
@@ -318,12 +324,6 @@ function HandleResetGameLog(index, row) {
 function HandleLoadRuleset() {
   console.log('loading ruleset: ', ruleset_to_load.value)
   AssignRuleset(ruleset.value, ruleset_to_load.value)
-  // set up timer
-  if (ruleset.value.total_minutes != undefined) {
-    tick_timer.value = new TickTimer(ruleset.value.total_minutes)
-  } else {
-    tick_timer.value = undefined
-  }
   SaveToStorage()
 }
 </script>

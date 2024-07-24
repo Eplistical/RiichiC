@@ -77,4 +77,12 @@ export class TickTimer {
   TimeLeftMs(): number {
     return this.total_ms - this.GetElapsedMs()
   }
+
+  TimeLeftMin(): number {
+    return (this.total_ms - this.GetElapsedMs()) / 1000 / 60
+  }
+
+  TotalMin(): number {
+    return this.total_ms / 1000 / 60
+  }
 }
