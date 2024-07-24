@@ -34,7 +34,7 @@ const time_left = computed(() => {
     return `${Math.min(Math.ceil(time_left_min / 5) * 5, Math.ceil(total_min))} min`
   } else {
     // if time left < 5min, update every 1 min
-    return `${Math.ceil(time_left_min)} ${MinuteText}`
+    return `${Math.ceil(time_left_min)} ${MinuteText.value}`
   }
 })
 
