@@ -28,12 +28,11 @@ function ToggleTimer() {
 
 const time_left = computed(() => {
   const time_left_min = props.tick_timer.TimeLeftMin()
-  if (time_left_min > 5) {
-    // if time left > 5min, update every 5min
+  // When time left > 20 min, update every 5min, otherwise, update every 1 min
+  if (time_left_min > 20) {
     const total_min = props.tick_timer.TotalMin()
     return `${Math.min(Math.ceil(time_left_min / 5) * 5, Math.ceil(total_min))} min`
   } else {
-    // if time left < 5min, update every 1 min
     return `${Math.ceil(time_left_min)} ${MinuteText.value}`
   }
 })

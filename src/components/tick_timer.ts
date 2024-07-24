@@ -64,22 +64,14 @@ export class TickTimer {
     }
   }
 
-  GetElapsedMs(): number {
-    this.Tick()
-    return this.elapsed_ms
-  }
-
   TimeIsUp(): boolean {
     this.Tick()
     return this.total_ms <= this.elapsed_ms
   }
 
-  TimeLeftMs(): number {
-    return this.total_ms - this.GetElapsedMs()
-  }
-
   TimeLeftMin(): number {
-    return (this.total_ms - this.GetElapsedMs()) / 1000 / 60
+    this.Tick()
+    return (this.total_ms - this.elapsed_ms) / 1000 / 60
   }
 
   TotalMin(): number {
