@@ -153,7 +153,7 @@ const AgariRateColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '和率'
   } else if (props.language == Lang.EN) {
-    return 'Win%'
+    return 'Agari%'
   }
 })
 const DealInRateColumnText = computed(() => {
@@ -167,7 +167,7 @@ const AvgAgariPtColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '平均和牌打点'
   } else if (props.language == Lang.EN) {
-    return 'Avg Win Income'
+    return 'Avg Agari Income'
   }
 })
 const AvgDealInPtColumnText = computed(() => {
