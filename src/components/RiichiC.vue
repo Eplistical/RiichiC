@@ -165,6 +165,38 @@ const RulesetText = computed(() => {
   }
 })
 
+const GameInfoText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return '对局信息'
+  } else if (ruleset.value.language == Lang.EN) {
+    return 'Game Info'
+  }
+})
+
+const HandReultsTitleText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return '对局结果'
+  } else if (ruleset.value.language == Lang.EN) {
+    return 'Hand Result'
+  }
+})
+
+const StatsTitleText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `统计`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Stats`
+  }
+})
+
+const LogTitleText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `日志`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Log`
+  }
+})
+
 function StartGame() {
   // check duplicated players
   let { duplicated, item } = HasDuplication(player_names.value)
@@ -364,27 +396,39 @@ function HandleLoadRuleset() {
             @saveState="SaveToStorage"
           />
         </div>
-        <el-divider> {{ RulesetName[ruleset.id][ruleset.language] }} {{ RulesetText }} </el-divider>
 
-        <div class="hand_results_input_board" v-if="game.IsOnGoing()">
-          <HandResultsInputBoard
-            v-model="hand_results_form"
-            :language="ruleset.language"
-            :game="game"
-            @submit="SubmitHandResultsForm"
-          />
-        </div>
-
-        <div class="game_log_board">
-          <GameLogBoard :language="ruleset.language" :game="game" @resetLog="HandleResetGameLog" />
-        </div>
-        <div class="game_stats_board" v-if="game.IsFinished()">
-          <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
-        </div>
+        <el-collapse class="game_info_board">
+          <el-collapse-item :title="`${GameInfoText}`">
+            <el-tabs>
+              <el-tab-pane :label="HandReultsTitleText" v-if="game.IsOnGoing()">
+                <div class="hand_results_input_board">
+                  <HandResultsInputBoard
+                    v-model="hand_results_form"
+                    :language="ruleset.language"
+                    :game="game"
+                    @submit="SubmitHandResultsForm"
+                  />
+                </div>
+              </el-tab-pane>
+              <el-tab-pane :label="StatsTitleText" v-if="game.IsFinished()">
+                <div class="game_stats_board">
+                  <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
+                </div>
+              </el-tab-pane>
+              <el-tab-pane :label="LogTitleText">
+                <div class="game_log_board">
+                  <GameLogBoard
+                    :language="ruleset.language"
+                    :game="game"
+                    @resetLog="HandleResetGameLog"
+                  />
+                </div>
+              </el-tab-pane>
+            </el-tabs>
+          </el-collapse-item>
+        </el-collapse>
       </div>
-
-      <el-divider />
-
+      <el-divider> {{ RulesetName[ruleset.id][ruleset.language] }} </el-divider>
       <!-- Game control buttons -->
       <div class="game_control_board">
         <GameControlBoard
@@ -424,12 +468,20 @@ function HandleLoadRuleset() {
 .gameboard {
   position: relative;
   border-style: solid;
-  width: 320px;
-  height: 480px;
-  margin-left: calc(50% - 160px);
-  margin-top: 30px;
-  margin-bottom: 30px;
+  width: 98vw;
+  height: 70vh;
+  margin-left: calc(50% - 49vw);
+  margin-top: 1vh;
+  margin-bottom: 1vh;
   background-color: white;
   color: black;
+}
+.game_info_board {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+.game_control_board {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 </style>

@@ -360,19 +360,18 @@ function GameHandCount() {
 </script>
 
 <template>
-  <el-collapse>
-    <el-collapse-item :title="`${StatsTitleText} (${HandCountLabelText}: ${GameHandCount()})`">
-      <el-table :data="GameStatsBoard" style="width: 100%" stripe table-layout="auto">
-        <el-table-column fixed prop="player_summary" :label="PlayerSummaryLabelText" />
-        <el-table-column prop="points" :label="PointsLabelText" />
-        <el-table-column prop="action_summary" :label="ActionSummaryLabelText" />
-        <el-table-column prop="avg_agari_pt_summary" :label="AvgAgariPtSummaryLabelText" />
-        <el-table-column prop="avg_deal_in_pt_summary" :label="AvgDealInPtSummaryLabelText" />
-      </el-table>
-      <el-divider />
-      <el-button v-if="props.game.IsFinished()" type="success" @click="UploadGameStats">
-        {{ UploadGameStatsButtonText }}</el-button
-      >
-    </el-collapse-item>
-  </el-collapse>
+  <el-row>
+    {{ `${HandCountLabelText}: ${GameHandCount()}` }}
+  </el-row>
+  <el-table :data="GameStatsBoard" style="width: 100%" stripe table-layout="auto">
+    <el-table-column fixed prop="player_summary" :label="PlayerSummaryLabelText" />
+    <el-table-column prop="points" :label="PointsLabelText" />
+    <el-table-column prop="action_summary" :label="ActionSummaryLabelText" />
+    <el-table-column prop="avg_agari_pt_summary" :label="AvgAgariPtSummaryLabelText" />
+    <el-table-column prop="avg_deal_in_pt_summary" :label="AvgDealInPtSummaryLabelText" />
+  </el-table>
+  <el-divider />
+  <el-button v-if="props.game.IsFinished()" type="success" @click="UploadGameStats">
+    {{ UploadGameStatsButtonText }}</el-button
+  >
 </template>

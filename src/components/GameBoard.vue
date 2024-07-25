@@ -66,25 +66,24 @@ function GetHandInfoBoardClass() {
 </template>
 
 <style scoped>
-.hand_info_board_cn {
-  border-style: solid;
-  text-align: center;
-  position: absolute;
-  height: 70px;
-  width: 70px;
-  top: calc(50% - 35px);
-  left: calc(50% - 35px);
-  font-size: 15px;
-}
+.hand_info_board_cn,
 .hand_info_board_en {
   border-style: solid;
   text-align: center;
   position: absolute;
-  height: 70px;
-  width: 120px;
-  top: calc(50% - 35px);
-  left: calc(50% - 60px);
-  font-size: 15px;
+  height: 20vw;
+  top: calc(50% - 10vw);
+  font-size: 4vw;
+}
+
+.hand_info_board_cn {
+  width: 20vw;
+  left: calc(50% - 10vw);
+}
+
+.hand_info_board_en {
+  width: 32vw;
+  left: calc(50% - 16vw);
 }
 
 .east_player_board,
@@ -93,28 +92,28 @@ function GetHandInfoBoardClass() {
 .north_player_board {
   position: absolute;
   text-align: center;
-  width: 240px;
-  height: 100px;
-  font-size: 20px;
+  width: 72vw;
+  height: 28vw;
+  font-size: 6vw;
 }
 .east_player_board {
   transform: rotate(0deg);
   bottom: 0;
-  left: calc(50% - 120px);
+  left: calc(50% - 36vw);
 }
 .south_player_board {
   transform: rotate(270deg);
-  right: -70px;
-  bottom: calc(50% - 50px);
+  right: -22vw;
+  bottom: calc(50% - 14vw);
 }
 .west_player_board {
   transform: rotate(180deg);
   top: 0;
-  left: calc(50% - 120px);
+  left: calc(50% - 36vw);
 }
 .north_player_board {
   transform: rotate(90deg);
-  left: -70px;
-  bottom: calc(50% - 50px);
+  left: -22vw;
+  bottom: calc(50% - 14vw);
 }
 </style>

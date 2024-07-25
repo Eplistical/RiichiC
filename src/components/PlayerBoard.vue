@@ -167,13 +167,13 @@ function ToggleDisplayMode() {
 }
 
 .filling_zeros {
-  font-size: 16px;
+  font-size: 5vw;
 }
 
 .points_delta {
-  font-size: 14px;
+  font-size: 4vw;
   position: absolute;
-  left: calc(50% + 35px);
+  left: calc(50% + 10vw);
   color: #2f261e;
 }
 </style>
