@@ -25,7 +25,7 @@ export const LastWindMap: Record<WindType, WindType> = Object.freeze({
   [Winds.NORTH]: Winds.WEST
 })
 
-export const WindsDisplayTextMap: Record<WindType, string> = Object.freeze({
+export const WindsDisplayTextMap: Record<WindType, Record<string, string>> = Object.freeze({
   [Winds.EAST]: {
     [Lang.CN]: '東',
     [Lang.EN]: '東/E'
@@ -41,5 +41,24 @@ export const WindsDisplayTextMap: Record<WindType, string> = Object.freeze({
   [Winds.NORTH]: {
     [Lang.CN]: '北',
     [Lang.EN]: '北/N'
+  }
+})
+
+export const WindsFullDisplayTextMap: Record<WindType, Record<string, string>> = Object.freeze({
+  [Winds.EAST]: {
+    [Lang.CN]: '東',
+    [Lang.EN]: 'East'
+  },
+  [Winds.SOUTH]: {
+    [Lang.CN]: '南',
+    [Lang.EN]: 'South'
+  },
+  [Winds.WEST]: {
+    [Lang.CN]: '西',
+    [Lang.EN]: 'West'
+  },
+  [Winds.NORTH]: {
+    [Lang.CN]: '北',
+    [Lang.EN]: 'North'
   }
 })

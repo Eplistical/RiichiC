@@ -392,7 +392,6 @@ function HandleLoadRuleset() {
             :game="game"
             :language="ruleset.language"
             :tick_timer="tick_timer"
-            v-model="hand_results_form.riichi_players"
             @saveState="SaveToStorage"
           />
         </div>
@@ -453,6 +452,7 @@ function HandleLoadRuleset() {
       </div>
     </div>
   </div>
+  {{ hand_results_form }}
 </template>
 
 <style scoped>

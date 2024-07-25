@@ -9,11 +9,11 @@ const props = defineProps({
   player_id: String,
   current_hand_index: Number,
   players: Players,
+  riichied: Boolean,
   riichi_disabled: Boolean,
   last_hand_points_delta: Object
 })
 
-const riichi_players = defineModel()
 const emit = defineEmits(['riichi'])
 const show_point_diff = ref(false)
 const display_mode_timeout_id = ref(undefined)
@@ -87,11 +87,13 @@ const IsDealer = computed(() => {
   return GetCurPlayer().current_wind == Winds.EAST
 })
 
-const RiichiText = computed(() => {
-  if (props.language == Lang.CN) {
-    return '立直'
+const RiichiStickImageSvg = computed(() => {
+  if (props.riichied) {
+    return 'src/assets/riichi_stick_white.svg'
+  } else if (props.language == Lang.CN) {
+    return 'src/assets/riichi_stick_empty_cn.svg'
   } else if (props.language == Lang.EN) {
-    return 'Riichi'
+    return 'src/assets/riichi_stick_empty_en.svg'
   }
 })
 
@@ -114,13 +116,20 @@ function ToggleDisplayMode() {
     }, 4000)
   }
 }
+
+function ToggleRiichi() {
+  console.log(`ToggleRiichi:`, GetCurPlayer())
+  emit('riichi', !props.riichied)
+}
 </script>
 
 <template>
   <div :class="IsDealer ? 'dealer_board' : 'non_dealer_board'">
-    <div class="player_info_div" v-on:click="ToggleDisplayMode()">
-      <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
+    <div class="riichi_stick_div">
+      <el-image :src="RiichiStickImageSvg" class="riichi_stick_img" v-on:click="ToggleRiichi()" />
+    </div>
 
+    <div class="player_info_div" v-on:click="ToggleDisplayMode()">
       <div v-if="!show_point_diff">
         <div v-if="show_last_hand_pt_delta && LastHandPointsDelta != 0" class="points_delta">
           {{ `[${LastHandPointsDelta > 0 ? '+' : ''}${LastHandPointsDelta}]` }}
@@ -143,17 +152,9 @@ function ToggleDisplayMode() {
           </el-col>
         </el-row>
       </div>
-    </div>
 
-    <el-checkbox-group fill="#f7bc45" v-model="riichi_players">
-      <el-checkbox-button
-        :label="player_id"
-        :disabled="riichi_disabled"
-        @change="$emit('riichi', $event)"
-      >
-        {{ RiichiText }}
-      </el-checkbox-button>
-    </el-checkbox-group>
+      <div>{{ PlayerName }}[{{ PlayerCurrentWind }}]</div>
+    </div>
   </div>
 </template>
 
@@ -175,5 +176,15 @@ function ToggleDisplayMode() {
   position: absolute;
   left: calc(50% + 10vw);
   color: #2f261e;
+}
+
+.riichi_stick_div {
+  height: 8vw;
+}
+
+.riichi_stick_img {
+  height: 8vw;
+  width: 50vw;
+  margin-bottom: 2vw;
 }
 </style>

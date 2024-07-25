@@ -10,7 +10,6 @@ const props = defineProps({
   game: Game,
   tick_timer: TickTimer
 })
-const riichi_players = defineModel()
 
 const emit = defineEmits(['saveState'])
 
@@ -53,11 +52,11 @@ function GetHandInfoBoardClass() {
 
   <div v-for="player_id in PlayerIdsInOrder" :class="`${player_id}_player_board`">
     <PlayerBoard
-      v-model="riichi_players"
       :language="language"
       :player_id="player_id"
       :current_hand_index="game.GetCurrentHandIndex()"
       :players="game.players"
+      :riichied="game.current_hand.PlayerRiichied(player_id)"
       :riichi_disabled="!GameIsOnGoing"
       :last_hand_points_delta="game.GetLastHandPointsDelta()"
       @riichi="HandlePlayerRiichi(player_id, $event)"
@@ -72,14 +71,14 @@ function GetHandInfoBoardClass() {
   border-width: 2px;
   text-align: center;
   position: absolute;
-  height: 20vw;
+  height: 24vw;
   top: calc(50% - 10vw);
-  font-size: 4vw;
+  font-size: 5vw;
 }
 
 .hand_info_board_cn {
-  width: 20vw;
-  left: calc(50% - 10vw);
+  width: 32vw;
+  left: calc(50% - 16vw);
 }
 
 .hand_info_board_en {

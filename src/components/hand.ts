@@ -379,6 +379,10 @@ export class Hand {
     }
   }
 
+  PlayerRiichied(player_id: PlayerId) {
+    return this.riichi.includes(player_id)
+  }
+
   PlayerUnRiichi(player_id: PlayerId, players: Players, ruleset: Ruleset) {
     if (this.riichi.includes(player_id)) {
       this.riichi_sticks -= 1

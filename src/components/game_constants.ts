@@ -153,6 +153,25 @@ export const ActionBriefDisplayMap = Object.freeze({
   }
 })
 
+export const NumberDisplayMap = Object.freeze({
+  [1]: {
+    [Lang.CN]: '一',
+    [Lang.EN]: '1'
+  },
+  [2]: {
+    [Lang.CN]: '二',
+    [Lang.EN]: '2'
+  },
+  [3]: {
+    [Lang.CN]: '三',
+    [Lang.EN]: '3'
+  },
+  [4]: {
+    [Lang.CN]: '四',
+    [Lang.EN]: '4'
+  }
+})
+
 export const PlaceNumberDisplayMap = Object.freeze({
   [1]: {
     [Lang.CN]: '一',
