@@ -119,7 +119,9 @@ function ToggleDisplayMode() {
 
 function ToggleRiichi() {
   console.log(`ToggleRiichi:`, GetCurPlayer())
-  emit('riichi', !props.riichied)
+  if (!props.riichi_disabled) {
+    emit('riichi', !props.riichied)
+  }
 }
 </script>
 

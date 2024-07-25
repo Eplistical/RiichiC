@@ -33,7 +33,7 @@ function SaveToStorage() {
     player_names: player_names.value,
     ruleset: ruleset.value,
     ruleset_to_load: ruleset_to_load.value,
-    tick_timer: tick_timer.value,
+    //tick_timer: tick_timer.value,
     game: game.value,
     timestamp: new Date()
   }
@@ -80,10 +80,12 @@ function LoadFromStorage() {
       ruleset.value = data.ruleset
       console.log('Loaded ruleset=', ruleset.value)
     }
+    /*
     if ('tick_timer' in data) {
       tick_timer.value = TickTimer.ParseFromObject(data.tick_timer)
       console.log('Loaded tick_timer=', tick_timer.value)
     }
+      */
     if ('game' in data) {
       game.value = Game.ParseFromObject(data.game)
       console.log('Loaded game=', game.value)
@@ -236,11 +238,13 @@ function StartGame() {
     return
   }
   // set up timer
+  /*
   if (ruleset.value.total_minutes > 0) {
     tick_timer.value = new TickTimer(ruleset.value.total_minutes)
   } else {
     tick_timer.value = null
   }
+    */
   game.value.Start()
   game.value.StartCurrentHand()
   SaveToStorage()
