@@ -42,11 +42,11 @@ const GameFinishedText = computed(() => {
 })
 
 const RiichiStickIconSvg = computed(() => {
-  return 'src/assets/riichi_stick_white.svg'
+  return '../assets/riichi_stick_white.svg'
 })
 
 const HonbaIconSvg = computed(() => {
-  return 'src/assets/honba_white.svg'
+  return '../assets/honba_white.svg'
 })
 </script>
 

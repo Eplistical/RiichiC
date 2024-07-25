@@ -89,11 +89,11 @@ const IsDealer = computed(() => {
 
 const RiichiStickImageSvg = computed(() => {
   if (props.riichied) {
-    return 'src/assets/riichi_stick_white.svg'
+    return '../assets/riichi_stick_white.svg'
   } else if (props.language == Lang.CN) {
-    return 'src/assets/riichi_stick_empty_cn.svg'
+    return '../assets/riichi_stick_empty_cn.svg'
   } else if (props.language == Lang.EN) {
-    return 'src/assets/riichi_stick_empty_en.svg'
+    return '../assets/riichi_stick_empty_en.svg'
   }
 })
 
