@@ -142,11 +142,18 @@ const AvgPointsColumnText = computed(() => {
     return 'Avg Score'
   }
 })
+const RiichiRateColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '立直率'
+  } else if (props.language == Lang.EN) {
+    return 'Riichi%'
+  }
+})
 const AgariRateColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '和率'
   } else if (props.language == Lang.EN) {
-    return 'Agari%'
+    return 'Win%'
   }
 })
 const DealInRateColumnText = computed(() => {
@@ -160,7 +167,7 @@ const AvgAgariPtColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '平均和牌打点'
   } else if (props.language == Lang.EN) {
-    return 'Avg Agari Income'
+    return 'Avg Win Income'
   }
 })
 const AvgDealInPtColumnText = computed(() => {
@@ -394,6 +401,7 @@ const ComputedLeaderBoard = computed(() => {
       max_points: stats.max_points,
       avg_points: avg_points,
 
+      riichi_rate: stats.hand_count == 0 ? 0 : stats.riichi_sum / stats.hand_count,
       agari_rate: stats.hand_count == 0 ? 0 : stats.agari_sum / stats.hand_count,
       avg_agari_points: stats.agari_sum == 0 ? 0 : stats.agari_pt_sum / stats.agari_sum,
       deal_in_rate: stats.hand_count == 0 ? 0 : stats.deal_in_sum / stats.hand_count,
@@ -471,6 +479,10 @@ function AvgRankFormatter(row, col) {
 
 function RateFormatter(rate) {
   return `${rate.toFixed(1)}%`
+}
+
+function RiichiRateFormatter(row, col) {
+  return `${(row.riichi_rate * 100).toFixed(2)}%`
 }
 
 function AgariRateFormatter(row, col) {
@@ -551,6 +563,12 @@ function ExpectedPtFormatter(row, col) {
         </template>
       </el-table-column>
       <el-table-column prop="chombo_count" :label="ChomboCountText" />
+      <el-table-column
+        prop="riichi_rate"
+        :label="RiichiRateColumnText"
+        :formatter="RiichiRateFormatter"
+        sortable
+      />
       <el-table-column
         prop="agari_rate"
         :label="AgariRateColumnText"
