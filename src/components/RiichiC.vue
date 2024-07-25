@@ -468,6 +468,7 @@ function HandleLoadRuleset() {
 .gameboard {
   position: relative;
   border-style: solid;
+  border-width: 2px;
   width: 98vw;
   height: 70vh;
   margin-left: calc(50% - 49vw);

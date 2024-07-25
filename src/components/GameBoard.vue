@@ -69,6 +69,7 @@ function GetHandInfoBoardClass() {
 .hand_info_board_cn,
 .hand_info_board_en {
   border-style: solid;
+  border-width: 2px;
   text-align: center;
   position: absolute;
   height: 20vw;
