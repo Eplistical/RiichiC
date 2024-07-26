@@ -23,15 +23,6 @@ const HandSignatureText = computed(() => {
   }
 })
 
-const RiichiSticksText = computed(() => {
-  if (props.language == Lang.CN) {
-    return `供托: ${props.hand.riichi_sticks}`
-  }
-  if (props.language == Lang.EN) {
-    return `Riichi Sticks: ${props.hand.riichi_sticks}`
-  }
-})
-
 const GameFinishedText = computed(() => {
   if (props.language == Lang.CN) {
     return `[已结束]`

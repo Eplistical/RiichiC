@@ -54,6 +54,18 @@ const GameLogTable = computed(() => {
 function GetPlayerName(player_id) {
   return props.game.players.GetPlayer(player_id).name
 }
+
+function HandResetable(log_index) {
+  // not a valid log index
+  if (log_index < 0 || log_index >= props.game.log.length) {
+    return false
+  }
+  // cannot reset the hand assigning left-over riichi
+  if (props.game.log[log_index].log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
+    return false
+  }
+  return true
+}
 </script>
 
 <template>
@@ -69,7 +81,7 @@ function GetPlayerName(player_id) {
     <el-table-column :label="OperationLabelText">
       <template #default="scope">
         <el-button
-          v-if="scope.$index > 0"
+          v-if="HandResetable(game.log.length - scope.$index - 1)"
           size="small"
           type="warning"
           @click="$emit('resetLog', scope.$index, scope.row)"

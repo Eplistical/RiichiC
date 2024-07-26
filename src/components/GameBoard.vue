@@ -56,7 +56,7 @@ function GetHandInfoBoardClass() {
       :player_id="player_id"
       :current_hand_index="game.GetCurrentHandIndex()"
       :players="game.players"
-      :riichied="game.current_hand.PlayerRiichied(player_id)"
+      :riichied="GameIsOnGoing && game.current_hand.PlayerRiichied(player_id)"
       :riichi_disabled="!GameIsOnGoing"
       :last_hand_points_delta="game.GetLastHandPointsDelta()"
       @riichi="HandlePlayerRiichi(player_id, $event)"
