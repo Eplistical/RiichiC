@@ -10,6 +10,12 @@ export const PointsLadder = Object.freeze({
   TRIPLE_YAKUMAN: 'TRIPLE_YAKUMAN'
 })
 
+export const PaoableHans = Object.freeze({
+  [PointsLadder.YAKUMAN]: true,
+  [PointsLadder.DOUBLE_YAKUMAN]: true,
+  [PointsLadder.TRIPLE_YAKUMAN]: true
+})
+
 export const PointsLadderDisplayMap = Object.freeze({
   [PointsLadder.MANGAN]: {
     [Lang.CN]: '满贯',

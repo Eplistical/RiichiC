@@ -8,7 +8,8 @@ import {
   TsumoPointsDealer,
   TsumoPointsNonDealer,
   Han,
-  Fu
+  Fu,
+  PaoableHans
 } from './game_constants.ts'
 import { Ruleset } from './rulesets.ts'
 import { NextWindMap, WindType } from './seat_constants.ts'
@@ -156,6 +157,30 @@ function InvalidHanFuPairMsgText(language) {
   }
 }
 
+function InvalidPaoLengthMsgText(language) {
+  if (language == Lang.CN) {
+    return '包牌人数错误'
+  } else if (language == Lang.EN) {
+    return 'Invalid Pao Size'
+  }
+}
+
+function HanNotPaoableMsgText(language) {
+  if (language == Lang.CN) {
+    return '番数不计包牌'
+  } else if (language == Lang.EN) {
+    return 'The Han is Not Pao-able'
+  }
+}
+
+function WinnerCannotPaoMsgText(language) {
+  if (language == Lang.CN) {
+    return '包牌家不能为赢家'
+  } else if (language == Lang.EN) {
+    return 'Winner Cannot Pao'
+  }
+}
+
 export type PointsDelta = Record<PlayerId, number>
 
 export type HandResults = {
@@ -167,6 +192,7 @@ export type HandResults = {
   fu?: (number | null)[]
   points_delta?: PointsDelta
   chombo?: PlayerId[]
+  pao?: PlayerId[]
 }
 
 interface HandInterface {
@@ -228,6 +254,9 @@ export class Hand {
     }
     if (this.results.chombo) {
       clone_instance.results.chombo = [...this.results.chombo]
+    }
+    if (this.results.pao) {
+      clone_instance.results.pao = [...this.results.pao]
     }
     return clone_instance
   }
@@ -440,14 +469,16 @@ export class Hand {
       Object.assign(formalized_results, {
         winner: results.winner,
         han: results.han,
-        fu: results.fu
+        fu: results.fu,
+        pao: results.pao ? results.pao : undefined
       })
     } else if (results.outcome == HandOutcomeEnum.RON) {
       Object.assign(formalized_results, {
         winner: results.winner,
         deal_in: results.deal_in,
         han: results.han,
-        fu: results.fu
+        fu: results.fu,
+        pao: results.pao ? results.pao : undefined
       })
     }
     this.MaybeApplyRoundUpMangan(formalized_results, ruleset)
@@ -519,6 +550,21 @@ export class Hand {
       ) {
         return [false, `${InvalidFuMsgText(ruleset.language)}: ${results.fu}`]
       }
+      if (results.pao != undefined) {
+        // if pao exists, it must has the same length as winner, and is null for non-paoable hans
+        if (results.pao.length == 0) {
+          return [false, `${InvalidPaoLengthMsgText(ruleset.language)}: ${results.pao.length}`]
+        }
+        if (results.pao[0] != null && !(results.han[0] in PaoableHans)) {
+          return [
+            false,
+            `${HanNotPaoableMsgText(ruleset.language)}: ${results.han[0]} ${results.pao[0]}`
+          ]
+        }
+        if (results.pao[0] != null && results.pao[0] == results.winner[0]) {
+          return [false, `${WinnerCannotPaoMsgText(ruleset.language)}: ${results.pao[0]}`]
+        }
+      }
       const key = this.GetPointMapKey(results.han[0], results.fu[0], ruleset)
       if (!TsumoPointsNonDealer.hasOwnProperty(key)) {
         return [
@@ -552,6 +598,23 @@ export class Hand {
       }
       if (!results.fu || results.fu.length != winner_count) {
         return [false, `${InvalidFuSizeMsgText(ruleset.language)}: ${results.han}`]
+      }
+      if (results.pao != undefined) {
+        // if pao exists, it must has the same length as winner, and is null for non-paoable hans
+        if (results.pao.length != winner_count) {
+          return [false, `${InvalidPaoLengthMsgText(ruleset.language)}: ${results.pao}`]
+        }
+        for (let i = 0; i < winner_count; ++i) {
+          if (results.pao[i] != null && !(results.han[i] in PaoableHans)) {
+            return [
+              false,
+              `${HanNotPaoableMsgText(ruleset.language)}: ${results.han[i]} ${results.pao[i]}`
+            ]
+          }
+          if (results.pao[i] != null && results.pao[i] == results.winner[i]) {
+            return [false, `${WinnerCannotPaoMsgText(ruleset.language)}: ${results.pao[i]}`]
+          }
+        }
       }
 
       for (let i = 0; i < winner_count; ++i) {
@@ -674,6 +737,7 @@ export class Hand {
     const winner_id: PlayerId = hand_results.winner[0]
     const han: Han = hand_results.han[0]
     const fu: Fu = hand_results.fu[0]
+    const pao: PlayerId | undefined = hand_results.pao ? hand_results.pao[0] : undefined
     const num_players: number = players.NumPlayers()
     const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
 
@@ -684,6 +748,11 @@ export class Hand {
       for (const [player_id, player] of Object.entries(players.GetPlayerMap())) {
         if (player_id == winner_id) {
           points_delta[player_id] = 3 * delta + this.riichi_sticks * ruleset.riichi_cost
+        } else if (pao != undefined && pao != null) {
+          // if pao exists, the pao player pays all
+          if (player_id == pao) {
+            points_delta[player_id] = -3 * delta
+          }
         } else {
           points_delta[player_id] = -delta
         }
@@ -702,10 +771,17 @@ export class Hand {
       for (const [player_id, player] of Object.entries(players.GetPlayerMap())) {
         if (player_id == winner_id) {
           points_delta[player_id] = winner_delta
-        } else if (player.IsDealer()) {
-          points_delta[player_id] = dealer_delta
+        } else if (pao != undefined && pao != null) {
+          // if pao exists, the pao player pays all
+          if (player_id == pao) {
+            points_delta[player_id] = dealer_delta + 2 * non_dealer_delta
+          }
         } else {
-          points_delta[player_id] = non_dealer_delta
+          if (player.IsDealer()) {
+            points_delta[player_id] = dealer_delta
+          } else {
+            points_delta[player_id] = non_dealer_delta
+          }
         }
       }
     }
@@ -728,21 +804,48 @@ export class Hand {
       const han: Han = hand_results.han[i]
       const fu: Fu = hand_results.fu[i]
       const key: PointsMapKey = this.GetPointMapKey(han, fu, ruleset)
+      const pao: PlayerId | undefined = hand_results.pao ? hand_results.pao[i] : undefined
       const points_map = players.GetPlayer(winner_id).IsDealer()
         ? RonPointsDealer
         : RonPointsNonDealer
       const delta = points_map[key]
-      points_delta[winner_id] = delta
-      points_delta[deal_in_id] -= delta
+
+      if (!(winner_id in points_delta)) {
+        points_delta[winner_id] = 0
+      }
+
+      points_delta[winner_id] += delta
+      if (pao != undefined && pao != null && pao != deal_in_id) {
+        // when pao exists and pao != deal in, the pao player pays half base points, and all honba
+        if (!(pao in points_delta)) {
+          points_delta[pao] = 0
+        }
+        points_delta[pao] -= delta / 2
+        points_delta[deal_in_id] -= delta / 2
+      } else {
+        points_delta[deal_in_id] -= delta
+      }
     }
     // riichi sticks and honba goes to the closest winner from the deal_in player
+    // (or the corresponding pao player if pao exists)
     let closest_winner_id = deal_in_id
     while (!hand_results.winner.includes(closest_winner_id)) {
       closest_winner_id = NextWindMap[closest_winner_id]
     }
     points_delta[closest_winner_id] +=
       this.riichi_sticks * ruleset.riichi_cost + this.honba * ruleset.honba_points
-    points_delta[deal_in_id] -= this.honba * ruleset.honba_points
+    if (hand_results.pao != undefined) {
+      // the corresponding pao player (if exists) for the closest winner pays honba
+      const closest_winner_index = hand_results.winner.indexOf(closest_winner_id)
+      const pao = hand_results.pao[closest_winner_index]
+      if (pao != null) {
+        points_delta[pao] -= this.honba * ruleset.honba_points
+      } else {
+        points_delta[deal_in_id] -= this.honba * ruleset.honba_points
+      }
+    } else {
+      points_delta[deal_in_id] -= this.honba * ruleset.honba_points
+    }
     return points_delta
   }
 
