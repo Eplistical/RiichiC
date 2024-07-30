@@ -89,8 +89,6 @@ function HandleWinnerSelectionChange(player_id, selected) {
       />
     </el-form-item>
 
-    {{ results_form }}
-
     <div v-if="game.ruleset.head_bump">
       <!-- Head bump ON case -->
       <el-form-item
