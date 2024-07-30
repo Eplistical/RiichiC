@@ -428,7 +428,14 @@ export class Game {
               hand.results.outcome == HandOutcomeEnum.RON) &&
             hand.results.winner.includes(player_id)
           ) {
-            row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI][language]}]`
+            const winner_index = hand.results.winner.indexOf(player_id)
+            const pao = hand.results.pao ? hand.results.pao[winner_index] : null
+            row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI][language]}`
+            if (pao) {
+              row[player_id] +=
+                `, ${ActionBriefDisplayMap[Actions.PAO][language]}: ${this.GetPlayerName(pao)}`
+            }
+            row[player_id] += `]`
           }
           if (hand.results.outcome == HandOutcomeEnum.RON && hand.results.deal_in == player_id) {
             row[player_id] += `[${ActionBriefDisplayMap[Actions.DEAL_IN][language]}]`

@@ -26,20 +26,6 @@ const AgariLabelText = computed(() => {
 const DealInLabelText = computed(() => {
   return ActionDisplayMap[Actions.DEAL_IN][props.language]
 })
-const HanLabelText = computed(() => {
-  if (props.language == Lang.CN) {
-    return `番`
-  } else if (props.language == Lang.EN) {
-    return `Han`
-  }
-})
-const FuLabelText = computed(() => {
-  if (props.language == Lang.CN) {
-    return `符`
-  } else if (props.language == Lang.EN) {
-    return `Fu`
-  }
-})
 const SubmitButtonText = computed(() => {
   if (props.language == Lang.CN) {
     return `提交`
@@ -56,7 +42,7 @@ const ChomboSelectionColor = ref('#e86161')
 const emit = defineEmits(['submit'])
 
 function HandleWinnerSelectionChange(player_id, selected) {
-  console.log('>>>', player_id, selected)
+  console.log('HandleWinnerSelectionChange: ', player_id, selected)
   // when winner selection changes, make sure the same player is un-selected from deal-in
   if (results_form.value.deal_in && results_form.value.deal_in == player_id) {
     delete results_form.value.deal_in
@@ -70,19 +56,7 @@ function HandleWinnerSelectionChange(player_id, selected) {
   if (!selected) {
     delete results_form.value[`${player_id}_han`]
     delete results_form.value[`${player_id}_fu`]
-  }
-}
-
-function HandleHanFuSelectionChange(winner, han, fu) {
-  if (han in PointsLadder) {
-    fu = null
-  }
-  if (results_form.value.hanfu === undefined) {
-    results_form.value.hanfu = {}
-  }
-  results_form.value.hanfu[winner] = {
-    han: han,
-    fu: fu
+    delete results_form.value[`${player_id}_pao`]
   }
 }
 </script>
@@ -114,6 +88,8 @@ function HandleHanFuSelectionChange(winner, han, fu) {
         :multi_selection="true"
       />
     </el-form-item>
+
+    {{ results_form }}
 
     <div v-if="game.ruleset.head_bump">
       <!-- Head bump ON case -->
@@ -150,13 +126,14 @@ function HandleHanFuSelectionChange(winner, han, fu) {
         "
         :language="language"
         :winner="results_form.winner"
+        :players="game.players"
         v-model:selected_han="results_form[`${results_form.winner}_han`]"
         v-model:selected_fu="results_form[`${results_form.winner}_fu`]"
+        v-model:pao="results_form[`${results_form.winner}_pao`]"
       />
     </div>
     <div v-else>
       <!-- Head bump OFF case -->
-      <!--@change="HandleHanFuSelectionChange"-->
       <el-form-item
         :label="AgariLabelText"
         v-if="
@@ -194,8 +171,10 @@ function HandleHanFuSelectionChange(winner, han, fu) {
           <HanFuSelection
             :language="language"
             :winner="winner"
+            :players="game.players"
             v-model:selected_han="results_form[`${winner}_han`]"
             v-model:selected_fu="results_form[`${winner}_fu`]"
+            v-model:pao="results_form[`${winner}_pao`]"
           />
         </div>
       </div>

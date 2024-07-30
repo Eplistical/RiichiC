@@ -300,6 +300,7 @@ function ResolveHandResultsFromHandResultsForm(hand_results_form) {
 
     hand_results.han = []
     hand_results.fu = []
+    hand_results.pao = []
     for (let winner of hand_results.winner) {
       hand_results.han.push(hand_results[`${winner}_han`])
       if (hand_results[`${winner}_han`] in PointsLadder || !hand_results[`${winner}_fu`]) {
@@ -307,8 +308,14 @@ function ResolveHandResultsFromHandResultsForm(hand_results_form) {
       } else {
         hand_results.fu.push(hand_results[`${winner}_fu`])
       }
+      if (hand_results[`${winner}_pao`]) {
+        hand_results.pao.push(hand_results[`${winner}_pao`])
+      } else {
+        hand_results.pao.push(null)
+      }
       delete hand_results[`${winner}_han`]
       delete hand_results[`${winner}_fu`]
+      delete hand_results[`${winner}_pao`]
     }
   }
 
