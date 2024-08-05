@@ -95,7 +95,8 @@ function LoadFromStorage() {
 }
 
 const registered_players = ref([])
-const player_names = ref([undefined, undefined, undefined, undefined])
+//const player_names = ref([undefined, undefined, undefined, undefined])
+const player_names = ref(['__FP1', '__FP2', '__FP3', '__FP4'])
 const player_starting_winds = ref([Winds.EAST, Winds.SOUTH, Winds.WEST, Winds.NORTH])
 const ruleset_to_load = ref('THE_3Q1_LEAGUE')
 const ruleset = ref({ ...The3Q1LeagueRuleset })
@@ -429,7 +430,10 @@ function HandleLoadRuleset() {
                 <div class="game_log_board">
                   <GameLogBoard
                     :language="ruleset.language"
-                    :game="game"
+                    :game_logs="game.log"
+                    :players="game.players"
+                    :ruleset="game.ruleset"
+                    :backtrace_enabled="true"
                     @resetLog="HandleResetGameLog"
                   />
                 </div>

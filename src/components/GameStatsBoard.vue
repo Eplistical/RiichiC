@@ -201,7 +201,6 @@ function UploadGameStats() {
   if (token == undefined || token == null) {
     return
   }
-  console.log('game date = ', props.game.game_date, typeof props.game.game_date)
   const date_info = props.game.game_date
     .toLocaleString('en-US', {
       timeZone: 'America/New_York',
@@ -219,7 +218,8 @@ function UploadGameStats() {
     ruleset_id: props.game.ruleset.id,
     game: {
       game_date: game_date,
-      game_hand_count: GameHandCount()
+      game_hand_count: GameHandCount(),
+      game_logs: props.game.log
     }
   }
   for (const player_id of PlayerIdsInOrder) {
@@ -236,6 +236,7 @@ function UploadGameStats() {
       deal_in_pt_sum: stats.deal_in_pt_sum
     }
   }
+  console.log('UploadGameStats: ', data_to_post)
   const { data, onFetchResponse, onFetchError } = useFetch(RECORD_GAME_API)
     .post(data_to_post)
     .text()

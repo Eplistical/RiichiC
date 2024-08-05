@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useFetch } from '@vueuse/core'
+import { Game } from './game'
 import { WindsDisplayTextMap, WindsInOrder } from './seat_constants'
 import { PlaceNumberDisplayMap } from './game_constants'
 import { Lang, GET_STATS_API, LIST_GAMES_API } from './app_constants'
@@ -17,6 +18,12 @@ const init_date = ref(false)
 const raw_stats = ref({})
 const raw_games = ref({})
 const date_range = ref([])
+
+const detailed_game_log_visible = ref(false)
+const detailed_game_log_index = ref(undefined)
+const detailed_game_logs = computed(() => {
+  return parseGameLogs(raw_games.value.value.games[detailed_game_log_index.value - 1].game_logs)
+})
 
 const RefreshDataText = computed(() => {
   if (props.language == Lang.CN) {
@@ -253,6 +260,30 @@ const NoDatabaseForRulesetIdText = computed(() => {
     return 'The Selected Ruleset Does Not Have Database'
   }
 })
+
+const GameLogNotAvailableText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '未找到详细游戏日志'
+  } else if (props.language == Lang.EN) {
+    return 'Detailed Game Log Not Available'
+  }
+})
+
+const DetailedGameLogText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '详细游戏日志'
+  } else if (props.language == Lang.EN) {
+    return 'Detailed Game Log'
+  }
+})
+
+const ruleset = computed(() => {
+  return FixedRulesetMap[props.ruleset_id]
+})
+
+function parseGameLogs(game_logs) {
+  return Game.ParseGameLogsFromObject(ruleset.value, game_logs)
+}
 
 function GetPlayerSummary(game, starting_wind) {
   return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind][props.language]}][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
@@ -496,6 +527,12 @@ function DealInRateFormatter(row, col) {
 function ExpectedPtFormatter(row, col) {
   return `${Math.round(row.expected_points)}`
 }
+
+function DisplayDetailedGameLog(i) {
+  console.log('DisplayDetailedGameLog called', i)
+  detailed_game_log_visible.value = true
+  detailed_game_log_index.value = i
+}
 </script>
 
 <template>
@@ -646,6 +683,32 @@ function ExpectedPtFormatter(row, col) {
               <el-table-column prop="avg_agari_points" :label="AvgAgariPtColumnText" />
               <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" />
             </el-table>
+            <div v-if="raw_games.value.games[i - 1].game_logs != undefined">
+              <el-button type="primary" @click="DisplayDetailedGameLog(i)">
+                {{ DetailedGameLogText }}
+              </el-button>
+            </div>
+            <div v-else>
+              <el-text type="danger">
+                {{ GameLogNotAvailableText }}
+              </el-text>
+            </div>
+            <el-divider />
+
+            <el-dialog
+              v-if="detailed_game_log_index != undefined && detailed_game_logs.length > 0"
+              v-model="detailed_game_log_visible"
+              :title="GenerateGameLabel(raw_games.value.games[detailed_game_log_index - 1])"
+              width="100%"
+            >
+              <GameLogBoard
+                :language="language"
+                :game_logs="detailed_game_logs"
+                :players="detailed_game_logs[0].players"
+                :ruleset="ruleset"
+                :backtrace_enabled="false"
+              />
+            </el-dialog>
           </div>
         </div>
       </el-collapse-item>

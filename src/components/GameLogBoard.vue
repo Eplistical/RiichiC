@@ -4,11 +4,7 @@ import { computed } from 'vue'
 import { PlayerIdsInOrder } from './players'
 import { Lang } from './app_constants'
 
-const props = defineProps({
-  language: String,
-  game: Game
-})
-
+const props = defineProps(['language', 'game_logs', 'players', 'ruleset', 'backtrace_enabled'])
 const emit = defineEmits(['resetLog'])
 
 const HandSignatureLabelText = computed(() => {
@@ -48,20 +44,20 @@ const ResetButtonText = computed(() => {
 })
 
 const GameLogTable = computed(() => {
-  return props.game.GenerateGameLogTable(props.language)
+  return Game.GenerateGameLogTableStatic(props.game_logs, props.ruleset, props.language)
 })
 
 function GetPlayerName(player_id) {
-  return props.game.players.GetPlayer(player_id).name
+  return props.players.GetPlayer(player_id).name
 }
 
 function HandResetable(log_index) {
   // not a valid log index
-  if (log_index < 0 || log_index >= props.game.log.length) {
+  if (log_index < 0 || log_index >= props.game_logs.length) {
     return false
   }
   // cannot reset the hand assigning left-over riichi
-  if (props.game.log[log_index].log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
+  if (props.game_logs[log_index].log_type == GameLogType.ASSIGN_LEFT_OVER_RIICHI) {
     return false
   }
   return true
@@ -78,10 +74,10 @@ function HandResetable(log_index) {
       :prop="player_id"
       :label="GetPlayerName(player_id)"
     />
-    <el-table-column :label="OperationLabelText">
+    <el-table-column :label="OperationLabelText" v-if="backtrace_enabled">
       <template #default="scope">
         <el-button
-          v-if="HandResetable(game.log.length - scope.$index - 1)"
+          v-if="HandResetable(game_logs.length - scope.$index - 1)"
           size="small"
           type="warning"
           @click="$emit('resetLog', scope.$index, scope.row)"

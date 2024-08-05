@@ -112,6 +112,24 @@ export class Game {
     this.log = []
   }
 
+  // Parses an object to create a Game logs.
+  static ParseGameLogsFromObject(ruleset: Ruleset, obj: any): GameLog[] {
+    if (!obj) {
+      console.log(`Cannot parse game logs from object: ${obj}`)
+      return undefined
+    }
+    let parsed_logs = []
+    for (let log of obj) {
+      parsed_logs.push({
+        state: log.state,
+        hand: Hand.ParseFromObject(log.hand),
+        players: Players.ParseFromObject(ruleset, log.players),
+        log_type: log.log_type
+      })
+    }
+    return parsed_logs
+  }
+
   // Parses an object to create a Game instance. This method does not verify the object, is the caller's responsibility to verify it before calling this method.
   static ParseFromObject(obj: any): Game {
     let parsed_instance = new Game()
@@ -356,14 +374,18 @@ export class Game {
     return this.log.length
   }
 
-  // Generate an object for game log for display/export purpose
-  GenerateGameLogTable(language: string = Lang.CN) {
+  // Generate an object for game log for given game logs and ruleset
+  static GenerateGameLogTableStatic(
+    game_logs: GameLog[],
+    ruleset: Ruleset,
+    language: string = Lang.CN
+  ) {
     let table = []
-    for (let i = 0; i < this.log.length; ++i) {
-      const log = this.log[i]
+    for (let i = 0; i < game_logs.length; ++i) {
+      const log = game_logs[i]
       const hand = log.hand
       const players = log.players
-      const last_log = i > 0 ? this.log[i - 1] : null
+      const last_log = i > 0 ? game_logs[i - 1] : null
       const last_hand = last_log ? last_log.hand : null
       const last_hand_players = last_log ? last_log.players : null
       let row = {
@@ -405,7 +427,7 @@ export class Game {
         const end_hand_pt = players.GetPlayer(player_id).points
         const start_hand_pt = last_hand_players
           ? last_hand_players.GetPlayer(player_id).points
-          : this.ruleset.starting_points
+          : ruleset.starting_points
         const pt_delta = end_hand_pt - start_hand_pt
         row[player_id] = `${end_hand_pt}`
         if (pt_delta > 0) {
@@ -433,7 +455,7 @@ export class Game {
             row[player_id] += `[${ActionBriefDisplayMap[Actions.AGARI][language]}`
             if (pao) {
               row[player_id] +=
-                `, ${ActionBriefDisplayMap[Actions.PAO][language]}: ${this.GetPlayerName(pao)}`
+                `, ${ActionBriefDisplayMap[Actions.PAO][language]}: ${players.GetPlayer(pao).name}`
             }
             row[player_id] += `]`
           }
@@ -449,6 +471,11 @@ export class Game {
       table.push(row)
     }
     return table.reverse()
+  }
+
+  // Generate an object for game log for display/export purpose
+  GenerateGameLogTable(language: string = Lang.CN) {
+    return Game.GenerateGameLogTableStatic(this.log, this.ruleset, language)
   }
 
   // Generate JSON fields for game log headers for export purpose
