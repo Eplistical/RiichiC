@@ -13,7 +13,7 @@ const props = defineProps({
   tick_timer: TickTimer
 })
 
-const emit = defineEmits(['saveState'])
+const emit = defineEmits(['saveState', 'displayGameInfo'])
 
 const HandSignatureText = computed(() => {
   if (props.language == Lang.CN) {
@@ -29,6 +29,14 @@ const GameFinishedText = computed(() => {
   }
   if (props.language == Lang.EN) {
     return `[Ended]`
+  }
+})
+
+const GameInfoText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '对局信息'
+  } else if (props.language == Lang.EN) {
+    return 'Game Info'
   }
 })
 
@@ -53,6 +61,11 @@ const HonbaIconSvg = computed(() => {
     <el-image :src="HonbaIconSvg" class="honba_icon" />
     {{ hand.honba }}
   </div>
+  <div class="game_info_button_div">
+    <el-button plain color="#3b1a22" @click="$emit('displayGameInfo')">
+      {{ GameInfoText }}
+    </el-button>
+  </div>
   <div v-if="game_finished" class="game_finished_div">
     {{ GameFinishedText }}
   </div>
@@ -65,7 +78,7 @@ const HonbaIconSvg = computed(() => {
 
 <style scoped>
 .game_finished_div {
-  font-size: 4vw;
+  font-size: 5vw;
   color: red;
 }
 

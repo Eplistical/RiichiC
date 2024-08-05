@@ -174,19 +174,19 @@ function ToggleRiichi() {
 }
 
 .points_delta {
-  font-size: 4vw;
+  font-size: 5vw;
   position: absolute;
-  left: calc(50% + 10vw);
+  left: calc(50% + 12vw);
   color: #2f261e;
 }
 
 .riichi_stick_div {
-  height: 8vw;
+  height: 10vw;
 }
 
 .riichi_stick_img {
-  height: 8vw;
-  width: 50vw;
+  height: 10vw;
+  width: 60vw;
   margin-bottom: 2vw;
 }
 </style>

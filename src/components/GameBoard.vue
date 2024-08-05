@@ -11,7 +11,7 @@ const props = defineProps({
   tick_timer: TickTimer
 })
 
-const emit = defineEmits(['saveState'])
+const emit = defineEmits(['saveState', 'displayGameInfo'])
 
 const GameIsOnGoing = computed(() => {
   return props.game.IsOnGoing()
@@ -47,6 +47,7 @@ function GetHandInfoBoardClass() {
       :game_finished="GameIsFinished"
       :tick_timer="tick_timer"
       @saveState="$emit('saveState')"
+      @displayGameInfo="$emit('displayGameInfo', $event)"
     />
   </div>
 
@@ -71,9 +72,9 @@ function GetHandInfoBoardClass() {
   border-width: 2px;
   text-align: center;
   position: absolute;
-  height: 24vw;
-  top: calc(50% - 10vw);
-  font-size: 5vw;
+  height: 40vw;
+  top: calc(50% - 20vw);
+  font-size: 6vw;
 }
 
 .hand_info_board_cn {
@@ -92,28 +93,28 @@ function GetHandInfoBoardClass() {
 .north_player_board {
   position: absolute;
   text-align: center;
-  width: 72vw;
-  height: 28vw;
-  font-size: 6vw;
+  width: 96vw;
+  height: 32vw;
+  font-size: 7vw;
 }
 .east_player_board {
   transform: rotate(0deg);
   bottom: 0;
-  left: calc(50% - 36vw);
+  left: calc(50% - 48vw);
 }
 .south_player_board {
   transform: rotate(270deg);
-  right: -22vw;
-  bottom: calc(50% - 14vw);
+  right: -32vw;
+  bottom: calc(50% - 16vw);
 }
 .west_player_board {
   transform: rotate(180deg);
   top: 0;
-  left: calc(50% - 36vw);
+  left: calc(50% - 48vw);
 }
 .north_player_board {
   transform: rotate(90deg);
-  left: -22vw;
-  bottom: calc(50% - 14vw);
+  left: -32vw;
+  bottom: calc(50% - 16vw);
 }
 </style>

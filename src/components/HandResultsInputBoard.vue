@@ -1,11 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { HandOutcomeEnum, HandOutcomeEnumDisplayTextMap } from './hand'
-import { Actions, ActionDisplayMap, PointsLadder } from './game_constants'
+import { Actions, ActionDisplayMap, PointsLadder, NumberDisplayMap } from './game_constants'
 import { Game } from './game'
 import { Lang } from './app_constants'
 import HanFuSelection from './HanFuSelection.vue'
 import { PlayerIdsInOrder } from './players'
+import { WindsFullDisplayTextMap } from './seat_constants'
 
 const props = defineProps({
   language: String,
@@ -14,6 +15,15 @@ const props = defineProps({
 
 const results_form = defineModel()
 
+const ResultLabelText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '结果'
+  } else if (props.language == Lang.EN) {
+    return 'Result'
+  }
+
+  return ActionDisplayMap[Actions.AGARI][props.language]
+})
 const TenpaiLabelText = computed(() => {
   return ActionDisplayMap[Actions.TENPAI][props.language]
 })
@@ -59,11 +69,42 @@ function HandleWinnerSelectionChange(player_id, selected) {
     delete results_form.value[`${player_id}_pao`]
   }
 }
+
+const HandSignatureText = computed(() => {
+  if (props.language == Lang.CN) {
+    return `${WindsFullDisplayTextMap[props.game.current_hand.round_wind][props.language]}${NumberDisplayMap[props.game.current_hand.hand][props.language]}局`
+  } else if (props.language == Lang.EN) {
+    return `${WindsFullDisplayTextMap[props.game.current_hand.round_wind][props.language]}${NumberDisplayMap[props.game.current_hand.hand][props.language]}`
+  }
+})
+
+const RiichiStickIconSvg = computed(() => {
+  return './riichi_stick_white.svg'
+})
+
+const HonbaIconSvg = computed(() => {
+  return './honba_white.svg'
+})
 </script>
 
 <template>
+  <el-row>
+    <el-col :span="6">
+      {{ HandSignatureText }}
+    </el-col>
+    <el-col :span="8">
+      <el-image :src="RiichiStickIconSvg" class="riichi_stick_icon" />
+      {{ game.current_hand.riichi_sticks }}
+    </el-col>
+    <el-col :span="8">
+      <el-image :src="HonbaIconSvg" class="honba_icon" />
+      {{ game.current_hand.honba }}
+    </el-col>
+  </el-row>
+  <el-divider />
+
   <el-form>
-    <el-form-item>
+    <el-form-item :label="ResultLabelText">
       <el-radio-group v-for="outcome in HandOutcomeEnum" v-model="results_form.outcome">
         <el-radio-button :label="outcome">
           {{ HandOutcomeEnumDisplayTextMap[outcome][language] }}
@@ -183,3 +224,13 @@ function HandleWinnerSelectionChange(player_id, selected) {
     </el-form-item>
   </el-form>
 </template>
+
+<style scoped>
+.honba_icon,
+.riichi_stick_icon {
+  height: 4vw;
+  width: 20vw;
+  margin-top: 1vw;
+  margin-right: 1vw;
+}
+</style>

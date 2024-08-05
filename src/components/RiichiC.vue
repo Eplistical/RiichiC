@@ -104,6 +104,7 @@ const game = ref(new Game())
 const tick_timer = ref(undefined)
 const hand_results_form = ref({})
 const app_mode = ref(AppMode.GAME)
+const display_game_info = ref(false)
 
 function HasDuplication(arr) {
   let seen = []
@@ -200,6 +201,14 @@ const LogTitleText = computed(() => {
   }
 })
 
+const ResetDoesNotChangeHandMsgText = computed(() => {
+  if (ruleset.value.language == Lang.CN) {
+    return `无效回溯，对局未改变`
+  } else if (ruleset.value.language == Lang.EN) {
+    return `Ineffective Backtrace, The Hand Stays The Same`
+  }
+})
+
 function StartGame() {
   // check duplicated players
   let { duplicated, item } = HasDuplication(player_names.value)
@@ -249,6 +258,10 @@ function StartGame() {
   game.value.Start()
   game.value.StartCurrentHand()
   SaveToStorage()
+}
+
+function DisplayGameInfo() {
+  display_game_info.value = true
 }
 
 function SetUpNewGame() {
@@ -343,6 +356,7 @@ function SubmitHandResultsForm() {
     game.value.SetUpNextHandOrFinishGame()
     game.value.StartCurrentHand()
     hand_results_form.value = {}
+    display_game_info.value = false
     SaveToStorage()
   }
 }
@@ -361,7 +375,10 @@ function HandleResetGameLog(index, row) {
     game.value.SetUpNextHandOrFinishGame()
     game.value.StartCurrentHand()
     hand_results_form.value = {}
+    display_game_info.value = false
     SaveToStorage()
+  } else if (!hand_changed) {
+    alert(ResetDoesNotChangeHandMsgText.value)
   }
 }
 
@@ -405,42 +422,41 @@ function HandleLoadRuleset() {
             :language="ruleset.language"
             :tick_timer="tick_timer"
             @saveState="SaveToStorage"
+            @displayGameInfo="DisplayGameInfo"
           />
         </div>
 
-        <el-collapse class="game_info_board">
-          <el-collapse-item :title="`${GameInfoText}`">
-            <el-tabs>
-              <el-tab-pane :label="HandReultsTitleText" v-if="game.IsOnGoing()">
-                <div class="hand_results_input_board">
-                  <HandResultsInputBoard
-                    v-model="hand_results_form"
-                    :language="ruleset.language"
-                    :game="game"
-                    @submit="SubmitHandResultsForm"
-                  />
-                </div>
-              </el-tab-pane>
-              <el-tab-pane :label="StatsTitleText" v-if="game.IsFinished()">
-                <div class="game_stats_board">
-                  <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
-                </div>
-              </el-tab-pane>
-              <el-tab-pane :label="LogTitleText">
-                <div class="game_log_board">
-                  <GameLogBoard
-                    :language="ruleset.language"
-                    :game_logs="game.log"
-                    :players="game.players"
-                    :ruleset="game.ruleset"
-                    :backtrace_enabled="true"
-                    @resetLog="HandleResetGameLog"
-                  />
-                </div>
-              </el-tab-pane>
-            </el-tabs>
-          </el-collapse-item>
-        </el-collapse>
+        <el-drawer v-model="display_game_info" :title="GameInfoText" direction="btt" size="90%">
+          <el-tabs>
+            <el-tab-pane :label="HandReultsTitleText" v-if="game.IsOnGoing()">
+              <div class="hand_results_input_board">
+                <HandResultsInputBoard
+                  v-model="hand_results_form"
+                  :language="ruleset.language"
+                  :game="game"
+                  @submit="SubmitHandResultsForm"
+                />
+              </div>
+            </el-tab-pane>
+            <el-tab-pane :label="StatsTitleText" v-if="game.IsFinished()">
+              <div class="game_stats_board">
+                <GameStatsBoard :game="game" @gameUploaded="GameUploaded" />
+              </div>
+            </el-tab-pane>
+            <el-tab-pane :label="LogTitleText">
+              <div class="game_log_board">
+                <GameLogBoard
+                  :language="ruleset.language"
+                  :game_logs="game.log"
+                  :players="game.players"
+                  :ruleset="game.ruleset"
+                  :backtrace_enabled="true"
+                  @resetLog="HandleResetGameLog"
+                />
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+        </el-drawer>
       </div>
       <el-divider> {{ RulesetName[ruleset.id][ruleset.language] }} </el-divider>
       <!-- Game control buttons -->
@@ -450,6 +466,7 @@ function HandleLoadRuleset() {
           :game="game"
           v-model="ruleset.language"
           @startGame="StartGame"
+          @gameInfo="DisplayGameInfo"
           @finishGame="FinishGame"
           @newGame="SetUpNewGame"
           @toLeaderBoard="EnterLeaderBoardMode"
@@ -485,7 +502,7 @@ function HandleLoadRuleset() {
   border-style: solid;
   border-width: 2px;
   width: 98vw;
-  height: 70vh;
+  height: 88vh;
   margin-left: calc(50% - 49vw);
   margin-top: 1vh;
   margin-bottom: 1vh;
