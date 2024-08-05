@@ -695,11 +695,11 @@ function DisplayDetailedGameLog(i) {
             </div>
             <el-divider />
 
-            <el-dialog
+            <el-drawer
               v-if="detailed_game_log_index != undefined && detailed_game_logs.length > 0"
               v-model="detailed_game_log_visible"
               :title="GenerateGameLabel(raw_games.value.games[detailed_game_log_index - 1])"
-              width="100%"
+              size="100%"
             >
               <GameLogBoard
                 :language="language"
@@ -708,7 +708,7 @@ function DisplayDetailedGameLog(i) {
                 :ruleset="ruleset"
                 :backtrace_enabled="false"
               />
-            </el-dialog>
+            </el-drawer>
           </div>
         </div>
       </el-collapse-item>
