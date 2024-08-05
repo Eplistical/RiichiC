@@ -285,6 +285,10 @@ function parseGameLogs(game_logs) {
   return Game.ParseGameLogsFromObject(ruleset.value, game_logs)
 }
 
+function parseGameLogsForIndex(index) {
+  return parseGameLogs(raw_games.value.value.games[index - 1].game_logs)
+}
+
 function GetPlayerSummary(game, starting_wind) {
   return `${game[starting_wind].name}[${WindsDisplayTextMap[starting_wind][props.language]}][${PlaceNumberDisplayMap[game[starting_wind].rank][props.language]}]`
 }
@@ -684,9 +688,22 @@ function DisplayDetailedGameLog(i) {
               <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" />
             </el-table>
             <div v-if="raw_games.value.games[i - 1].game_logs != undefined">
+              <!--
               <el-button type="primary" @click="DisplayDetailedGameLog(i)">
                 {{ DetailedGameLogText }}
               </el-button>
+              -->
+              <el-collapse>
+                <el-collapse-item :title="DetailedGameLogText">
+                  <GameLogBoard
+                    :language="language"
+                    :game_logs="parseGameLogsForIndex(i)"
+                    :players="parseGameLogsForIndex(i)[0].players"
+                    :ruleset="ruleset"
+                    :backtrace_enabled="false"
+                  />
+                </el-collapse-item>
+              </el-collapse>
             </div>
             <div v-else>
               <el-text type="danger">
@@ -695,6 +712,7 @@ function DisplayDetailedGameLog(i) {
             </div>
             <el-divider />
 
+            <!--
             <el-dialog
               v-if="detailed_game_log_index != undefined && detailed_game_logs.length > 0"
               v-model="detailed_game_log_visible"
@@ -709,6 +727,7 @@ function DisplayDetailedGameLog(i) {
                 :backtrace_enabled="false"
               />
             </el-dialog>
+            -->
           </div>
         </div>
       </el-collapse-item>
