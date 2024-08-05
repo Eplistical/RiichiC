@@ -688,22 +688,9 @@ function DisplayDetailedGameLog(i) {
               <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" />
             </el-table>
             <div v-if="raw_games.value.games[i - 1].game_logs != undefined">
-              <!--
               <el-button type="primary" @click="DisplayDetailedGameLog(i)">
                 {{ DetailedGameLogText }}
               </el-button>
-              -->
-              <el-collapse>
-                <el-collapse-item :title="DetailedGameLogText">
-                  <GameLogBoard
-                    :language="language"
-                    :game_logs="parseGameLogsForIndex(i)"
-                    :players="parseGameLogsForIndex(i)[0].players"
-                    :ruleset="ruleset"
-                    :backtrace_enabled="false"
-                  />
-                </el-collapse-item>
-              </el-collapse>
             </div>
             <div v-else>
               <el-text type="danger">
@@ -711,26 +698,25 @@ function DisplayDetailedGameLog(i) {
               </el-text>
             </div>
             <el-divider />
-
-            <!--
-            <el-dialog
-              v-if="detailed_game_log_index != undefined && detailed_game_logs.length > 0"
-              v-model="detailed_game_log_visible"
-              :title="GenerateGameLabel(raw_games.value.games[detailed_game_log_index - 1])"
-              width="100%"
-            >
-              <GameLogBoard
-                :language="language"
-                :game_logs="detailed_game_logs"
-                :players="detailed_game_logs[0].players"
-                :ruleset="ruleset"
-                :backtrace_enabled="false"
-              />
-            </el-dialog>
-            -->
           </div>
         </div>
       </el-collapse-item>
+
+      <el-drawer
+        v-if="detailed_game_log_index != undefined && detailed_game_logs.length > 0"
+        v-model="detailed_game_log_visible"
+        :title="GenerateGameLabel(raw_games.value.games[detailed_game_log_index - 1])"
+        direction="btt"
+        size="90%"
+      >
+        <GameLogBoard
+          :language="language"
+          :game_logs="detailed_game_logs"
+          :players="detailed_game_logs[0].players"
+          :ruleset="ruleset"
+          :backtrace_enabled="false"
+        />
+      </el-drawer>
     </el-collapse>
     <el-divider />
   </div>
