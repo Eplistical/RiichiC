@@ -184,6 +184,13 @@ const AvgDealInPtColumnText = computed(() => {
     return 'Avg Deal-in Cost'
   }
 })
+const AvgObserverPtColumnText = computed(() => {
+  if (props.language == Lang.CN) {
+    return '平均摆烂得点'
+  } else if (props.language == Lang.EN) {
+    return 'Avg Non Agari/Deal-in Points Change'
+  }
+})
 const ExpectedPtColumnText = computed(() => {
   if (props.language == Lang.CN) {
     return '期望得点'
@@ -441,6 +448,8 @@ const ComputedLeaderBoard = computed(() => {
       avg_agari_points: stats.agari_sum == 0 ? 0 : stats.agari_pt_sum / stats.agari_sum,
       deal_in_rate: stats.hand_count == 0 ? 0 : stats.deal_in_sum / stats.hand_count,
       avg_deal_in_points: stats.deal_in_sum == 0 ? 0 : -stats.deal_in_pt_sum / stats.deal_in_sum,
+      observer_rate: stats.hand_count == 0 ? 0 : stats.observer_sum / stats.hand_count,
+      avg_observer_points: stats.observer_sum == 0 ? 0 : stats.observer_pt_sum / stats.observer_sum,
 
       max_top1_rate: false,
       max_top2_rate: false,
@@ -450,7 +459,9 @@ const ComputedLeaderBoard = computed(() => {
     }
     // expected points
     row.expected_points =
-      row.agari_rate * row.avg_agari_points - row.deal_in_rate * row.avg_deal_in_points
+      row.agari_rate * row.avg_agari_points -
+      row.deal_in_rate * row.avg_deal_in_points +
+      row.observer_rate * row.avg_observer_points
     // find max top 1 rate
     if (top1_rate > max_top1_rate) {
       max_top1_rate = top1_rate
@@ -630,6 +641,11 @@ function DisplayDetailedGameLog(i) {
       <el-table-column prop="avg_deal_in_points" :label="AvgDealInPtColumnText" sortable>
         <template #default="scope">
           {{ scope.row.avg_deal_in_points.toFixed(0) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="avg_observer_points" :label="AvgObserverPtColumnText" sortable>
+        <template #default="scope">
+          {{ scope.row.avg_observer_points.toFixed(0) }}
         </template>
       </el-table-column>
       <el-table-column
