@@ -577,7 +577,13 @@ function DisplayDetailedGameLog(i) {
     </el-space>
 
     <el-divider> {{ LeaderBoardTitleText }} </el-divider>
-    <el-table :data="ComputedLeaderBoard" style="width: 100%" stripe table-layout="auto">
+    <el-table
+      :data="ComputedLeaderBoard"
+      :default-sort="{ prop: 'points_with_uma', order: 'descending' }"
+      style="width: 100%"
+      stripe
+      table-layout="auto"
+    >
       <el-table-column fixed prop="name" :label="NameColumnText" />
       <el-table-column prop="points_with_uma" :label="PointsWithUmaColumnText" sortable>
         <template #default="scope">
